@@ -1,0 +1,16 @@
+---
+description: Conventies voor React-componenten
+globs: src/components/**/*.tsx,src/app/**/*.tsx
+alwaysApply: false
+---
+
+# Component conventies
+
+- Server Components zijn de standaard; voeg alleen `"use client"` toe wanneer je
+  state, effects, of browser-API's nodig hebt.
+- Plaats herbruikbare, presentational UI in `src/components/ui`, layout-onderdelen
+  in `src/components/layout`, en feature-specifieke onderdelen in `src/components/features`.
+- Gebruik `cn()` uit `@/lib/utils` voor conditionele Tailwind-classes.
+- Houd componenten klein en met één verantwoordelijkheid; til datafetching naar
+  hooks of server components.
+- Typeer props expliciet met een `type`/`interface`; vermijd `any`.
