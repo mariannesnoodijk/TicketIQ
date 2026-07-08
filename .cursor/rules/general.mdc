@@ -1,0 +1,17 @@
+---
+description: Algemene projectregels voor de AI Developer eindopdracht
+alwaysApply: true
+---
+
+# Algemene projectregels
+
+- Dit is een **Next.js (App Router) + TypeScript + Tailwind CSS** project met een **Supabase** backend.
+- Alle applicatiecode staat onder `src/` (`src/app`, `src/components`, `src/hooks`, `src/lib`, `src/types`).
+- Gebruik het pad-alias `@/*` (wijst naar `src/*`) voor imports binnen de app.
+- Let op: dit is Next.js 16 — controleer bij twijfel de meegeleverde docs in
+  `node_modules/next/dist/docs/` voordat je API's gebruikt.
+- Databewerkingen naar Supabase verlopen client-side via **React Query (TanStack Query)**.
+- AI-functionaliteit gebruikt de **Vercel AI SDK** met een agent (tools + `maxSteps`) en streaming responses.
+- Externe data wordt door de AI **geïnterpreteerd/verrijkt**, niet alleen doorgestuurd.
+- Documenteer keuzes, prompts en architectuurbeslissingen in `docs/` (`PROMPT-LOG.md`, `AI-DECISIONS.md`).
+- Houd de repository-structuur aan zoals beschreven in `docs/eindopdracht.md`.

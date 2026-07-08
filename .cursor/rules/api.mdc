@@ -1,0 +1,13 @@
+---
+description: Regels voor API-routes, Supabase en de AI-agent
+globs: src/app/api/**/*.ts,src/lib/**/*.ts
+alwaysApply: false
+---
+
+# API / Supabase / AI regels
+
+- Route handlers staan onder `src/app/api/**/route.ts` en retourneren een `Response`/`NextResponse`.
+- Lees secrets uit environment variables (`.env.local`); commit nooit echte keys. Zie `.env.example`.
+- Supabase-toegang loopt via de client in `@/lib/supabase`; dwing dataisolatie af met **Row Level Security** (policies op `user_id`).
+- De AI-agent (`src/app/api/agent/route.ts`) gebruikt de Vercel AI SDK met tools en `maxSteps`.
+- Bouw foutafhandeling en fallbacks in de AI-flow in; valideer modeloutput vóór opslag in de database.
