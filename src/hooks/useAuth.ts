@@ -1,16 +1,38 @@
 "use client";
 
-/**
- * Auth-hook (placeholder).
- *
- * TODO (Deelopdracht 2): koppel aan Supabase Auth (sessie ophalen, login/logout,
- * en de ingelogde gebruiker teruggeven).
- */
+import type { User } from "@supabase/supabase-js";
+import { useEffect, useState } from "react";
+
+import { createClient } from "@/lib/supabase/client";
+
 export type AuthState = {
-  user: null;
+  user: User | null;
   loading: boolean;
 };
 
 export function useAuth(): AuthState {
-  return { user: null, loading: false };
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  return { user, loading };
 }
