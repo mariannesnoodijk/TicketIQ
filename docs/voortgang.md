@@ -7,9 +7,9 @@
 
 Uitgangspunt: casus **TicketIQ** goedgekeurd. Project bevat een werkende Next.js 16 +
 TypeScript + Tailwind v4 opzet volgens de voorgeschreven repo-structuur (`src/`, `.cursor/rules`,
-`.agents/skills`, `docs`). Auth, database, React Query, externe API en AI-agent zijn nog niet
-volledig gebouwd (database/AI nog open). Supabase-project bestaat; GitHub (public), Vercel
-en Skills.sh zijn opgezet (PR1).
+`.agents/skills`, `docs`). Auth (PR2) en databaseschema met RLS (PR3) zijn gebouwd;
+CRUD, externe API en AI-agent volgen in latere PR's. Supabase-project bestaat;
+GitHub (public), Vercel en Skills.sh zijn opgezet (PR1).
 
 ## Deelopdracht 1 – Broncode Next.js project (25%)
 
@@ -18,21 +18,21 @@ en Skills.sh zijn opgezet (PR1).
 - [ ] AI interpreteert/verrijkt data i.c.m. gebruikersinput — niet alleen doorsturen (1.2)
 - [ ] Agent-based flow met werkende `maxSteps` meerstaps-aanpak (1.3)
 - [~] Schone, gestructureerde, onderhoudbare code; logische scheiding server/client/utils/data (1.4)
-- [ ] Minimaal 20 kleine commits met zinvolle messages (1.5)
-- [~] Minimaal 5 pull requests gemerged naar `main` (1.5)
+- [~] Minimaal 20 kleine commits met zinvolle messages (1.5)
+- [~] Minimaal 5 pull requests gemerged naar `main` (1.5) — PR1 + PR2 gemerged; PR3 in uitvoering
 - [x] Repository volgens voorgeschreven structuur
 - [ ] Gedeployed op Vercel
 - [ ] `README.md` met heldere installatie-instructies
-- [~] Minimaal 4 kernfunctionaliteiten (auth + 1 AI + 2 casus-specifiek)
+- [~] Minimaal 4 kernfunctionaliteiten (auth klaar; database-schema klaar; AI + ticket-ingestie + dashboard volgen)
 
 ## Deelopdracht 2 – Supabase backend (15%)
 
-- [ ] Databaseschema met minimaal 4 tabellen (2.1)
-- [ ] Passende relaties (foreign keys) en constraints (PK, not null, unique) (2.1)
+- [x] Databaseschema met minimaal 4 tabellen (2.1) — 5 tabellen: categories, tickets, labels, ticket_labels, ai_suggestions
+- [x] Passende relaties (foreign keys) en constraints (PK, not null, unique) (2.1)
 - [ ] CRUD-operaties met React Query voor relevante entiteiten (2.2)
-- [~] Supabase Auth: registreren, inloggen, correcte sessieafhandeling (2.3)
-- [ ] RLS ingeschakeld op relevante tabellen (2.3)
-- [ ] Werkende policies: gebruiker benadert alleen eigen data (2.3)
+- [x] Supabase Auth: registreren, inloggen, correcte sessieafhandeling (2.3)
+- [x] RLS ingeschakeld op relevante tabellen (2.3)
+- [x] Werkende policies: gebruiker benadert alleen eigen data (2.3)
 - [ ] Supabase REST API base URL in `README.md`
 - [ ] Betrokken docent toegevoegd als administrator in Supabase-team
 
