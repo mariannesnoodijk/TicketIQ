@@ -13,3 +13,4 @@
 ## Cursor-prompts (ontwikkelproces)
 
 | 11 jul 2026 | PR5-plan | Plan voor AI-agent met ToolLoopAgent, 3 tools, streaming UI | Akkoord gebruiker; implementatie op `feat/ai-agent`. |
+| 11 jul 2026 | Import-categorisatie | Regelgebaseerde mapping + dashboarddiagram i.p.v. DummyJSON aanpassen | Akkoord gebruiker; tickets direct categoriseerbaar zonder aparte AI-stap. |
