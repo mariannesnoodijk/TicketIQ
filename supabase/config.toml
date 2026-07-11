@@ -1,0 +1,20 @@
+# Supabase local development config (TicketIQ).
+# Remote schema changes are tracked in supabase/migrations/.
+# See: https://supabase.com/docs/guides/cli/config
+
+project_id = "ticket-iq"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
