@@ -61,3 +61,17 @@
 - **Alternatieven:** één groot `useTicketIQ`-hook — afgevallen (moeilijker te onderhouden). Server Actions voor reads — afgevallen (React Query patroon vereist client-side fetching met cache).
 - **AI-rol:** hook-structuur en invalidatie-patronen opgezet met Cursor.
 - **Gevolgen:** herbruikbare data-laag voor PR5 (AI-agent) en PR6 (suggesties-dashboard).
+
+### AI-agent met ToolLoopAgent (AI SDK v7)
+- **Context:** PR5 vereist agent-based flow met tool calling naar DummyJSON, meerstaps-aanpak, streaming en opslag van AI-suggesties. Het oorspronkelijke bouwplan gebruikte 6 tabellen; PR3/PR4 hebben 5 user-scoped tabellen (`ai_suggestions` i.p.v. `analyses` + `article_suggestions`).
+- **Beslissing:** `ToolLoopAgent` in `src/lib/ai/agent.ts` met vier tools: `fetchTickets` (DummyJSON API), `assignTicketCategory` (Supabase `tickets.category_id`), `findExistingSuggestions` (Supabase), `saveSuggestion` (Supabase `ai_suggestions`). Route `POST /api/agent` gebruikt `createAgentUIStreamResponse` + auth via Supabase server-client. Meerstaps-flow via `stopWhen: isStepCount(10)`. Model: `gpt-4.1-mini` via `@ai-sdk/openai`. Hybride UI op `/dashboard/analyze`: Analyseer-knop + gedeelde chat via `AgentChatProvider` + `sessionStorage`.
+- **Alternatieven:** `streamText` handmatig — afgevallen (meer boilerplate). Tickets alleen uit Supabase lezen in `fetchTickets` — afgevallen (eindopdracht vereist externe API via tool calling). Categorie alleen op suggesties — uitgebreid met `assignTicketCategory` zodat tickets filterbaar zijn. Chat per pagina — vervangen door provider + sessionStorage.
+- **AI-rol:** agent-ontwerp, tools, prompts en UI opgezet met Cursor; AI SDK v7 API's geverifieerd in `node_modules/ai/docs/`.
+- **Gevolgen:** streaming analyse zichtbaar in UI; tickets kunnen ook via agent `category_id` krijgen; suggesties landen in `ai_suggestions`; chat overleeft navigatie en refresh. PR6 bouwt suggesties-beheer.
+
+### Regelgebaseerde ticketcategorisatie bij import
+- **Context:** tickets hadden na import geen `category_id`; het dashboard-diagram toonde vrijwel alles als ongecategoriseerd. Categorisatie via de AI-agent vereist een aparte analyse-stap en is traag/duur voor ~500 tickets.
+- **Beslissing:** gedeelde helper `inferCategoryName` (keywords op onderwerp/body/bronlabel) + `ensureDefaultCategories` (seed 11 standaardcategorieën per gebruiker). Import-route (`POST /api/tickets/import`) wijst `category_id` toe bij insert en backfillt bestaande tickets zonder categorie. Aparte route `POST /api/tickets/categorize` en dashboard-knop voor eenmalige backfill. Dashboard toont verdeling per categorie via `useTicketCategoryStats` + recharts donut.
+- **Alternatieven:** DummyJSON API aanpassen met categorieveld — afgevallen (buiten projectscope, labels in bron zijn geen TicketIQ-categorieën). Alleen AI-categorisatie — afgevallen (te traag voor basisoverzicht). Handmatig standaardcategorieën seeden vóór import — vervangen door automatisch seeden in import/categorize-flow.
+- **AI-rol:** keyword-regels en import-flow uitgewerkt met Cursor; verdeling getest tegen DummyJSON-dataset.
+- **Gevolgen:** na import of “Categoriseer bestaande tickets” zijn tickets filterbaar op categorie en is de verdeling direct zichtbaar op `/dashboard` zonder AI-analyse. Agent-tool `assignTicketCategory` blijft beschikbaar voor herclassificatie na analyse.

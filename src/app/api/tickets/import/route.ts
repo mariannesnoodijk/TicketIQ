@@ -1,10 +1,23 @@
 import { NextResponse } from "next/server";
 
+import { ensureDefaultCategories } from "@/lib/categories/ensureDefaultCategories";
+import { categorizeUncategorizedTickets } from "@/lib/categories/categorizeTickets";
+import { inferCategoryName } from "@/lib/categories/inferCategory";
 import { fetchDummyJsonTickets } from "@/lib/dummyjson";
 import { createClient } from "@/lib/supabase/server";
 import { mapDummyJsonTickets } from "@/lib/tickets/mapDummyJsonTicket";
 
 const BATCH_SIZE = 50;
+
+function resolveCategoryId(categoryName: string, categoryByName: Map<string, string>) {
+  return (
+    categoryByName.get(categoryName) ??
+    categoryByName.get("Overig / Onboarding nieuwe klant") ??
+    null
+  );
+}
+
+type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
 export async function POST() {
   try {
@@ -17,6 +30,8 @@ export async function POST() {
     if (authError || !user) {
       return NextResponse.json({ error: "Niet geautoriseerd" }, { status: 401 });
     }
+
+    const categoryByName = await ensureDefaultCategories(supabase, user.id);
 
     const rawTickets = await fetchDummyJsonTickets();
     const mapped = mapDummyJsonTickets(rawTickets);
@@ -33,45 +48,50 @@ export async function POST() {
     const existingIds = new Set((existingTickets ?? []).map((t) => t.external_id));
     const newTickets = mapped.filter((m) => !existingIds.has(m.ticket.external_id));
 
-    if (newTickets.length === 0) {
-      return NextResponse.json({
-        imported: 0,
-        skipped: mapped.length,
-        total: mapped.length,
-      });
-    }
-
     let imported = 0;
 
-    for (let i = 0; i < newTickets.length; i += BATCH_SIZE) {
-      const batch = newTickets.slice(i, i + BATCH_SIZE);
-      const inserts = batch.map((m) => ({
-        ...m.ticket,
-        user_id: user.id,
-      }));
+    if (newTickets.length > 0) {
+      for (let i = 0; i < newTickets.length; i += BATCH_SIZE) {
+        const batch = newTickets.slice(i, i + BATCH_SIZE);
+        const inserts = batch.map((m) => {
+          const categoryName = inferCategoryName(
+            m.ticket.subject,
+            m.ticket.body,
+            m.sourceLabel
+          );
 
-      const { data: inserted, error: insertError } = await supabase
-        .from("tickets")
-        .insert(inserts)
-        .select("id, external_id");
+          return {
+            ...m.ticket,
+            user_id: user.id,
+            category_id: resolveCategoryId(categoryName, categoryByName),
+          };
+        });
 
-      if (insertError) {
-        return NextResponse.json({ error: insertError.message }, { status: 500 });
+        const { data: inserted, error: insertError } = await supabase
+          .from("tickets")
+          .insert(inserts)
+          .select("id, external_id");
+
+        if (insertError) {
+          return NextResponse.json({ error: insertError.message }, { status: 500 });
+        }
+
+        imported += inserted?.length ?? 0;
+
+        await linkSourceLabels(supabase, user.id, batch, inserted ?? []);
       }
-
-      imported += inserted?.length ?? 0;
-
-      await linkSourceLabels(
-        supabase,
-        user.id,
-        batch,
-        inserted ?? []
-      );
     }
+
+    const backfilled = await categorizeUncategorizedTickets(
+      supabase,
+      user.id,
+      categoryByName
+    );
 
     return NextResponse.json({
       imported,
       skipped: mapped.length - newTickets.length,
+      backfilled,
       total: mapped.length,
     });
   } catch (error) {
@@ -79,8 +99,6 @@ export async function POST() {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-
-type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
 async function linkSourceLabels(
   supabase: SupabaseServerClient,

@@ -7,23 +7,23 @@
 
 Uitgangspunt: casus **TicketIQ** goedgekeurd. Project bevat een werkende Next.js 16 +
 TypeScript + Tailwind v4 opzet volgens de voorgeschreven repo-structuur (`src/`, `.cursor/rules`,
-`.agents/skills`, `docs`). Auth (PR2), databaseschema met RLS (PR3) en CRUD + ticket-import (PR4)
-zijn gebouwd; AI-agent volgt in PR5. Supabase-project bestaat; GitHub (public), Vercel en
-Skills.sh zijn opgezet (PR1).
+`.agents/skills`, `docs`). Auth (PR2), databaseschema met RLS (PR3), CRUD + ticket-import (PR4)
+en AI-agent (PR5) zijn gebouwd; suggesties-beheer volgt in PR6. Supabase-project bestaat;
+GitHub (public), Vercel en Skills.sh zijn opgezet (PR1).
 
 ## Deelopdracht 1 – Broncode Next.js project (25%)
 
 - [~] Next.js (App Router) + TypeScript + Tailwind CSS, werkend in dev (prod nog niet) zonder kritieke errors (1.1)
-- [~] Externe data via netwerkrequests naar een gratis API (DummyJSON) (1.2) — import via `/api/tickets/import`; tool calling volgt PR5
-- [ ] AI interpreteert/verrijkt data i.c.m. gebruikersinput — niet alleen doorsturen (1.2)
-- [ ] Agent-based flow met werkende `maxSteps` meerstaps-aanpak (1.3)
+- [x] Externe data via netwerkrequests naar een gratis API (DummyJSON) (1.2) — import + tool calling via agent
+- [x] AI interpreteert/verrijkt data i.c.m. gebruikersinput — niet alleen doorsturen (1.2)
+- [x] Agent-based flow met werkende `maxSteps` meerstaps-aanpak (1.3) — `stopWhen: isStepCount(8)` in AI SDK v7
 - [~] Schone, gestructureerde, onderhoudbare code; logische scheiding server/client/utils/data (1.4)
 - [~] Minimaal 20 kleine commits met zinvolle messages (1.5)
-- [~] Minimaal 5 pull requests gemerged naar `main` (1.5) — PR1–PR3 gemerged; PR4 in uitvoering
+- [~] Minimaal 5 pull requests gemerged naar `main` (1.5) — PR1–PR4 gemerged; PR5 klaar voor merge
 - [x] Repository volgens voorgeschreven structuur
 - [ ] Gedeployed op Vercel
 - [ ] `README.md` met heldere installatie-instructies
-- [~] Minimaal 4 kernfunctionaliteiten (auth + ticket-ingestie/organisatie klaar; AI + volledig dashboard volgen)
+- [~] Minimaal 4 kernfunctionaliteiten (auth + ticket-ingestie + AI-analyse + dashboard-statistieken klaar; suggesties-beheer volgt in PR6)
 
 ## Deelopdracht 2 – Supabase backend (15%)
 
@@ -66,9 +66,9 @@ Skills.sh zijn opgezet (PR1).
 
 - [x] GitHub repository op **public**
 - [x] Skills.sh met minimaal 2 actieve skills (waaronder `vercel-react-best-practices`)
-- [ ] Vercel AI SDK met werkende AI Agent
-- [ ] Minimaal 1 externe API via **Tool Calling**
-- [ ] Streaming responses in de chat-interface
+- [x] Vercel AI SDK met werkende AI Agent
+- [x] Minimaal 1 externe API via **Tool Calling**
+- [x] Streaming responses in de chat-interface
 - [~] Architectuurbeslissingen met AI-hulp gedocumenteerd
 
 ## Casus (vooraf, ter goedkeuring docent)

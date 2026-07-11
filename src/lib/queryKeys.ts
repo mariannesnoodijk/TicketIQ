@@ -20,6 +20,7 @@ export const queryKeys = {
   },
   stats: {
     dashboard: ["dashboard-stats"] as const,
+    categoryDistribution: ["category-distribution"] as const,
   },
 } as const;
 

@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { href: "/dashboard", label: "Dashboard", exact: true },
   { href: "/dashboard/tickets", label: "Tickets" },
+  { href: "/dashboard/analyze", label: "Analyse" },
   { href: "/dashboard/categories", label: "Categorieën" },
   { href: "/dashboard/labels", label: "Labels" },
 ];
