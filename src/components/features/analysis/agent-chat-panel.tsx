@@ -11,8 +11,11 @@ import { Input } from "@/components/ui/input";
 import { useAgentChat } from "@/hooks/useAgentChat";
 import { useDashboardStats } from "@/hooks/useTickets";
 import {
+  ANALYZE_LIMIT_ALL,
   ANALYZE_LIMIT_OPTIONS,
   buildAnalyzePrompt,
+  getAnalyzeLimitLabel,
+  parseAnalyzeTicketLimit,
   type AnalyzeTicketLimit,
 } from "@/lib/ai/analyzePrompt";
 
@@ -56,7 +59,7 @@ export function AgentChatPanel({ displayName }: AgentChatPanelProps) {
         <CardHeader>
           <CardTitle>Start analyse</CardTitle>
           <CardDescription>
-            Kies hoeveel tickets de agent ophaalt en start de meerstaps-analyse.
+            Kies hoeveel geïmporteerde tickets de agent analyseert en start de meerstaps-analyse.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-end">
@@ -66,18 +69,19 @@ export function AgentChatPanel({ displayName }: AgentChatPanelProps) {
             </label>
             <select
               id="ticket-limit"
-              value={ticketLimit}
-              onChange={(event) =>
-                setTicketLimit(Number(event.target.value) as AnalyzeTicketLimit)
-              }
-              className="flex h-10 w-full min-w-[8rem] rounded-lg border border-input bg-background px-3 text-sm"
+              value={String(ticketLimit)}
+              onChange={(event) => setTicketLimit(parseAnalyzeTicketLimit(event.target.value))}
+              className="flex h-10 w-full min-w-[12rem] rounded-lg border border-input bg-background px-3 text-sm"
               disabled={isLoading || !hasTickets}
             >
               {ANALYZE_LIMIT_OPTIONS.map((limit) => (
                 <option key={limit} value={limit}>
-                  {limit} tickets
+                  {getAnalyzeLimitLabel(limit)}
                 </option>
               ))}
+              <option value={ANALYZE_LIMIT_ALL}>
+                {getAnalyzeLimitLabel(ANALYZE_LIMIT_ALL, stats?.tickets)}
+              </option>
             </select>
           </div>
           <div className="flex flex-wrap gap-2 sm:self-end">

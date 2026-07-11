@@ -34,7 +34,7 @@ Leidend principe: **jouw meningen sturen de backlog**; audit/guidelines vullen a
 - **Dashboard** (`/dashboard`): alleen statistieken/import (geen chat)
 - `/dashboard/analyze` → redirect naar Home
 - Welkomstbericht: statisch (geen API), met knoppen naar dashboard/tickets/helpcenter + start analyse
-- **Nog open (W3 vervolg):** inklapbare tool-stappen, user/AI-styling, limieten 200/500/alle
+- **Nog open (W3 vervolg):** user/AI-styling in chat; hybride fetchTickets (database + DummyJSON via tool) + limieten 200/500/alle
 
 ### W4 – Welkom (detail)
 

@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const TOOL_LABELS: Record<string, string> = {
-  fetchTickets: "Tickets ophalen (DummyJSON)",
+  fetchTickets: "Tickets ophalen",
   assignTicketCategory: "Tickets categoriseren",
   findExistingSuggestions: "Duplicaatcheck",
   saveSuggestion: "Suggestie opslaan",
@@ -57,14 +57,24 @@ function getToolDetailContent(part: UIMessage["parts"][number]): string | null {
   }
 
   const output = "output" in part ? part.output : undefined;
-  if (
-    part.state === "output-available" &&
-    output &&
-    typeof output === "object" &&
-    "message" in output &&
-    typeof output.message === "string"
-  ) {
-    return output.message;
+  if (part.state === "output-available" && output && typeof output === "object") {
+    const toolName = part.type.replace("tool-", "");
+
+    if (
+      toolName === "fetchTickets" &&
+      "count" in output &&
+      typeof output.count === "number" &&
+      "source" in output &&
+      (output.source === "database" || output.source === "api")
+    ) {
+      const sourceLabel =
+        output.source === "api" ? "DummyJSON API" : "geïmporteerde database";
+      return `${output.count} ticket${output.count === 1 ? "" : "s"} uit ${sourceLabel}`;
+    }
+
+    if ("message" in output && typeof output.message === "string") {
+      return output.message;
+    }
   }
 
   return null;

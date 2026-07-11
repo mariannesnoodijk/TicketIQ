@@ -15,7 +15,7 @@ GitHub (public), Vercel en Skills.sh zijn opgezet (PR1).
 ## Deelopdracht 1 – Broncode Next.js project (25%)
 
 - [~] Next.js (App Router) + TypeScript + Tailwind CSS, werkend in dev (prod nog niet) zonder kritieke errors (1.1)
-- [x] Externe data via netwerkrequests naar een gratis API (DummyJSON) (1.2) — import + tool calling via agent
+- [x] Externe data via netwerkrequests naar een gratis API (DummyJSON) (1.2) — import + tool calling (`fetchTickets` met `source: "api"`)
 - [x] AI interpreteert/verrijkt data i.c.m. gebruikersinput — niet alleen doorsturen (1.2)
 - [x] Agent-based flow met werkende `maxSteps` meerstaps-aanpak (1.3) — `stopWhen: isStepCount(8)` in AI SDK v7
 - [~] Schone, gestructureerde, onderhoudbare code; logische scheiding server/client/utils/data (1.4)
