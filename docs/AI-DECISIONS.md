@@ -61,3 +61,10 @@
 - **Alternatieven:** één groot `useTicketIQ`-hook — afgevallen (moeilijker te onderhouden). Server Actions voor reads — afgevallen (React Query patroon vereist client-side fetching met cache).
 - **AI-rol:** hook-structuur en invalidatie-patronen opgezet met Cursor.
 - **Gevolgen:** herbruikbare data-laag voor PR5 (AI-agent) en PR6 (suggesties-dashboard).
+
+### AI-agent met ToolLoopAgent (AI SDK v7)
+- **Context:** PR5 vereist agent-based flow met tool calling naar DummyJSON, meerstaps-aanpak, streaming en opslag van AI-suggesties. Het oorspronkelijke bouwplan gebruikte 6 tabellen; PR3/PR4 hebben 5 user-scoped tabellen (`ai_suggestions` i.p.v. `analyses` + `article_suggestions`).
+- **Beslissing:** `ToolLoopAgent` in `src/lib/ai/agent.ts` met drie tools: `fetchTickets` (DummyJSON API), `findExistingSuggestions` (Supabase), `saveSuggestion` (Supabase `ai_suggestions`). Route `POST /api/agent` gebruikt `createAgentUIStreamResponse` + auth via Supabase server-client. Meerstaps-flow via `stopWhen: isStepCount(8)` (AI SDK v7-equivalent van `maxSteps`). Model: `gpt-4.1-mini` via `@ai-sdk/openai`. Hybride UI op `/dashboard/analyze`: Analyseer-knop + `useChat` met `DefaultChatTransport`.
+- **Alternatieven:** `streamText` handmatig — afgevallen (meer boilerplate). Tickets alleen uit Supabase lezen in `fetchTickets` — afgevallen (eindopdracht vereist externe API via tool calling). Aparte `analyses`-tabel — afgevallen (schema uit PR3 behouden).
+- **AI-rol:** agent-ontwerp, tools, prompts en UI opgezet met Cursor; AI SDK v7 API's geverifieerd in `node_modules/ai/docs/`.
+- **Gevolgen:** streaming analyse zichtbaar in UI; suggesties landen in `ai_suggestions` met `metadata` jsonb (reasoning, duplicateCheck, sourceTicketIds). PR6 bouwt suggesties-beheer en dashboard-trends.
