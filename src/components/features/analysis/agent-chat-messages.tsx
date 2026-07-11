@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 const TOOL_LABELS: Record<string, string> = {
   fetchTickets: "Tickets ophalen (DummyJSON)",
+  assignTicketCategory: "Tickets categoriseren",
   findExistingSuggestions: "Duplicaatcheck",
   saveSuggestion: "Suggestie opslaan",
 };
@@ -50,6 +51,13 @@ function MessagePart({ part, messageId, index }: { part: UIMessage["parts"][numb
       typeof output === "object" &&
       "saved" in output &&
       output.saved === true;
+    const categorized =
+      toolName === "assignTicketCategory" &&
+      output &&
+      typeof output === "object" &&
+      "updated" in output &&
+      typeof output.updated === "number" &&
+      output.updated > 0;
 
     return (
       <div
@@ -64,6 +72,9 @@ function MessagePart({ part, messageId, index }: { part: UIMessage["parts"][numb
           </Badge>
           {saved ? (
             <Badge className="text-xs">Opgeslagen</Badge>
+          ) : null}
+          {categorized ? (
+            <Badge className="text-xs">Gecategoriseerd</Badge>
           ) : null}
         </div>
         {part.state === "output-error" && "errorText" in part ? (

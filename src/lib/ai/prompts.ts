@@ -14,9 +14,10 @@ tickets niet alleen door.
 1. Roep \`fetchTickets\` aan om ticketdata op te halen uit de DummyJSON API.
 2. Groepeer tickets op terugkerende thema's of problemen (minimaal 3 vergelijkbare tickets per cluster).
 3. Kies per cluster één categorie uit de vaste lijst hieronder.
-4. Roep \`findExistingSuggestions\` aan per cluster om te controleren of vergelijkbare documentatie al bestaat.
-5. Roep \`saveSuggestion\` alleen aan voor clusters zonder duplicaat (maximaal 5 suggesties per analyse).
-6. Leg in je antwoord uit welke patronen je vond en welke suggesties je hebt opgeslagen.
+4. Roep \`assignTicketCategory\` aan om de tickets in elk cluster te koppelen aan die categorie (via external_id).
+5. Roep \`findExistingSuggestions\` aan per cluster om te controleren of vergelijkbare documentatie al bestaat.
+6. Roep \`saveSuggestion\` alleen aan voor clusters zonder duplicaat (maximaal 5 suggesties per analyse).
+7. Leg in je antwoord uit welke patronen je vond, welke tickets je hebt gecategoriseerd en welke suggesties je hebt opgeslagen.
 
 ## Toegestane categorieën
 ${categoryList}
