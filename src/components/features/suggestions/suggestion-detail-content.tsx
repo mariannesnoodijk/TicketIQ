@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { use, useState } from "react";
 
 import {
@@ -33,12 +33,39 @@ function formatDate(value: string | null) {
   }).format(new Date(value));
 }
 
+type ActionFeedback = {
+  message: string;
+  variant: "success" | "default";
+};
+
+function ActionFeedbackBanner({ feedback }: { feedback: ActionFeedback }) {
+  const isSuccess = feedback.variant === "success";
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className={cn(
+        "flex items-center gap-2 rounded-lg border px-4 py-3 text-sm",
+        isSuccess
+          ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"
+          : "border-border bg-muted/40 text-muted-foreground"
+      )}
+    >
+      {isSuccess ? <Check className="size-4 shrink-0" aria-hidden /> : null}
+      <span>{feedback.message}</span>
+    </div>
+  );
+}
+
 function SuggestionEditForm({
   suggestion,
   onSaved,
+  onEditStart,
 }: {
   suggestion: SuggestionWithCategory;
-  onSaved: (message: string) => void;
+  onSaved: () => void;
+  onEditStart: () => void;
 }) {
   const updateSuggestion = useUpdateAiSuggestion();
   const [title, setTitle] = useState(suggestion.title);
@@ -57,7 +84,7 @@ function SuggestionEditForm({
       summary: summary.trim() || null,
       content: content.trim(),
     });
-    onSaved("Wijzigingen opgeslagen.");
+    onSaved();
   }
 
   return (
@@ -68,18 +95,35 @@ function SuggestionEditForm({
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="title">Titel</Label>
-          <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
+          <Input
+            id="title"
+            value={title}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              onEditStart();
+            }}
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="summary">Samenvatting</Label>
-          <Input id="summary" value={summary} onChange={(e) => setSummary(e.target.value)} />
+          <Input
+            id="summary"
+            value={summary}
+            onChange={(e) => {
+              setSummary(e.target.value);
+              onEditStart();
+            }}
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="content">Artikelinhoud</Label>
           <textarea
             id="content"
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(e) => {
+              setContent(e.target.value);
+              onEditStart();
+            }}
             rows={16}
             className="flex min-h-[280px] w-full rounded-lg border border-input bg-background px-3 py-2 font-mono text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
@@ -89,7 +133,14 @@ function SuggestionEditForm({
           onClick={handleSave}
           disabled={updateSuggestion.isPending || !isDirty || !title.trim() || !content.trim()}
         >
-          Opslaan
+          {updateSuggestion.isPending ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              Opslaan...
+            </>
+          ) : (
+            "Opslaan"
+          )}
         </Button>
       </CardContent>
     </Card>
@@ -227,7 +278,15 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
   const updateSuggestion = useUpdateAiSuggestion();
   const deleteSuggestion = useDeleteAiSuggestion();
   const reviseSuggestion = useReviseAiSuggestion();
-  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [actionFeedback, setActionFeedback] = useState<ActionFeedback | null>(null);
+
+  function showFeedback(message: string, variant: ActionFeedback["variant"] = "default") {
+    setActionFeedback({ message, variant });
+  }
+
+  function clearFeedback() {
+    setActionFeedback(null);
+  }
 
   if (isLoading) {
     return <p className="px-4 py-10 text-sm text-muted-foreground">Suggestie laden...</p>;
@@ -257,7 +316,7 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
     if (status === "rejected") return;
 
     await updateSuggestion.mutateAsync({ id: suggestionId, status });
-    setActionMessage(`Status gewijzigd naar ${suggestionStatusLabel(status).toLowerCase()}.`);
+    showFeedback(`Status gewijzigd naar ${suggestionStatusLabel(status).toLowerCase()}.`);
   }
 
   async function handleReject(feedback: string) {
@@ -280,12 +339,12 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
       },
     });
 
-    setActionMessage("Suggestie afgewezen. Je kunt nu een nieuw artikel laten schrijven.");
+    showFeedback("Suggestie afgewezen. Je kunt nu een nieuw artikel laten schrijven.");
   }
 
   async function handleRevise(feedback: string) {
     const result = await reviseSuggestion.mutateAsync({ id: suggestionId, feedback });
-    setActionMessage(
+    showFeedback(
       `Nieuw artikel gegenereerd: "${result.title ?? currentSuggestion.title}". Status staat op concept.`
     );
   }
@@ -325,7 +384,7 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
         </Button>
       </div>
 
-      {actionMessage ? <p className="text-sm text-muted-foreground">{actionMessage}</p> : null}
+      {actionFeedback ? <ActionFeedbackBanner feedback={actionFeedback} /> : null}
 
       {showReviseCard ? (
         <ReviseSuggestionCard
@@ -339,7 +398,8 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
       <SuggestionEditForm
         key={`${suggestion.id}-${suggestion.updated_at}`}
         suggestion={suggestion}
-        onSaved={setActionMessage}
+        onSaved={() => showFeedback("Artikel opgeslagen.", "success")}
+        onEditStart={clearFeedback}
       />
 
       <Card>
