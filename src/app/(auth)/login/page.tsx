@@ -1,8 +1,21 @@
-export default function LoginPage() {
+import { LoginForm } from "@/components/features/auth/login-form";
+
+type LoginPageProps = {
+  searchParams: Promise<{ redirect?: string; error?: string }>;
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const params = await searchParams;
+  const redirectTo = params.redirect ?? "/dashboard";
+
   return (
-    <main className="flex flex-1 items-center justify-center p-8">
-      {/* TODO (Deelopdracht 2): loginformulier met Supabase Auth */}
-      <h1 className="text-2xl font-semibold">Inloggen</h1>
-    </main>
+    <>
+      {params.error === "auth_callback_failed" ? (
+        <p className="mb-4 rounded-lg bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
+          Inloggen via de bevestigingslink is mislukt. Probeer opnieuw in te loggen.
+        </p>
+      ) : null}
+      <LoginForm redirectTo={redirectTo} />
+    </>
   );
 }
