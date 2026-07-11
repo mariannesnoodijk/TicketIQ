@@ -15,7 +15,7 @@ Leidend principe: **jouw meningen sturen de backlog**; audit/guidelines vullen a
 
 | ID | Scherm | Prioriteit | Status | Samenvatting |
 |----|--------|------------|--------|--------------|
-| **W1** | `/dashboard` | Hoog | open | Meer analytics: trends per datum, drukke dagen/seizoenen, top-organisaties per periode |
+| **W1** | `/dashboard` | Hoog | **done** | Meer analytics: trends per datum, drukke dagen/seizoenen, top-organisaties per periode |
 | **W2** | `/dashboard` | Hoog | **done** | Donut: betere tooltip + klik → tickets van die categorie |
 | **W3** | `/dashboard/analyze` → `/dashboard` | Hoog | open | Chat op dashboard, prominenter; stappen inklapbaar; user/AI onderscheid; limiet 50–500–alles |
 | **W4** | `/dashboard` + registratie | Normaal | **done** | Welkom met naam; korte intro op aparte regel; naamveld bij registratie |
@@ -47,7 +47,7 @@ Leidend principe: **jouw meningen sturen de backlog**; audit/guidelines vullen a
 ## Voortgang & volgorde
 
 ```
-W2 ✓ → W4 ✓ → W1 → W3 (chat UX) → W3 (dashboard-integratie) → W3 (limieten) → W5
+W2 ✓ → W4 ✓ → W1 ✓ → W3 (chat UX) → W3 (dashboard-integratie) → W3 (limieten) → W5
 ```
 
 Audit-items (mobile nav, skeletons, …) komen **na** jouw wensen, tenzij expliciet prioriteit.
@@ -85,7 +85,25 @@ Audit-items (mobile nav, skeletons, …) komen **na** jouw wensen, tenzij explic
 
 ---
 
-## Fase 0 – Inventaris (11 jul 2026)
+## W1 – Analytics dashboard (afgerond 11 jul 2026)
+
+**Gedaan:**
+
+- **Periode-selector** (default 30 dagen): dag · week · 30 dagen · 90 dagen · jaar · complete periode
+- Datumbadges en concrete datumbereiken in elke grafiek + tooltips
+- **Tickets over tijd**, **per weekdag**, **top-organisaties**, **categorie-donut** — klikbaar → gefilterde ticketlijst
+- Stat-kaart “Tickets” + “AI-helpcenter-artikelen” tonen aantal in geselecteerde periode
+- Statusdiagram verplaatst naar `/dashboard/suggestions` met duidelijke AI/helpcenter-terminologie
+
+**Bestanden:** `lib/analytics/*`, `useTicketAnalytics.ts`, dashboard chart components, `filterUrls.ts`, `suggestions-page-content.tsx`
+
+**Commit:** na akkoord Marianne (zie git log)
+
+---
+
+## Volgende stap
+
+**W3** — chat op dashboard, inklapbare AI-stappen, user/AI-styling, ticketlimieten 50–500–alles
 
 ### Routes en huidige staat
 
@@ -133,4 +151,4 @@ Quick wins (ellipsis, loading-teksten, aria-hidden) staan in backlog fase 4. Zie
 
 ## Volgende stap
 
-**W1** – analytics widgets + periode-selector (default 30 dagen)
+**W3** — chat op dashboard integreren (prominent, altijd zichtbaar)

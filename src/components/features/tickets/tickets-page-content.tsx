@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
 import { Badge, priorityBadgeVariant, statusBadgeVariant } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -19,13 +19,12 @@ import {
 import { useCategories } from "@/hooks/useCategories";
 import { useLabels } from "@/hooks/useLabels";
 import { useTickets } from "@/hooks/useTickets";
-import type { TicketListFilters } from "@/lib/queryKeys";
 import { UNCATEGORIZED_CATEGORY_FILTER } from "@/lib/tickets/constants";
+import {
+  hasActiveTicketFilters,
+  parseTicketFiltersFromSearchParams,
+} from "@/lib/tickets/filterUrls";
 import { cn } from "@/lib/utils";
-
-function hasActiveFilters(filters: TicketListFilters): boolean {
-  return Boolean(filters.status || filters.categoryId || filters.labelId || filters.search);
-}
 
 function formatDate(value: string | null) {
   if (!value) return "—";
@@ -38,11 +37,15 @@ function formatDate(value: string | null) {
 export function TicketsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const categoryIdFromUrl = searchParams.get("categoryId") ?? undefined;
 
-  const [filters, setFilters] = useState<TicketListFilters>(() => ({
-    categoryId: categoryIdFromUrl,
-  }));
+  const [filters, setFilters] = useState(() =>
+    parseTicketFiltersFromSearchParams(searchParams)
+  );
+
+  useEffect(() => {
+    setFilters(parseTicketFiltersFromSearchParams(searchParams));
+  }, [searchParams]);
+
   const { data: tickets, isLoading, error } = useTickets(filters);
   const { data: categories } = useCategories();
   const { data: labels } = useLabels();
@@ -66,7 +69,7 @@ export function TicketsPageContent() {
           <Label htmlFor="search">Zoeken</Label>
           <Input
             id="search"
-            placeholder="Onderwerp..."
+            placeholder="Onderwerp…"
             value={filters.search ?? ""}
             onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value || undefined }))}
           />
@@ -127,12 +130,12 @@ export function TicketsPageContent() {
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Tickets laden...</p>
+        <p className="text-sm text-muted-foreground">Tickets laden…</p>
       ) : error ? (
         <p className="text-sm text-destructive">Kon tickets niet laden.</p>
       ) : !tickets?.length ? (
         <div className="rounded-xl border border-dashed border-border p-10 text-center">
-          {hasActiveFilters(filters) ? (
+          {hasActiveTicketFilters(filters) ? (
             <>
               <p className="font-medium">Geen tickets voor dit filter</p>
               <p className="mt-1 text-sm text-muted-foreground">

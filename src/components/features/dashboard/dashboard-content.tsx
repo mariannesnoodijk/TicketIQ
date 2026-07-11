@@ -1,29 +1,38 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 
+import { AnalyticsPeriodSelector } from "@/components/features/dashboard/analytics-period-selector";
 import { CategoryDistributionChart } from "@/components/features/dashboard/category-distribution-chart";
-import { SuggestionStatusChart } from "@/components/features/dashboard/suggestion-status-chart";
+import { TicketVolumeChart } from "@/components/features/dashboard/ticket-volume-chart";
+import { TicketWeekdayChart } from "@/components/features/dashboard/ticket-weekday-chart";
+import { TopOrganizationsChart } from "@/components/features/dashboard/top-organizations-chart";
 import { CategorizeTicketsButton } from "@/components/features/tickets/categorize-tickets-button";
 import { ImportTicketsButton } from "@/components/features/tickets/import-tickets-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
-import { useTicketCategoryStats } from "@/hooks/useTicketCategoryStats";
 import { useSuggestionStatusStats } from "@/hooks/useSuggestionStatusStats";
+import { useTicketAnalytics } from "@/hooks/useTicketAnalytics";
 import { useDashboardStats } from "@/hooks/useTickets";
+import {
+  DEFAULT_ANALYTICS_PERIOD,
+  getPeriodLabel,
+  type AnalyticsPeriod,
+} from "@/lib/analytics/period";
 import { cn } from "@/lib/utils";
 
 const quickLinks = [
   { href: "/dashboard/tickets", label: "Tickets bekijken", description: "Overzicht en filters" },
   {
     href: "/dashboard/suggestions",
-    label: "Suggesties beheren",
-    description: "Bekijk, bewerk en keur AI-artikelen goed",
+    label: "Helpcenter-artikelen",
+    description: "AI-voorstellen bekijken, bewerken en goedkeuren",
   },
   {
     href: "/dashboard/analyze",
     label: "AI-analyse starten",
-    description: "Detecteer patronen en genereer suggesties",
+    description: "Detecteer patronen en laat artikelen genereren",
   },
   {
     href: "/dashboard/categories",
@@ -34,10 +43,13 @@ const quickLinks = [
 ];
 
 export function DashboardContent({ displayName }: { displayName: string | undefined }) {
-  const { data: stats, isLoading } = useDashboardStats();
-  const { data: categoryStats, isLoading: isCategoryStatsLoading } = useTicketCategoryStats();
+  const [period, setPeriod] = useState<AnalyticsPeriod>(DEFAULT_ANALYTICS_PERIOD);
+  const periodLabel = getPeriodLabel(period);
+
+  const { data: stats, isLoading: isDashboardStatsLoading } = useDashboardStats();
+  const { data: analytics, isLoading: isAnalyticsLoading } = useTicketAnalytics(period);
   const { data: suggestionStats, isLoading: isSuggestionStatsLoading } =
-    useSuggestionStatusStats();
+    useSuggestionStatusStats(period);
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10">
@@ -48,33 +60,70 @@ export function DashboardContent({ displayName }: { displayName: string | undefi
         </h1>
         <p className="max-w-2xl text-muted-foreground">
           Op deze pagina kun je je statistieken bekijken, tickets importeren en snel verder met
-          AI-analyse, suggesties of het organiseren van categorieën en labels.
+          AI-analyse, helpcenter-artikelen of het organiseren van categorieën en labels.
         </p>
       </div>
 
+      <AnalyticsPeriodSelector value={period} onChange={setPeriod} />
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>Tickets ({periodLabel.toLowerCase()})</CardDescription>
+            <CardTitle className="text-3xl tabular-nums">
+              {isAnalyticsLoading ? "—" : (analytics?.ticketCount ?? 0)}
+            </CardTitle>
+          </CardHeader>
+        </Card>
         {[
-          { label: "Tickets", value: stats?.tickets },
           { label: "Categorieën", value: stats?.categories },
           { label: "Labels", value: stats?.labels },
-          { label: "AI-suggesties", value: stats?.suggestions },
+          { label: "AI-helpcenter-artikelen", value: suggestionStats?.total },
         ].map((item) => (
           <Card key={item.label}>
             <CardHeader className="pb-2">
-              <CardDescription>{item.label}</CardDescription>
+              <CardDescription>
+                {item.label}
+                {item.label === "AI-helpcenter-artikelen" ? ` (${periodLabel.toLowerCase()})` : ""}
+              </CardDescription>
               <CardTitle className="text-3xl tabular-nums">
-                {isLoading ? "—" : (item.value ?? 0)}
+                {isDashboardStatsLoading ||
+                (item.label === "AI-helpcenter-artikelen" && isSuggestionStatsLoading)
+                  ? "—"
+                  : (item.value ?? 0)}
               </CardTitle>
             </CardHeader>
           </Card>
         ))}
       </div>
 
-      <CategoryDistributionChart data={categoryStats} isLoading={isCategoryStatsLoading} />
+      <TicketVolumeChart
+        data={analytics?.volumeSeries}
+        period={period}
+        ticketCount={analytics?.ticketCount ?? 0}
+        isLoading={isAnalyticsLoading}
+      />
 
-      <SuggestionStatusChart data={suggestionStats} isLoading={isSuggestionStatsLoading} />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <TicketWeekdayChart
+          data={analytics?.weekdaySeries}
+          period={period}
+          isLoading={isAnalyticsLoading}
+        />
+        <TopOrganizationsChart
+          data={analytics?.topOrganizations}
+          period={period}
+          isLoading={isAnalyticsLoading}
+        />
+      </div>
 
-      {categoryStats?.items.some(
+      <CategoryDistributionChart
+        data={analytics?.categoryDistribution}
+        isLoading={isAnalyticsLoading}
+        period={period}
+      />
+
+      {analytics?.categoryDistribution.items.some(
         (item) => item.categoryId === null && item.count > 0
       ) ? (
         <Card>

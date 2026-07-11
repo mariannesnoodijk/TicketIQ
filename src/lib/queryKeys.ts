@@ -22,8 +22,13 @@ export const queryKeys = {
   },
   stats: {
     dashboard: ["dashboard-stats"] as const,
+    /** @deprecated gebruik ticketAnalytics(period) */
     categoryDistribution: ["category-distribution"] as const,
-    suggestionStatusDistribution: ["suggestion-status-distribution"] as const,
+    ticketAnalytics: (period: string) => ["ticket-analytics", period] as const,
+    ticketAnalyticsRoot: ["ticket-analytics"] as const,
+    suggestionStatusDistribution: (period: string) =>
+      ["suggestion-status-distribution", period] as const,
+    suggestionStatusRoot: ["suggestion-status-distribution"] as const,
   },
 } as const;
 
@@ -32,9 +37,15 @@ export type TicketListFilters = {
   categoryId?: string;
   labelId?: string;
   search?: string;
+  createdFrom?: string;
+  createdTo?: string;
+  weekday?: number;
+  organization?: string;
 };
 
 export type AiSuggestionListFilters = {
   status?: string;
   search?: string;
+  createdFrom?: string;
+  createdTo?: string;
 };

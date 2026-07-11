@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { invalidateDashboardAnalytics } from "@/lib/analytics/invalidateDashboardAnalytics";
 import { queryKeys } from "@/lib/queryKeys";
 
 type CategorizeResult = {
@@ -26,7 +27,7 @@ export function useCategorizeTickets() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.tickets.lists() });
       void queryClient.invalidateQueries({ queryKey: queryKeys.categories.all });
       void queryClient.invalidateQueries({ queryKey: queryKeys.stats.dashboard });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.stats.categoryDistribution });
+      invalidateDashboardAnalytics(queryClient);
     },
   });
 }
