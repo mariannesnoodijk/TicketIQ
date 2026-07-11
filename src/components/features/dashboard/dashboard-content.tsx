@@ -2,9 +2,12 @@
 
 import Link from "next/link";
 
+import { CategoryDistributionChart } from "@/components/features/dashboard/category-distribution-chart";
+import { CategorizeTicketsButton } from "@/components/features/tickets/categorize-tickets-button";
 import { ImportTicketsButton } from "@/components/features/tickets/import-tickets-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { useTicketCategoryStats } from "@/hooks/useTicketCategoryStats";
 import { useDashboardStats } from "@/hooks/useTickets";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +28,7 @@ const quickLinks = [
 
 export function DashboardContent({ email }: { email: string | undefined }) {
   const { data: stats, isLoading } = useDashboardStats();
+  const { data: categoryStats, isLoading: isCategoryStatsLoading } = useTicketCategoryStats();
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10">
@@ -53,6 +57,25 @@ export function DashboardContent({ email }: { email: string | undefined }) {
           </Card>
         ))}
       </div>
+
+      <CategoryDistributionChart data={categoryStats} isLoading={isCategoryStatsLoading} />
+
+      {categoryStats?.items.some(
+        (item) => item.categoryId === null && item.count > 0
+      ) ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Tickets categoriseren</CardTitle>
+            <CardDescription>
+              Tickets die vóór de automatische categorisatie zijn geïmporteerd, krijgen pas een
+              categorie na onderstaande actie (of opnieuw importeren).
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CategorizeTicketsButton />
+          </CardContent>
+        </Card>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>

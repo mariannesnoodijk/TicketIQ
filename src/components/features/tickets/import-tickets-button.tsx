@@ -14,8 +14,12 @@ export function ImportTicketsButton() {
     setMessage(null);
     try {
       const result = await importTickets.mutateAsync();
+      const backfilledPart =
+        result.backfilled && result.backfilled > 0
+          ? ` ${result.backfilled} bestaande tickets gecategoriseerd.`
+          : "";
       setMessage(
-        `${result.imported} tickets geïmporteerd, ${result.skipped} overgeslagen (totaal ${result.total}).`
+        `${result.imported} tickets geïmporteerd, ${result.skipped} overgeslagen (totaal ${result.total}).${backfilledPart}`
       );
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Import mislukt");

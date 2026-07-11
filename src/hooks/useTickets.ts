@@ -99,6 +99,7 @@ export function useUpdateTicket() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.tickets.lists() });
       void queryClient.invalidateQueries({ queryKey: queryKeys.tickets.detail(data.id) });
       void queryClient.invalidateQueries({ queryKey: queryKeys.stats.dashboard });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.stats.categoryDistribution });
     },
   });
 }
@@ -115,6 +116,7 @@ export function useDeleteTicket() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.tickets.lists() });
       void queryClient.invalidateQueries({ queryKey: queryKeys.stats.dashboard });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.stats.categoryDistribution });
     },
   });
 }
