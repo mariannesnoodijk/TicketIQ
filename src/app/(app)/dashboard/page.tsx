@@ -1,4 +1,5 @@
 import { DashboardContent } from "@/components/features/dashboard/dashboard-content";
+import { getUserDisplayName } from "@/lib/auth/displayName";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function DashboardPage() {
@@ -7,5 +8,7 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  return <DashboardContent email={user?.email} />;
+  const displayName = getUserDisplayName(user?.user_metadata);
+
+  return <DashboardContent displayName={displayName} />;
 }

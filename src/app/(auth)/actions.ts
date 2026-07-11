@@ -53,6 +53,11 @@ export async function register(
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
+  const fullName = String(formData.get("fullName") ?? "").trim();
+
+  if (!fullName) {
+    return { error: "Vul je naam in." };
+  }
 
   if (!email || !password) {
     return { error: "Vul je e-mailadres en wachtwoord in." };
@@ -72,6 +77,9 @@ export async function register(
     password,
     options: {
       emailRedirectTo: `${getSiteOrigin()}/auth/callback`,
+      data: {
+        full_name: fullName,
+      },
     },
   });
 

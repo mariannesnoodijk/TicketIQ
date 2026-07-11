@@ -18,7 +18,7 @@ Leidend principe: **jouw meningen sturen de backlog**; audit/guidelines vullen a
 | **W1** | `/dashboard` | Hoog | open | Meer analytics: trends per datum, drukke dagen/seizoenen, top-organisaties per periode |
 | **W2** | `/dashboard` | Hoog | **done** | Donut: betere tooltip + klik → tickets van die categorie |
 | **W3** | `/dashboard/analyze` → `/dashboard` | Hoog | open | Chat op dashboard, prominenter; stappen inklapbaar; user/AI onderscheid; limiet 50–500–alles |
-| **W4** | `/dashboard` + registratie | Normaal | open | Welkom met naam; korte intro op aparte regel; naamveld bij registratie |
+| **W4** | `/dashboard` + registratie | Normaal | **done** | Welkom met naam; korte intro op aparte regel; naamveld bij registratie |
 | **W5** | `/dashboard/tickets` | Laag | open | Paginering / “toon meer” i.p.v. alle tickets |
 
 ### W1 – Analytics (detail)
@@ -47,7 +47,7 @@ Leidend principe: **jouw meningen sturen de backlog**; audit/guidelines vullen a
 ## Voortgang & volgorde
 
 ```
-W2 ✓ → W4 → W1 → W3 (chat UX) → W3 (dashboard-integratie) → W3 (limieten) → W5
+W2 ✓ → W4 ✓ → W1 → W3 (chat UX) → W3 (dashboard-integratie) → W3 (limieten) → W5
 ```
 
 Audit-items (mobile nav, skeletons, …) komen **na** jouw wensen, tenzij expliciet prioriteit.
@@ -66,7 +66,22 @@ Audit-items (mobile nav, skeletons, …) komen **na** jouw wensen, tenzij explic
 
 **Bestanden:** `category-distribution-chart.tsx`, `tickets-page-content.tsx`, `useTickets.ts`, `lib/tickets/constants.ts`, `dashboard/tickets/page.tsx`
 
-**Wacht op:** akkoord Marianne → door naar W4
+**Commit:** `d4c5ad1` — akkoord Marianne
+
+---
+
+## W4 – Welkomst + naam (afgerond 11 jul 2026)
+
+**Gedaan:**
+
+- Registratie: verplicht **Naam**-veld → opgeslagen in `user_metadata.full_name`
+- Dashboard: **Welkom terug, {naam}** (groot, prominent); geen e-mail meer
+- Uitleg: “Op deze pagina kun je…” op aparte regel
+- Bestaande accounts zonder naam: alleen “Welkom terug”
+
+**Bestanden:** `register-form.tsx`, `actions.ts`, `dashboard/page.tsx`, `dashboard-content.tsx`, `lib/auth/displayName.ts`
+
+**Commit:** na akkoord Marianne (zie git log)
 
 ---
 
@@ -112,10 +127,10 @@ Quick wins (ellipsis, loading-teksten, aria-hidden) staan in backlog fase 4. Zie
 | 11 jul 2026 | Naam dashboard | Naamveld bij registratie | Marianne |
 | 11 jul 2026 | Chat op dashboard | Altijd zichtbaar | Marianne |
 | 11 jul 2026 | Analyze limiet | 50, 100, 200, 500, alle geïmporteerd | Marianne |
-| 11 jul 2026 | W2 donut | Geïmplementeerd | Agent |
+| 11 jul 2026 | W4 welkom + naam | Geïmplementeerd | Marianne + Agent |
 
 ---
 
 ## Volgende stap
 
-**W4** – welkomsttekst + naamveld registratie (na akkoord op W2)
+**W1** – analytics widgets + periode-selector (default 30 dagen)

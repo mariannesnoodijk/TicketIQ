@@ -33,7 +33,7 @@ const quickLinks = [
   { href: "/dashboard/labels", label: "Labels beheren", description: "Tag tickets met labels" },
 ];
 
-export function DashboardContent({ email }: { email: string | undefined }) {
+export function DashboardContent({ displayName }: { displayName: string | undefined }) {
   const { data: stats, isLoading } = useDashboardStats();
   const { data: categoryStats, isLoading: isCategoryStatsLoading } = useTicketCategoryStats();
   const { data: suggestionStats, isLoading: isSuggestionStatsLoading } =
@@ -42,10 +42,13 @@ export function DashboardContent({ email }: { email: string | undefined }) {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10">
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welkom terug{email ? `, ${email}` : ""}. Importeer tickets, analyseer patronen met AI,
-          beheer suggesties en organiseer tickets met categorieën en labels.
+        <p className="text-sm font-medium text-primary">Dashboard</p>
+        <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+          {displayName ? `Welkom terug, ${displayName}` : "Welkom terug"}
+        </h1>
+        <p className="max-w-2xl text-muted-foreground">
+          Op deze pagina kun je je statistieken bekijken, tickets importeren en snel verder met
+          AI-analyse, suggesties of het organiseren van categorieën en labels.
         </p>
       </div>
 
