@@ -43,3 +43,10 @@ export type SaveSuggestionResult = {
   message: string;
   metadata?: AiSuggestionMetadata;
 };
+
+export type AssignTicketCategoryResult = {
+  updated: number;
+  skipped: number;
+  message: string;
+  errors?: string[];
+};
