@@ -299,45 +299,81 @@ function TextMessagePart({
   part,
   messageId,
   index,
+  variant,
 }: {
   part: Extract<UIMessage["parts"][number], { type: "text" }>;
   messageId: string;
   index: number;
+  variant: "user" | "assistant";
 }) {
   if (!part.text.trim()) {
     return null;
   }
 
   return (
-    <p key={`${messageId}-${index}`} className="whitespace-pre-wrap text-sm leading-relaxed">
+    <p
+      key={`${messageId}-${index}`}
+      className={cn(
+        "whitespace-pre-wrap text-sm leading-relaxed",
+        variant === "user"
+          ? "rounded-2xl rounded-tr-md bg-primary px-4 py-2.5 text-primary-foreground shadow-sm"
+          : "text-foreground"
+      )}
+    >
       {part.text}
     </p>
   );
 }
 
-function ChatMessage({ message }: { message: UIMessage }) {
-  const isUser = message.role === "user";
-  const segments = orderSegmentsForDisplay(segmentMessageParts(message.parts), !isUser);
+function UserChatMessage({ message }: { message: UIMessage }) {
+  const textParts = message.parts.filter(
+    (part): part is Extract<UIMessage["parts"][number], { type: "text" }> =>
+      part.type === "text" && part.text.trim().length > 0
+  );
+
+  if (textParts.length === 0) {
+    return null;
+  }
 
   return (
-    <div
-      className={cn(
-        "flex gap-3 rounded-xl border px-4 py-3",
-        isUser ? "border-border bg-card" : "border-primary/20 bg-accent/30"
-      )}
-    >
-      <div
-        className={cn(
-          "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full",
-          isUser ? "bg-muted" : "bg-primary/10 text-primary"
-        )}
-      >
-        {isUser ? <User className="size-4" /> : <Bot className="size-4" />}
+    <div className="flex items-end justify-end gap-2.5">
+      <div className="max-w-[min(85%,34rem)] space-y-1">
+        <p className="text-right text-xs font-medium text-muted-foreground">Jij</p>
+        <div className="space-y-2">
+          {textParts.map((part, index) => (
+            <TextMessagePart
+              key={`${message.id}-text-${index}`}
+              part={part}
+              messageId={message.id}
+              index={index}
+              variant="user"
+            />
+          ))}
+        </div>
       </div>
-      <div className="min-w-0 flex-1 space-y-2">
-        <p className="text-xs font-medium text-muted-foreground">
-          {isUser ? "Jij" : "TicketIQ AI"}
-        </p>
+      <div
+        className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm"
+        aria-hidden
+      >
+        <User className="size-4" />
+      </div>
+    </div>
+  );
+}
+
+function AssistantChatMessage({ message }: { message: UIMessage }) {
+  const segments = orderSegmentsForDisplay(segmentMessageParts(message.parts), true);
+
+  return (
+    <div className="flex gap-2.5">
+      <div
+        className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"
+        aria-hidden
+      >
+        <Bot className="size-4" />
+      </div>
+      <div className="min-w-0 flex-1 space-y-2 rounded-xl border border-primary/15 bg-muted/50 px-4 py-3 shadow-sm">
+        <p className="text-xs font-semibold tracking-wide text-primary">TicketIQ AI</p>
         {segments.map((segment, segmentIndex) => {
           if (segment.kind === "text") {
             return (
@@ -346,6 +382,7 @@ function ChatMessage({ message }: { message: UIMessage }) {
                 part={segment.part}
                 messageId={message.id}
                 index={segment.index}
+                variant="assistant"
               />
             );
           }
@@ -361,6 +398,14 @@ function ChatMessage({ message }: { message: UIMessage }) {
       </div>
     </div>
   );
+}
+
+function ChatMessage({ message }: { message: UIMessage }) {
+  if (message.role === "user") {
+    return <UserChatMessage message={message} />;
+  }
+
+  return <AssistantChatMessage message={message} />;
 }
 
 type AgentChatMessagesProps = {
@@ -392,9 +437,16 @@ export function AgentChatMessages({ messages, isLoading, emptyContent }: AgentCh
         <ChatMessage key={message.id} message={message} />
       ))}
       {isLoading ? (
-        <div className="flex items-center gap-2 px-2 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" />
-          Agent analyseert…
+        <div className="flex gap-2.5">
+          <div
+            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"
+            aria-hidden
+          >
+            <Loader2 className="size-4 animate-spin" />
+          </div>
+          <div className="rounded-xl border border-primary/15 bg-muted/50 px-4 py-3 text-sm text-muted-foreground shadow-sm">
+            TicketIQ AI analyseert…
+          </div>
         </div>
       ) : null}
     </div>

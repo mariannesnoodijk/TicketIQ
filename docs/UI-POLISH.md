@@ -34,7 +34,7 @@ Leidend principe: **jouw meningen sturen de backlog**; audit/guidelines vullen a
 - **Dashboard** (`/dashboard`): alleen statistieken/import (geen chat)
 - `/dashboard/analyze` → redirect naar Home
 - Welkomstbericht: statisch (geen API), met knoppen naar dashboard/tickets/helpcenter + start analyse
-- **Nog open (W3 vervolg):** user/AI-styling in chat; hybride fetchTickets (database + DummyJSON via tool) + limieten 200/500/alle
+- **Nog open (W3 vervolg):** —
 
 ### W4 – Welkom (detail)
 
@@ -47,7 +47,7 @@ Leidend principe: **jouw meningen sturen de backlog**; audit/guidelines vullen a
 ## Voortgang & volgorde
 
 ```
-W2 ✓ → W4 ✓ → W1 ✓ → W3 (home split) ✓ → W3 (chat UX) → W3 (limieten) → W5
+W2 ✓ → W4 ✓ → W1 ✓ → W3 ✓ → W5
 ```
 
 Audit-items (mobile nav, skeletons, …) komen **na** jouw wensen, tenzij expliciet prioriteit.
@@ -113,13 +113,28 @@ Audit-items (mobile nav, skeletons, …) komen **na** jouw wensen, tenzij explic
 
 **Bestanden:** `home-page-content.tsx`, `agent-chat-panel.tsx`, `agent-chat-welcome.tsx`, `lib/ai/analyzePrompt.ts`, routing + header
 
-**Commit:** na akkoord Marianne (zie git log)
+**Commit:** `bc51f20` — hybride fetchTickets + limieten; akkoord Marianne
+
+---
+
+## W3 vervolg – Chat UX (afgerond 11 jul 2026)
+
+**Gedaan:**
+
+- Inklapbare AI-tool-stappen (individueel + groep); antwoord vóór stappen
+- Hybride `fetchTickets`: database (standaard) + DummyJSON via `source: "api"`
+- Ticketlimieten: 50 · 100 · 200 · 500 · alle geïmporteerde
+- User/AI-styling: gebruiker rechts (primary bubble), AI links (muted card + bot-avatar)
+
+**Bestanden:** `agent-chat-messages.tsx`, `agent-chat-panel.tsx`, `fetchTickets.ts`, `analyzePrompt.ts`, `prompts.ts`
+
+**Commits:** `a7b5805` (tool collapse), `bc51f20` (hybride + limieten), user/AI-styling (deze commit)
 
 ---
 
 ## Volgende stap
 
-**W3 vervolg** — inklapbare AI-stappen, user/AI-styling, ticketlimieten 200/500/alle
+**W5** — tickets paginering / “toon meer”
 
 ### Routes en huidige staat
 
@@ -163,10 +178,10 @@ Quick wins (ellipsis, loading-teksten, aria-hidden) staan in backlog fase 4. Zie
 | 11 jul 2026 | Chat op dashboard | Altijd zichtbaar | Marianne |
 | 11 jul 2026 | Home vs dashboard | Home = chat; dashboard = statistieken; analyze redirect | Marianne |
 | 11 jul 2026 | Analyze limiet | 50, 100, 200, 500, alle geïmporteerd | Marianne |
-| 11 jul 2026 | W4 welkom + naam | Geïmplementeerd | Marianne + Agent |
+| 11 jul 2026 | W3 chat UX | Inklapbare stappen, hybride fetch, limieten, user/AI bubbles | Marianne + Agent |
 
 ---
 
 ## Volgende stap
 
-**W3 vervolg** — inklapbare tool-stappen, user/AI-styling, limieten 200/500/alle
+**W5** — tickets paginering / “toon meer”
