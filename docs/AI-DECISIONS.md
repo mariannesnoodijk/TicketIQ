@@ -82,3 +82,10 @@
 - **Alternatieven:** inline bewerken in tabel — afgevallen (artikeltekst te lang). Aparte goedkeur-API route — afgevallen (bestaande Supabase update + RLS volstaat). Status alleen via dropdown — uitgebreid met expliciete knoppen voor duidelijkere workflow.
 - **AI-rol:** pagina’s en hooks opgezet met Cursor; UI-patronen hergebruikt van tickets/categorieën.
 - **Gevolgen:** volledige CRUD-UI voor alle 5 tabellen; vier kernfunctionaliteiten compleet; goedgekeurde suggesties (`status = approved`) dienen als helpcenter-bibliotheek zoals in het datamodel-besluit bedoeld.
+
+### Revisie-flow na afwijzing (optie A)
+- **Context:** afgewezen suggesties hadden geen feedbackloop; artikelteksten waren vaak te dun (verwijzingen naar handleiding i.p.v. stappen). `fetchTickets` kapte bodies af op 400 tekens; `saveSuggestion` accepteerde vanaf 50 tekens.
+- **Beslissing:** vaste markdown-structuur voor artikelen (`articleContent.ts`) met validatie (min. 400 tekens, stappen/secties verplicht). Agent-prompt aangescherpt. Bij afwijzen: verplichte feedback in `metadata.revisionFeedback` + `revisionHistory`. Dedicated `POST /api/suggestions/[id]/revise` met `generateObject` (niet de analyse-agent): laadt volledige bron-tickets uit Supabase, herschrijft titel/samenvatting/inhoud, zet status op `draft`. UI: “Afwijzen met feedback” + “Nieuw artikel laten schrijven” op detailpagina.
+- **Alternatieven:** revisie via analyse-chat/agent-tool — afgevallen (mindere UX op detailpagina). Alleen handmatig bewerken — afgevallen (geen AI-herschrijving). Nieuwe rij per revisie — afgevallen (zelfde suggestie bijwerken is overzichtelijker).
+- **AI-rol:** prompt, validatie, API-route en UI ontworpen met Cursor; AI SDK v7 `generateObject` geverifieerd.
+- **Gevolgen:** supportmedewerker kan itereren op afgewezen suggesties; artikelen bevatten concrete stappen. DummyJSON-tickets blijven klantvragen — AI levert plausibele helpcenter-inhoud op basis van tickets + feedback.

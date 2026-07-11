@@ -8,7 +8,8 @@
 Uitgangspunt: casus **TicketIQ** goedgekeurd. Project bevat een werkende Next.js 16 +
 TypeScript + Tailwind v4 opzet volgens de voorgeschreven repo-structuur (`src/`, `.cursor/rules`,
 `.agents/skills`, `docs`). Auth (PR2), databaseschema met RLS (PR3), CRUD + ticket-import (PR4),
-AI-agent (PR5) en suggesties-beheer (PR6) zijn gebouwd. Supabase-project bestaat;
+AI-agent (PR5) en suggesties-beheer (PR6) zijn gebouwd, inclusief revisie-flow na
+afwijzing. Supabase-project bestaat;
 GitHub (public), Vercel en Skills.sh zijn opgezet (PR1).
 
 ## Deelopdracht 1 – Broncode Next.js project (25%)
