@@ -1,22 +1,21 @@
 "use client";
 
-import { DefaultChatTransport } from "ai";
-import { useChat } from "@ai-sdk/react";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { AgentChatMessages } from "@/components/features/analysis/agent-chat-messages";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useAgentChat } from "@/hooks/useAgentChat";
 import { useDashboardStats } from "@/hooks/useTickets";
 import { cn } from "@/lib/utils";
 
 const LIMIT_OPTIONS = [50, 100] as const;
 
 function buildAnalyzePrompt(limit: number): string {
-  return `Analyseer de laatste ${limit} supporttickets. Zoek terugkerende patronen, categoriseer ze met de vaste categorieën, controleer op duplicaten en sla maximaal 5 nieuwe helpcenter-suggesties op. Leg daarna uit wat je hebt gevonden.`;
+  return `Analyseer de laatste ${limit} supporttickets. Zoek terugkerende patronen, categoriseer de tickets met assignTicketCategory, controleer op duplicaten en sla maximaal 5 nieuwe helpcenter-suggesties op. Leg daarna uit wat je hebt gevonden.`;
 }
 
 export function AnalyzePageContent() {
@@ -24,20 +23,11 @@ export function AnalyzePageContent() {
   const [ticketLimit, setTicketLimit] = useState<(typeof LIMIT_OPTIONS)[number]>(50);
   const { data: stats } = useDashboardStats();
 
-  const transport = useMemo(
-    () =>
-      new DefaultChatTransport({
-        api: "/api/agent",
-      }),
-    []
-  );
-
-  const { messages, sendMessage, status, error } = useChat({
-    transport,
-  });
+  const { messages, sendMessage, status, error, clearChat } = useAgentChat();
 
   const isLoading = status === "streaming" || status === "submitted";
   const hasTickets = (stats?.tickets ?? 0) > 0;
+  const hasMessages = messages.length > 0;
 
   function handleAnalyze() {
     void sendMessage({ text: buildAnalyzePrompt(ticketLimit) });
@@ -51,13 +41,20 @@ export function AnalyzePageContent() {
     setInput("");
   }
 
+  function handleClearChat() {
+    if (!hasMessages) return;
+    if (confirm("Chatgeschiedenis wissen en opnieuw beginnen?")) {
+      clearChat();
+    }
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-10">
       <div className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">AI-analyse</h1>
         <p className="text-muted-foreground">
-          De agent haalt tickets op via DummyJSON, detecteert terugkerende problemen en genereert
-          helpcenter-suggesties.
+          De agent haalt tickets op via DummyJSON, categoriseert ze, detecteert terugkerende
+          problemen en genereert helpcenter-suggesties. De chat blijft bewaard bij navigatie.
         </p>
       </div>
 
@@ -106,19 +103,32 @@ export function AnalyzePageContent() {
               ))}
             </select>
           </div>
-          <Button onClick={handleAnalyze} disabled={isLoading} className="sm:self-end">
-            {isLoading ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                Analyseren…
-              </>
-            ) : (
-              <>
-                <Sparkles className="size-4" />
-                Analyseer tickets
-              </>
-            )}
-          </Button>
+          <div className="flex flex-wrap gap-2 sm:self-end">
+            <Button onClick={handleAnalyze} disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Analyseren…
+                </>
+              ) : (
+                <>
+                  <Sparkles className="size-4" />
+                  Analyseer tickets
+                </>
+              )}
+            </Button>
+            {hasMessages ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClearChat}
+                disabled={isLoading}
+              >
+                <Trash2 className="size-4" />
+                Nieuwe analyse
+              </Button>
+            ) : null}
+          </div>
         </CardContent>
       </Card>
 
@@ -126,7 +136,8 @@ export function AnalyzePageContent() {
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Analyse &amp; chat</CardTitle>
           <CardDescription>
-            Streaming antwoord met zichtbare tool-calls (fetch, duplicaatcheck, opslaan).
+            Streaming antwoord met zichtbare tool-calls (ophalen, categoriseren, duplicaatcheck,
+            opslaan). Blijft bewaard bij tabwissel en pagina-refresh.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-1 flex-col gap-4">
