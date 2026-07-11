@@ -58,3 +58,35 @@ export function priorityBadgeVariant(
       return "outline";
   }
 }
+
+export function suggestionStatusBadgeVariant(
+  status: string
+): NonNullable<VariantProps<typeof badgeVariants>["variant"]> {
+  switch (status) {
+    case "approved":
+      return "success";
+    case "pending":
+      return "warning";
+    case "rejected":
+      return "destructive";
+    case "draft":
+      return "secondary";
+    default:
+      return "outline";
+  }
+}
+
+export function suggestionStatusLabel(status: string): string {
+  switch (status) {
+    case "approved":
+      return "Goedgekeurd";
+    case "pending":
+      return "In afwachting";
+    case "rejected":
+      return "Afgewezen";
+    case "draft":
+      return "Concept";
+    default:
+      return status;
+  }
+}
