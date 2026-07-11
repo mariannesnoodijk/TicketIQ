@@ -2,24 +2,72 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { queryKeys } from "@/lib/queryKeys";
+import { type AiSuggestionListFilters, queryKeys } from "@/lib/queryKeys";
 import { createClient } from "@/lib/supabase/client";
 import type { AiSuggestionInsert, AiSuggestionUpdate } from "@/types";
 
-export function useAiSuggestions() {
+const suggestionSelect = "*, categories ( id, name, color )";
+
+function invalidateSuggestionQueries(
+  queryClient: ReturnType<typeof useQueryClient>,
+  suggestionId?: string
+) {
+  void queryClient.invalidateQueries({ queryKey: queryKeys.aiSuggestions.lists() });
+  void queryClient.invalidateQueries({ queryKey: queryKeys.stats.dashboard });
+  void queryClient.invalidateQueries({
+    queryKey: queryKeys.stats.suggestionStatusDistribution,
+  });
+
+  if (suggestionId) {
+    void queryClient.invalidateQueries({
+      queryKey: queryKeys.aiSuggestions.detail(suggestionId),
+    });
+  }
+}
+
+export function useAiSuggestions(filters: AiSuggestionListFilters = {}) {
   const supabase = createClient();
 
   return useQuery({
-    queryKey: queryKeys.aiSuggestions.all,
+    queryKey: queryKeys.aiSuggestions.list(filters),
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("ai_suggestions")
-        .select("*, categories ( id, name, color )")
+        .select(suggestionSelect)
         .order("created_at", { ascending: false });
+
+      if (filters.status) {
+        query = query.eq("status", filters.status);
+      }
+
+      if (filters.search?.trim()) {
+        query = query.ilike("title", `%${filters.search.trim()}%`);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       return data;
     },
+  });
+}
+
+export function useAiSuggestion(id: string) {
+  const supabase = createClient();
+
+  return useQuery({
+    queryKey: queryKeys.aiSuggestions.detail(id),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ai_suggestions")
+        .select(suggestionSelect)
+        .eq("id", id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: Boolean(id),
   });
 }
 
@@ -44,8 +92,7 @@ export function useCreateAiSuggestion() {
       return data;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.aiSuggestions.all });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.stats.dashboard });
+      invalidateSuggestionQueries(queryClient);
     },
   });
 }
@@ -67,11 +114,7 @@ export function useUpdateAiSuggestion() {
       return data;
     },
     onSuccess: (data) => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.aiSuggestions.all });
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.aiSuggestions.detail(data.id),
-      });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.stats.dashboard });
+      invalidateSuggestionQueries(queryClient, data.id);
     },
   });
 }
@@ -86,8 +129,7 @@ export function useDeleteAiSuggestion() {
       if (error) throw error;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.aiSuggestions.all });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.stats.dashboard });
+      invalidateSuggestionQueries(queryClient);
     },
   });
 }
