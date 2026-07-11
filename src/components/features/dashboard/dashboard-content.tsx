@@ -3,16 +3,23 @@
 import Link from "next/link";
 
 import { CategoryDistributionChart } from "@/components/features/dashboard/category-distribution-chart";
+import { SuggestionStatusChart } from "@/components/features/dashboard/suggestion-status-chart";
 import { CategorizeTicketsButton } from "@/components/features/tickets/categorize-tickets-button";
 import { ImportTicketsButton } from "@/components/features/tickets/import-tickets-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { useTicketCategoryStats } from "@/hooks/useTicketCategoryStats";
+import { useSuggestionStatusStats } from "@/hooks/useSuggestionStatusStats";
 import { useDashboardStats } from "@/hooks/useTickets";
 import { cn } from "@/lib/utils";
 
 const quickLinks = [
   { href: "/dashboard/tickets", label: "Tickets bekijken", description: "Overzicht en filters" },
+  {
+    href: "/dashboard/suggestions",
+    label: "Suggesties beheren",
+    description: "Bekijk, bewerk en keur AI-artikelen goed",
+  },
   {
     href: "/dashboard/analyze",
     label: "AI-analyse starten",
@@ -29,14 +36,16 @@ const quickLinks = [
 export function DashboardContent({ email }: { email: string | undefined }) {
   const { data: stats, isLoading } = useDashboardStats();
   const { data: categoryStats, isLoading: isCategoryStatsLoading } = useTicketCategoryStats();
+  const { data: suggestionStats, isLoading: isSuggestionStatsLoading } =
+    useSuggestionStatusStats();
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10">
       <div className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">
-          Welkom terug{email ? `, ${email}` : ""}. Importeer tickets, analyseer patronen met AI
-          en organiseer ze met categorieën en labels.
+          Welkom terug{email ? `, ${email}` : ""}. Importeer tickets, analyseer patronen met AI,
+          beheer suggesties en organiseer tickets met categorieën en labels.
         </p>
       </div>
 
@@ -59,6 +68,8 @@ export function DashboardContent({ email }: { email: string | undefined }) {
       </div>
 
       <CategoryDistributionChart data={categoryStats} isLoading={isCategoryStatsLoading} />
+
+      <SuggestionStatusChart data={suggestionStats} isLoading={isSuggestionStatsLoading} />
 
       {categoryStats?.items.some(
         (item) => item.categoryId === null && item.count > 0

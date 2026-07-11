@@ -7,8 +7,9 @@
 
 Uitgangspunt: casus **TicketIQ** goedgekeurd. Project bevat een werkende Next.js 16 +
 TypeScript + Tailwind v4 opzet volgens de voorgeschreven repo-structuur (`src/`, `.cursor/rules`,
-`.agents/skills`, `docs`). Auth (PR2), databaseschema met RLS (PR3), CRUD + ticket-import (PR4)
-en AI-agent (PR5) zijn gebouwd; suggesties-beheer volgt in PR6. Supabase-project bestaat;
+`.agents/skills`, `docs`). Auth (PR2), databaseschema met RLS (PR3), CRUD + ticket-import (PR4),
+AI-agent (PR5) en suggesties-beheer (PR6) zijn gebouwd, inclusief revisie-flow na
+afwijzing. Supabase-project bestaat;
 GitHub (public), Vercel en Skills.sh zijn opgezet (PR1).
 
 ## Deelopdracht 1 – Broncode Next.js project (25%)
@@ -19,17 +20,17 @@ GitHub (public), Vercel en Skills.sh zijn opgezet (PR1).
 - [x] Agent-based flow met werkende `maxSteps` meerstaps-aanpak (1.3) — `stopWhen: isStepCount(8)` in AI SDK v7
 - [~] Schone, gestructureerde, onderhoudbare code; logische scheiding server/client/utils/data (1.4)
 - [~] Minimaal 20 kleine commits met zinvolle messages (1.5)
-- [~] Minimaal 5 pull requests gemerged naar `main` (1.5) — PR1–PR4 gemerged; PR5 klaar voor merge
+- [~] Minimaal 5 pull requests gemerged naar `main` (1.5) — PR1–PR5 gemerged; PR6 klaar voor merge
 - [x] Repository volgens voorgeschreven structuur
 - [ ] Gedeployed op Vercel
 - [ ] `README.md` met heldere installatie-instructies
-- [~] Minimaal 4 kernfunctionaliteiten (auth + ticket-ingestie + AI-analyse + dashboard-statistieken klaar; suggesties-beheer volgt in PR6)
+- [x] Minimaal 4 kernfunctionaliteiten (auth + ticket-ingestie + AI-analyse + suggesties-beheer + dashboard-statistieken)
 
 ## Deelopdracht 2 – Supabase backend (15%)
 
 - [x] Databaseschema met minimaal 4 tabellen (2.1) — 5 tabellen: categories, tickets, labels, ticket_labels, ai_suggestions
 - [x] Passende relaties (foreign keys) en constraints (PK, not null, unique) (2.1)
-- [x] CRUD-operaties met React Query voor relevante entiteiten (2.2) — hooks voor alle 5 tabellen; UI voor categories, tickets, labels
+- [x] CRUD-operaties met React Query voor relevante entiteiten (2.2) — hooks + UI voor alle 5 tabellen
 - [x] Supabase Auth: registreren, inloggen, correcte sessieafhandeling (2.3)
 - [x] RLS ingeschakeld op relevante tabellen (2.3)
 - [x] Werkende policies: gebruiker benadert alleen eigen data (2.3)
@@ -69,7 +70,7 @@ GitHub (public), Vercel en Skills.sh zijn opgezet (PR1).
 - [x] Vercel AI SDK met werkende AI Agent
 - [x] Minimaal 1 externe API via **Tool Calling**
 - [x] Streaming responses in de chat-interface
-- [~] Architectuurbeslissingen met AI-hulp gedocumenteerd
+- [x] Architectuurbeslissingen met AI-hulp gedocumenteerd
 
 ## Casus (vooraf, ter goedkeuring docent)
 

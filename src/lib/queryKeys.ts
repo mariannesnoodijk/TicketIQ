@@ -16,11 +16,14 @@ export const queryKeys = {
   },
   aiSuggestions: {
     all: ["ai-suggestions"] as const,
+    lists: () => ["ai-suggestions", "list"] as const,
+    list: (filters: AiSuggestionListFilters) => ["ai-suggestions", "list", filters] as const,
     detail: (id: string) => ["ai-suggestions", id] as const,
   },
   stats: {
     dashboard: ["dashboard-stats"] as const,
     categoryDistribution: ["category-distribution"] as const,
+    suggestionStatusDistribution: ["suggestion-status-distribution"] as const,
   },
 } as const;
 
@@ -28,5 +31,10 @@ export type TicketListFilters = {
   status?: string;
   categoryId?: string;
   labelId?: string;
+  search?: string;
+};
+
+export type AiSuggestionListFilters = {
+  status?: string;
   search?: string;
 };

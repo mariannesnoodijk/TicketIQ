@@ -2,6 +2,10 @@ import { tool } from "ai";
 import { z } from "zod";
 
 import { DEFAULT_CATEGORIES } from "@/lib/categories/defaultCategories";
+import {
+  ARTICLE_CONTENT_MIN_LENGTH,
+  articleContentValidationMessage,
+} from "@/lib/ai/articleContent";
 import type { createClient } from "@/lib/supabase/server";
 import type { AiSuggestionMetadata } from "@/types";
 import type { SaveSuggestionResult } from "@/lib/ai/types";
@@ -13,7 +17,7 @@ const allowedCategoryNames = new Set<string>(DEFAULT_CATEGORIES.map((c) => c.nam
 const saveSuggestionInputSchema = z.object({
   title: z.string().min(3).max(200),
   summary: z.string().min(10).max(500),
-  content: z.string().min(50),
+  content: z.string().min(ARTICLE_CONTENT_MIN_LENGTH),
   categoryName: z.string(),
   sourceTicketExternalIds: z.array(z.string()).min(1),
   frequency: z.number().int().min(1),
@@ -42,6 +46,14 @@ export function createSaveSuggestionTool(
         }
 
         const data = parsed.data;
+
+        const contentError = articleContentValidationMessage(data.content);
+        if (contentError) {
+          return {
+            saved: false,
+            message: `Suggestie "${data.title}" niet opgeslagen: ${contentError}`,
+          };
+        }
 
         if (data.isDuplicate) {
           return {
