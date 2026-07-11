@@ -3,6 +3,7 @@
 import type { UIMessage } from "ai";
 import { isToolUIPart } from "ai";
 import { Bot, Loader2, User, Wrench } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -127,17 +128,21 @@ function ChatMessage({ message }: { message: UIMessage }) {
 type AgentChatMessagesProps = {
   messages: UIMessage[];
   isLoading: boolean;
+  emptyContent?: ReactNode;
 };
 
-export function AgentChatMessages({ messages, isLoading }: AgentChatMessagesProps) {
+export function AgentChatMessages({ messages, isLoading, emptyContent }: AgentChatMessagesProps) {
   if (messages.length === 0 && !isLoading) {
+    if (emptyContent) {
+      return <div className="flex flex-1 flex-col">{emptyContent}</div>;
+    }
+
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border px-6 py-12 text-center">
         <Bot className="size-8 text-muted-foreground" />
-        <p className="text-sm font-medium">Nog geen analyse gestart</p>
+        <p className="text-sm font-medium">Nog geen berichten</p>
         <p className="max-w-md text-sm text-muted-foreground">
-          Klik op &quot;Analyseer tickets&quot; om de AI-agent te starten, of stel een vraag over
-          je supporttickets.
+          Start een analyse of stel een vraag aan de AI-assistent.
         </p>
       </div>
     );

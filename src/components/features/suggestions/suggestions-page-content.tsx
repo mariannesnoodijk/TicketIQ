@@ -117,10 +117,10 @@ export function SuggestionsPageContent() {
               genereren op basis van je tickets.
             </p>
             <Link
-              href="/dashboard/analyze"
+              href="/dashboard/home"
               className={cn(buttonVariants({ variant: "outline" }), "w-fit")}
             >
-              Naar AI-analyse
+              Naar AI-assistent
             </Link>
           </div>
         ) : (

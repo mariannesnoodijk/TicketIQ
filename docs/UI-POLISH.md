@@ -17,7 +17,7 @@ Leidend principe: **jouw meningen sturen de backlog**; audit/guidelines vullen a
 |----|--------|------------|--------|--------------|
 | **W1** | `/dashboard` | Hoog | **done** | Meer analytics: trends per datum, drukke dagen/seizoenen, top-organisaties per periode |
 | **W2** | `/dashboard` | Hoog | **done** | Donut: betere tooltip + klik → tickets van die categorie |
-| **W3** | `/dashboard/analyze` → `/dashboard` | Hoog | open | Chat op dashboard, prominenter; stappen inklapbaar; user/AI onderscheid; limiet 50–500–alles |
+| **W3** | `/dashboard/home` + `/dashboard` | Hoog | **done** | Home met chat-conciërge; dashboard = statistieken; analyze weg |
 | **W4** | `/dashboard` + registratie | Normaal | **done** | Welkom met naam; korte intro op aparte regel; naamveld bij registratie |
 | **W5** | `/dashboard/tickets` | Laag | open | Paginering / “toon meer” i.p.v. alle tickets |
 
@@ -28,13 +28,13 @@ Leidend principe: **jouw meningen sturen de backlog**; audit/guidelines vullen a
 - Alle analytics-widgets filteren op dezelfde geselecteerde periode
 - Organisaties via `raw_payload.organisatie_naam` (JSONB)
 
-### W3 – Analyze / chat (detail)
+### W3 – Home + chat (detail)
 
-- Chat **altijd zichtbaar** op dashboard (niet inklapbaar panel)
-- AI-tool-stappen standaard ingeklapt na voltooiing, uitklapbaar
-- Duidelijker onderscheid user vs AI in chat
-- Ticketlimiet: **50 · 100 · 200 · 500 · alle geïmporteerde tickets**
-- “Alle geïmporteerde tickets” vereist agent-tool uitbreiding (Supabase, niet alleen DummyJSON)
+- **Home** (`/dashboard/home`): landing na login; statisch welkom + AI-chat
+- **Dashboard** (`/dashboard`): alleen statistieken/import (geen chat)
+- `/dashboard/analyze` → redirect naar Home
+- Welkomstbericht: statisch (geen API), met knoppen naar dashboard/tickets/helpcenter + start analyse
+- **Nog open (W3 vervolg):** inklapbare tool-stappen, user/AI-styling, limieten 200/500/alle
 
 ### W4 – Welkom (detail)
 
@@ -47,7 +47,7 @@ Leidend principe: **jouw meningen sturen de backlog**; audit/guidelines vullen a
 ## Voortgang & volgorde
 
 ```
-W2 ✓ → W4 ✓ → W1 ✓ → W3 (chat UX) → W3 (dashboard-integratie) → W3 (limieten) → W5
+W2 ✓ → W4 ✓ → W1 ✓ → W3 (home split) ✓ → W3 (chat UX) → W3 (limieten) → W5
 ```
 
 Audit-items (mobile nav, skeletons, …) komen **na** jouw wensen, tenzij expliciet prioriteit.
@@ -101,18 +101,35 @@ Audit-items (mobile nav, skeletons, …) komen **na** jouw wensen, tenzij explic
 
 ---
 
+## W3 – Home + chat-conciërge (afgerond 11 jul 2026)
+
+**Gedaan:**
+
+- **`/dashboard/home`**: welkom + `AgentChatPanel` (default na login)
+- **`AgentChatWelcome`**: statisch onboarding met uitleg + navigatieknoppen + start analyse
+- **`/dashboard`**: analytics-only; quick link naar AI-assistent
+- **`/dashboard/analyze`**: redirect naar Home
+- Nav: Home · Dashboard · … (Analyse verwijderd)
+
+**Bestanden:** `home-page-content.tsx`, `agent-chat-panel.tsx`, `agent-chat-welcome.tsx`, `lib/ai/analyzePrompt.ts`, routing + header
+
+**Commit:** na akkoord Marianne (zie git log)
+
+---
+
 ## Volgende stap
 
-**W3** — chat op dashboard, inklapbare AI-stappen, user/AI-styling, ticketlimieten 50–500–alles
+**W3 vervolg** — inklapbare AI-stappen, user/AI-styling, ticketlimieten 200/500/alle
 
 ### Routes en huidige staat
 
 | Route | Component | Demo-prio | Opmerkingen |
 |-------|-----------|-----------|-------------|
 | `/` | `page.tsx` | Hoog | Basic hero |
-| `/dashboard` | `dashboard-content.tsx` | Hoog | Stats + charts; W2 donut klikbaar |
+| `/dashboard/home` | `home-page-content.tsx` | Hoog | Landing + AI-chat |
+| `/dashboard` | `dashboard-content.tsx` | Hoog | Stats + charts |
 | `/dashboard/tickets` | `tickets-page-content.tsx` | Midden | URL-filter categoryId; paginering W5 |
-| `/dashboard/analyze` | `analyze-page-content.tsx` | Hoog | Wordt geïntegreerd in dashboard (W3) |
+| `/dashboard/analyze` | redirect | — | → `/dashboard/home` |
 | `/dashboard/suggestions` | `suggestions-page-content.tsx` | Hoog | |
 | Overige | auth, categories, labels | Laag | |
 
@@ -144,6 +161,7 @@ Quick wins (ellipsis, loading-teksten, aria-hidden) staan in backlog fase 4. Zie
 | 11 jul 2026 | Analytics periode | Default 30 dagen; dag/week/90d/jaar/complete | Marianne |
 | 11 jul 2026 | Naam dashboard | Naamveld bij registratie | Marianne |
 | 11 jul 2026 | Chat op dashboard | Altijd zichtbaar | Marianne |
+| 11 jul 2026 | Home vs dashboard | Home = chat; dashboard = statistieken; analyze redirect | Marianne |
 | 11 jul 2026 | Analyze limiet | 50, 100, 200, 500, alle geïmporteerd | Marianne |
 | 11 jul 2026 | W4 welkom + naam | Geïmplementeerd | Marianne + Agent |
 
@@ -151,4 +169,4 @@ Quick wins (ellipsis, loading-teksten, aria-hidden) staan in backlog fase 4. Zie
 
 ## Volgende stap
 
-**W3** — chat op dashboard integreren (prominent, altijd zichtbaar)
+**W3 vervolg** — inklapbare tool-stappen, user/AI-styling, limieten 200/500/alle

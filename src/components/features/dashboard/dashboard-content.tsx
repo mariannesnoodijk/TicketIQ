@@ -23,16 +23,16 @@ import {
 import { cn } from "@/lib/utils";
 
 const quickLinks = [
+  {
+    href: "/dashboard/home",
+    label: "Naar AI-assistent",
+    description: "Tickets analyseren en helpcenter-artikelen laten genereren",
+  },
   { href: "/dashboard/tickets", label: "Tickets bekijken", description: "Overzicht en filters" },
   {
     href: "/dashboard/suggestions",
     label: "Helpcenter-artikelen",
     description: "AI-voorstellen bekijken, bewerken en goedkeuren",
-  },
-  {
-    href: "/dashboard/analyze",
-    label: "AI-analyse starten",
-    description: "Detecteer patronen en laat artikelen genereren",
   },
   {
     href: "/dashboard/categories",
@@ -42,7 +42,7 @@ const quickLinks = [
   { href: "/dashboard/labels", label: "Labels beheren", description: "Tag tickets met labels" },
 ];
 
-export function DashboardContent({ displayName }: { displayName: string | undefined }) {
+export function DashboardContent() {
   const [period, setPeriod] = useState<AnalyticsPeriod>(DEFAULT_ANALYTICS_PERIOD);
   const periodLabel = getPeriodLabel(period);
 
@@ -56,11 +56,11 @@ export function DashboardContent({ displayName }: { displayName: string | undefi
       <div className="space-y-2">
         <p className="text-sm font-medium text-primary">Dashboard</p>
         <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-          {displayName ? `Welkom terug, ${displayName}` : "Welkom terug"}
+          Statistieken
         </h1>
         <p className="max-w-2xl text-muted-foreground">
-          Op deze pagina kun je je statistieken bekijken, tickets importeren en snel verder met
-          AI-analyse, helpcenter-artikelen of het organiseren van categorieën en labels.
+          Bekijk trends in je supporttickets, importeer nieuwe data en spring snel door naar tickets,
+          helpcenter-artikelen of de AI-assistent op Home.
         </p>
       </div>
 
