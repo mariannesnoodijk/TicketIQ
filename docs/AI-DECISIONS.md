@@ -40,3 +40,10 @@
 - **Alternatieven:** meteen confirm aan — afgevallen voor snellere iteratie tijdens bouwen.
 - **AI-rol:** keuze besproken en vastgelegd; implementatie ondersteunt beide flows via `data.session` na `signUp`.
 - **Gevolgen:** bij confirm uit logt registratie direct in; bij confirm aan toont het formulier een “check je e-mail”-melding.
+
+### TicketIQ datamodel: 5 tabellen met user-scoped RLS
+- **Context:** PR3 vereist minimaal 4 tabellen met relaties, constraints en RLS. TicketIQ moet tickets organiseren (categorieën + labels), DummyJSON-import ondersteunen en AI-suggesties opslaan.
+- **Beslissing:** vijf tabellen: `categories`, `tickets`, `labels`, `ticket_labels` (M:N), `ai_suggestions`. Elke entiteit heeft `user_id → auth.users`. `tickets` heeft `external_id` + `UNIQUE(user_id, external_id)` voor idempotente import, `raw_payload jsonb` voor API-data, en `ticket_created_at` naast `imported_at`. `ai_suggestions` heeft `status`, `summary` en `metadata jsonb` voor AI-redenering/duplicate-check. RLS via `auth.uid() = user_id`; `ticket_labels` via EXISTS op tickets + labels.
+- **Alternatieven:** labels als `text[]` op tickets — afgevallen (geen herbruikbaar vocabulaire, lastige statistieken). Aparte `help_articles`-tabel — uitgesteld; goedgekeurde suggesties (`status = approved`) dienen als documentatiebibliotheek. `ai_suggestion_tickets` junction — uitgesteld naar PR4/5.
+- **AI-rol:** schema ontworpen en gemigreerd met Cursor; security-checklist (UPDATE met WITH CHECK, geen `auth.role()`) toegepast.
+- **Gevolgen:** migraties in `supabase/migrations/`; TypeScript types gegenereerd. CRUD-hooks en DummyJSON-import volgen in PR4.
