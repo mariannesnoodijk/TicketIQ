@@ -57,7 +57,7 @@
 
 ### React Query hooks per entiteit
 - **Context:** eindopdracht 2.2 vereist CRUD met React Query inclusief cache-invalidatie.
-- **Beslissing:** één hook-bestand per domein (`useCategories`, `useLabels`, `useTickets`, `useTicketLabels` + `useAiSuggestions`), gecentraliseerde `queryKeys` in `src/lib/queryKeys.ts`, Supabase browser-client in hooks, mutations invalidates gerelateerde queries.
+- **Beslissing:** één hook-bestand per domein (`useCategories`, `useLabels`, `useTickets`, `useTicketLabels`, `useAiSuggestions`), gecentraliseerde `queryKeys` in `src/lib/queryKeys.ts`, Supabase browser-client in hooks, mutations invalidates gerelateerde queries.
 - **Alternatieven:** één groot `useTicketIQ`-hook — afgevallen (moeilijker te onderhouden). Server Actions voor reads — afgevallen (React Query patroon vereist client-side fetching met cache).
 - **AI-rol:** hook-structuur en invalidatie-patronen opgezet met Cursor.
 - **Gevolgen:** herbruikbare data-laag voor PR5 (AI-agent) en PR6 (suggesties-dashboard).
@@ -75,3 +75,10 @@
 - **Alternatieven:** DummyJSON API aanpassen met categorieveld — afgevallen (buiten projectscope, labels in bron zijn geen TicketIQ-categorieën). Alleen AI-categorisatie — afgevallen (te traag voor basisoverzicht). Handmatig standaardcategorieën seeden vóór import — vervangen door automatisch seeden in import/categorize-flow.
 - **AI-rol:** keyword-regels en import-flow uitgewerkt met Cursor; verdeling getest tegen DummyJSON-dataset.
 - **Gevolgen:** na import of “Categoriseer bestaande tickets” zijn tickets filterbaar op categorie en is de verdeling direct zichtbaar op `/dashboard` zonder AI-analyse. Agent-tool `assignTicketCategory` blijft beschikbaar voor herclassificatie na analyse.
+
+### Suggesties-beheer UI (PR6)
+- **Context:** PR6 maakt kernfunctionaliteit 4 af: AI-suggesties bekijken, bewerken, goedkeuren en statistieken op het dashboard. Hooks stonden nog in `useTicketLabels.ts`; er was nog geen UI voor `ai_suggestions`.
+- **Beslissing:** hooks verplaatst naar `useAiSuggestions.ts` met lijstfilter (`status`, `search`), detail-hook `useAiSuggestion`, en statusverdeling via `useSuggestionStatusStats`. UI op `/dashboard/suggestions` (overzicht + filters) en `/dashboard/suggestions/[id]` (bewerken, status wijzigen, metadata tonen). Dashboard uitgebreid met suggestie-status donut (recharts) en snelle actie-link. Navigatie bevat “Suggesties”.
+- **Alternatieven:** inline bewerken in tabel — afgevallen (artikeltekst te lang). Aparte goedkeur-API route — afgevallen (bestaande Supabase update + RLS volstaat). Status alleen via dropdown — uitgebreid met expliciete knoppen voor duidelijkere workflow.
+- **AI-rol:** pagina’s en hooks opgezet met Cursor; UI-patronen hergebruikt van tickets/categorieën.
+- **Gevolgen:** volledige CRUD-UI voor alle 5 tabellen; vier kernfunctionaliteiten compleet; goedgekeurde suggesties (`status = approved`) dienen als helpcenter-bibliotheek zoals in het datamodel-besluit bedoeld.
