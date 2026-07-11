@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { use, useState } from "react";
 
 import {
@@ -10,12 +11,13 @@ import {
   suggestionStatusLabel,
 } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   useAiSuggestion,
   useDeleteAiSuggestion,
+  useReviseAiSuggestion,
   useUpdateAiSuggestion,
 } from "@/hooks/useAiSuggestions";
 import type { AiSuggestionMetadata, SuggestionStatus } from "@/types";
@@ -78,8 +80,8 @@ function SuggestionEditForm({
             id="content"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            rows={12}
-            className="flex min-h-[200px] w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            rows={16}
+            className="flex min-h-[280px] w-full rounded-lg border border-input bg-background px-3 py-2 font-mono text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -94,11 +96,137 @@ function SuggestionEditForm({
   );
 }
 
+function RejectSuggestionCard({
+  onReject,
+  isPending,
+}: {
+  onReject: (feedback: string) => Promise<void>;
+  isPending: boolean;
+}) {
+  const [feedback, setFeedback] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    const trimmed = feedback.trim();
+
+    if (trimmed.length < 10) {
+      setError("Beschrijf minimaal wat er ontbreekt of beter moet (10+ tekens).");
+      return;
+    }
+
+    setError(null);
+    await onReject(trimmed);
+    setFeedback("");
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Afwijzen met feedback</CardTitle>
+        <CardDescription>
+          Leg uit wat er ontbreekt of anders moet. Daarna kun je de AI een nieuw artikel laten
+          schrijven.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="reject-feedback">Aanpassingen voorstellen</Label>
+            <textarea
+              id="reject-feedback"
+              value={feedback}
+              onChange={(e) => {
+                setFeedback(e.target.value);
+                setError(null);
+              }}
+              rows={4}
+              placeholder="Bijv.: voeg concrete stappen toe voor het resetten van het wachtwoord, inclusief waar de gebruiker moet klikken."
+              className="flex w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </div>
+          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+          <Button type="submit" variant="destructive" disabled={isPending}>
+            Afwijzen en feedback opslaan
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ReviseSuggestionCard({
+  initialFeedback,
+  onRevise,
+  isPending,
+}: {
+  initialFeedback: string;
+  onRevise: (feedback: string) => Promise<void>;
+  isPending: boolean;
+}) {
+  const [feedback, setFeedback] = useState(initialFeedback);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    const trimmed = feedback.trim();
+
+    if (trimmed.length < 10) {
+      setError("Feedback moet minimaal 10 tekens bevatten.");
+      return;
+    }
+
+    setError(null);
+    await onRevise(trimmed);
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Nieuw artikel laten schrijven</CardTitle>
+        <CardDescription>
+          De AI herschrijft dit artikel op basis van je feedback en de bron-supporttickets, met
+          concrete stappen en secties.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="revise-feedback">Feedback voor AI</Label>
+            <textarea
+              id="revise-feedback"
+              value={feedback}
+              onChange={(e) => {
+                setFeedback(e.target.value);
+                setError(null);
+              }}
+              rows={5}
+              className="flex w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </div>
+          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+          <Button type="submit" disabled={isPending}>
+            {isPending ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Artikel wordt geschreven...
+              </>
+            ) : (
+              "Nieuw artikel laten schrijven"
+            )}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function SuggestionDetailContent({ suggestionId }: { suggestionId: string }) {
   const router = useRouter();
   const { data: suggestion, isLoading, error } = useAiSuggestion(suggestionId);
   const updateSuggestion = useUpdateAiSuggestion();
   const deleteSuggestion = useDeleteAiSuggestion();
+  const reviseSuggestion = useReviseAiSuggestion();
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   if (isLoading) {
@@ -120,10 +248,46 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
   }
 
   const metadata = suggestion.metadata as AiSuggestionMetadata | null;
+  const storedFeedback = metadata?.revisionFeedback ?? "";
+  const showReviseCard =
+    suggestion.status === "rejected" || storedFeedback.length >= 10;
+  const currentSuggestion = suggestion;
 
   async function handleStatusChange(status: SuggestionStatus) {
+    if (status === "rejected") return;
+
     await updateSuggestion.mutateAsync({ id: suggestionId, status });
     setActionMessage(`Status gewijzigd naar ${suggestionStatusLabel(status).toLowerCase()}.`);
+  }
+
+  async function handleReject(feedback: string) {
+    const existingMetadata = (currentSuggestion.metadata ?? {}) as AiSuggestionMetadata;
+
+    await updateSuggestion.mutateAsync({
+      id: suggestionId,
+      status: "rejected",
+      metadata: {
+        ...existingMetadata,
+        revisionFeedback: feedback,
+        revisionHistory: [
+          ...(existingMetadata.revisionHistory ?? []),
+          {
+            feedback,
+            at: new Date().toISOString(),
+            action: "rejected",
+          },
+        ],
+      },
+    });
+
+    setActionMessage("Suggestie afgewezen. Je kunt nu een nieuw artikel laten schrijven.");
+  }
+
+  async function handleRevise(feedback: string) {
+    const result = await reviseSuggestion.mutateAsync({ id: suggestionId, feedback });
+    setActionMessage(
+      `Nieuw artikel gegenereerd: "${result.title ?? currentSuggestion.title}". Status staat op concept.`
+    );
   }
 
   async function handleDelete() {
@@ -163,6 +327,15 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
 
       {actionMessage ? <p className="text-sm text-muted-foreground">{actionMessage}</p> : null}
 
+      {showReviseCard ? (
+        <ReviseSuggestionCard
+          key={`${suggestion.id}-${storedFeedback}-${suggestion.updated_at}`}
+          initialFeedback={storedFeedback}
+          onRevise={handleRevise}
+          isPending={reviseSuggestion.isPending}
+        />
+      ) : null}
+
       <SuggestionEditForm
         key={`${suggestion.id}-${suggestion.updated_at}`}
         suggestion={suggestion}
@@ -174,7 +347,7 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
           <CardTitle>Status wijzigen</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
-          {(["approved", "pending", "draft", "rejected"] as const).map((status) => (
+          {(["approved", "pending", "draft"] as const).map((status) => (
             <Button
               key={status}
               variant={suggestion.status === status ? "default" : "outline"}
@@ -188,6 +361,13 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
         </CardContent>
       </Card>
 
+      {suggestion.status !== "rejected" ? (
+        <RejectSuggestionCard
+          onReject={handleReject}
+          isPending={updateSuggestion.isPending}
+        />
+      ) : null}
+
       <Card>
         <CardHeader>
           <CardTitle>Metadata</CardTitle>
@@ -195,6 +375,28 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
         <CardContent className="space-y-3 text-sm text-muted-foreground">
           <p>Aangemaakt: {formatDate(suggestion.created_at)}</p>
           <p>Bijgewerkt: {formatDate(suggestion.updated_at)}</p>
+          {metadata?.revisionFeedback ? (
+            <div className="space-y-1">
+              <p className="font-medium text-foreground">Laatste feedback</p>
+              <p className="whitespace-pre-wrap">{metadata.revisionFeedback}</p>
+            </div>
+          ) : null}
+          {metadata?.revisionHistory?.length ? (
+            <div className="space-y-1">
+              <p className="font-medium text-foreground">Revisiegeschiedenis</p>
+              <ul className="space-y-2">
+                {metadata.revisionHistory.map((entry, index) => (
+                  <li key={`${entry.at}-${index}`} className="rounded-lg border border-border p-2">
+                    <p className="text-xs text-muted-foreground">
+                      {entry.action === "rejected" ? "Afgewezen" : "Herschreven"} —{" "}
+                      {formatDate(entry.at)}
+                    </p>
+                    <p className="whitespace-pre-wrap">{entry.feedback}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           {metadata?.reasoning ? (
             <div className="space-y-1">
               <p className="font-medium text-foreground">AI-redenering</p>

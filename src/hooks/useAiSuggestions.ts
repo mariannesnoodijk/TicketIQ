@@ -133,3 +133,28 @@ export function useDeleteAiSuggestion() {
     },
   });
 }
+
+export function useReviseAiSuggestion() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, feedback }: { id: string; feedback: string }) => {
+      const response = await fetch(`/api/suggestions/${id}/revise`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ feedback }),
+      });
+
+      const data: { error?: string; title?: string } = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "Herschrijven mislukt");
+      }
+
+      return data;
+    },
+    onSuccess: (_data, variables) => {
+      invalidateSuggestionQueries(queryClient, variables.id);
+    },
+  });
+}
