@@ -24,7 +24,7 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             );
           } catch {
-            // Aangeroepen vanuit een Server Component; sessieverversing gebeurt in de proxy/middleware.
+            // Aangeroepen vanuit een Server Component; sessieverversing gebeurt in proxy.ts.
           }
         },
       },

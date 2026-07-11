@@ -29,7 +29,7 @@
 
 ### Supabase Auth: middleware + server actions
 - **Context:** PR2 vereist registreren, inloggen, sessiebeheer en routebescherming volgens de Supabase SSR-aanpak voor Next.js App Router.
-- **Beslissing:** `@supabase/ssr` met drie clients (`client.ts`, `server.ts`, `middleware.ts`), root `middleware.ts` voor sessie-refresh en redirects, en server actions voor login/registratie/logout. Auth callback op `/auth/callback` voor PKCE/e-mailbevestiging.
+- **Beslissing:** `@supabase/ssr` met drie clients (`client.ts`, `server.ts`, `middleware.ts`), root `proxy.ts` (Next.js 16) voor sessie-refresh en redirects, en server actions voor login/registratie/logout. Auth callback op `/auth/callback` voor PKCE/e-mailbevestiging. `(app)/layout.tsx` redirect server-side als fallback.
 - **Alternatieven:** client-side-only auth — afgevallen omdat RLS en server components dan geen betrouwbare sessie hebben.
 - **AI-rol:** auth-flow ontworpen en geïmplementeerd met Cursor; gebaseerd op Supabase SSR-documentatie.
 - **Gevolgen:** `/dashboard` is beschermd; login/register redirecten ingelogde gebruikers. E-mailbevestiging kan later in Supabase Dashboard worden ingeschakeld zonder codewijziging (alleen UX-melding na registratie).

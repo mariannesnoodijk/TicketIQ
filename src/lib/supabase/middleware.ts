@@ -16,7 +16,7 @@ function isProtectedRoute(pathname: string): boolean {
   );
 }
 
-/** Ververs de Supabase-sessie en handhaaf auth-redirects in middleware. */
+/** Ververs de Supabase-sessie en handhaaf auth-redirects in proxy.ts. */
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
