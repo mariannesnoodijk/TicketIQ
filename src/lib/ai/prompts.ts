@@ -1,4 +1,5 @@
 import { DEFAULT_CATEGORIES } from "@/lib/categories/defaultCategories";
+import { ARTICLE_STRUCTURE_TEMPLATE } from "@/lib/ai/articleContent";
 
 const categoryList = DEFAULT_CATEGORIES.map((c) => `- ${c.name}`).join("\n");
 
@@ -25,6 +26,25 @@ ${categoryList}
 ## Regels
 - Antwoord in het Nederlands.
 - Sla geen suggesties op als \`isDuplicate\` true is of als het cluster te klein is (< 3 tickets).
-- Schrijf suggesties concreet: titel, korte samenvatting en volledige artikeltekst met stappen of uitleg.
+- Schrijf volledige helpcenter-artikelen met concrete stappen die de gebruiker direct kan volgen.
+- Gebruik exact deze markdown-structuur voor \`content\`:
+
+${ARTICLE_STRUCTURE_TEMPLATE}
+
+- Verboden: alleen verwijzen naar "de handleiding" of "documentatie" zonder concrete stappen.
+- Minimaal 3 genummerde stappen onder ## Stappen; elke stap beschrijft een uitvoerbare actie.
 - Vermeld in \`reasoning\` waarom je een cluster als terugkerend probleem ziet.
 - Bij fouten van tools: leg uit wat misging en geef een bruikbaar alternatief.`;
+
+/** System prompt voor het herschrijven van afgewezen suggesties. */
+export const REVISE_SUGGESTION_INSTRUCTIONS = `Je bent TicketIQ, een AI-schrijver voor helpcenterartikelen.
+
+Herschrijf een afgewezen artikel-suggestie op basis van feedback van een supportmedewerker en
+bron-supporttickets. Schrijf in het Nederlands.
+
+Regels:
+- Volg exact de markdown-structuur uit de opdracht (Probleem, Oplossing, Stappen, FAQ, Support).
+- Geef concrete, uitvoerbare stappen — geen vage verwijzingen naar handleidingen.
+- Minimaal 3 genummerde stappen onder ## Stappen.
+- Gebruik ticketinhoud om realistische details te verwerken.
+- Verbeter titel en samenvatting indien nodig.`;

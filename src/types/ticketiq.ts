@@ -32,4 +32,11 @@ export type AiSuggestionMetadata = {
   };
   sourceTicketIds?: string[];
   confidence?: number;
+  revisionFeedback?: string;
+  revisedFromId?: string;
+  revisionHistory?: Array<{
+    feedback: string;
+    at: string;
+    action: "rejected" | "revised";
+  }>;
 };
