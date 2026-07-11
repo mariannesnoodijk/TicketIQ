@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys, type TicketListFilters } from "@/lib/queryKeys";
 import { createClient } from "@/lib/supabase/client";
+import { UNCATEGORIZED_CATEGORY_FILTER } from "@/lib/tickets/constants";
 import type { TicketUpdate } from "@/types";
 
 const TICKET_SELECT = `
@@ -29,7 +30,9 @@ async function fetchTickets(filters: TicketListFilters) {
   if (filters.status) {
     query = query.eq("status", filters.status);
   }
-  if (filters.categoryId) {
+  if (filters.categoryId === UNCATEGORIZED_CATEGORY_FILTER) {
+    query = query.is("category_id", null);
+  } else if (filters.categoryId) {
     query = query.eq("category_id", filters.categoryId);
   }
   if (filters.search) {

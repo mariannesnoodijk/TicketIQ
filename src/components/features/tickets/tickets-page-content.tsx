@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { Badge, priorityBadgeVariant, statusBadgeVariant } from "@/components/ui/badge";
@@ -19,7 +20,12 @@ import { useCategories } from "@/hooks/useCategories";
 import { useLabels } from "@/hooks/useLabels";
 import { useTickets } from "@/hooks/useTickets";
 import type { TicketListFilters } from "@/lib/queryKeys";
+import { UNCATEGORIZED_CATEGORY_FILTER } from "@/lib/tickets/constants";
 import { cn } from "@/lib/utils";
+
+function hasActiveFilters(filters: TicketListFilters): boolean {
+  return Boolean(filters.status || filters.categoryId || filters.labelId || filters.search);
+}
 
 function formatDate(value: string | null) {
   if (!value) return "—";
@@ -30,7 +36,13 @@ function formatDate(value: string | null) {
 }
 
 export function TicketsPageContent() {
-  const [filters, setFilters] = useState<TicketListFilters>({});
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const categoryIdFromUrl = searchParams.get("categoryId") ?? undefined;
+
+  const [filters, setFilters] = useState<TicketListFilters>(() => ({
+    categoryId: categoryIdFromUrl,
+  }));
   const { data: tickets, isLoading, error } = useTickets(filters);
   const { data: categories } = useCategories();
   const { data: labels } = useLabels();
@@ -86,6 +98,7 @@ export function TicketsPageContent() {
             }
           >
             <option value="">Alle categorieën</option>
+            <option value={UNCATEGORIZED_CATEGORY_FILTER}>Ongecategoriseerd</option>
             {(categories ?? []).map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -119,13 +132,35 @@ export function TicketsPageContent() {
         <p className="text-sm text-destructive">Kon tickets niet laden.</p>
       ) : !tickets?.length ? (
         <div className="rounded-xl border border-dashed border-border p-10 text-center">
-          <p className="font-medium">Nog geen tickets</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Importeer tickets via het dashboard om te beginnen.
-          </p>
-          <Link href="/dashboard" className={cn(buttonVariants(), "mt-4")}>
-            Naar dashboard
-          </Link>
+          {hasActiveFilters(filters) ? (
+            <>
+              <p className="font-medium">Geen tickets voor dit filter</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Pas de filters aan om andere tickets te bekijken.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-4"
+                onClick={() => {
+                  setFilters({});
+                  router.replace("/dashboard/tickets");
+                }}
+              >
+                Filters wissen
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="font-medium">Nog geen tickets</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Importeer tickets via het dashboard om te beginnen.
+              </p>
+              <Link href="/dashboard" className={cn(buttonVariants(), "mt-4")}>
+                Naar dashboard
+              </Link>
+            </>
+          )}
         </div>
       ) : (
         <div className="rounded-xl border border-border bg-card">
