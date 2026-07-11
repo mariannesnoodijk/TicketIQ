@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { use, useState } from "react";
 
 import {
   Badge,
@@ -21,6 +21,8 @@ import {
 import type { AiSuggestionMetadata, SuggestionStatus } from "@/types";
 import { cn } from "@/lib/utils";
 
+type SuggestionWithCategory = NonNullable<ReturnType<typeof useAiSuggestion>["data"]>;
+
 function formatDate(value: string | null) {
   if (!value) return "—";
   return new Intl.DateTimeFormat("nl-NL", {
@@ -29,23 +31,75 @@ function formatDate(value: string | null) {
   }).format(new Date(value));
 }
 
+function SuggestionEditForm({
+  suggestion,
+  onSaved,
+}: {
+  suggestion: SuggestionWithCategory;
+  onSaved: (message: string) => void;
+}) {
+  const updateSuggestion = useUpdateAiSuggestion();
+  const [title, setTitle] = useState(suggestion.title);
+  const [summary, setSummary] = useState(suggestion.summary ?? "");
+  const [content, setContent] = useState(suggestion.content);
+
+  const isDirty =
+    title !== suggestion.title ||
+    summary !== (suggestion.summary ?? "") ||
+    content !== suggestion.content;
+
+  async function handleSave() {
+    await updateSuggestion.mutateAsync({
+      id: suggestion.id,
+      title: title.trim(),
+      summary: summary.trim() || null,
+      content: content.trim(),
+    });
+    onSaved("Wijzigingen opgeslagen.");
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Suggestie bewerken</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="title">Titel</Label>
+          <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="summary">Samenvatting</Label>
+          <Input id="summary" value={summary} onChange={(e) => setSummary(e.target.value)} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="content">Artikelinhoud</Label>
+          <textarea
+            id="content"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={12}
+            className="flex min-h-[200px] w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+        </div>
+
+        <Button
+          onClick={handleSave}
+          disabled={updateSuggestion.isPending || !isDirty || !title.trim() || !content.trim()}
+        >
+          Opslaan
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function SuggestionDetailContent({ suggestionId }: { suggestionId: string }) {
   const router = useRouter();
   const { data: suggestion, isLoading, error } = useAiSuggestion(suggestionId);
   const updateSuggestion = useUpdateAiSuggestion();
   const deleteSuggestion = useDeleteAiSuggestion();
-
-  const [title, setTitle] = useState("");
-  const [summary, setSummary] = useState("");
-  const [content, setContent] = useState("");
-  const [saveMessage, setSaveMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!suggestion) return;
-    setTitle(suggestion.title);
-    setSummary(suggestion.summary ?? "");
-    setContent(suggestion.content);
-  }, [suggestion]);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   if (isLoading) {
     return <p className="px-4 py-10 text-sm text-muted-foreground">Suggestie laden...</p>;
@@ -66,24 +120,10 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
   }
 
   const metadata = suggestion.metadata as AiSuggestionMetadata | null;
-  const isDirty =
-    title !== suggestion.title ||
-    summary !== (suggestion.summary ?? "") ||
-    content !== suggestion.content;
-
-  async function handleSave() {
-    await updateSuggestion.mutateAsync({
-      id: suggestionId,
-      title: title.trim(),
-      summary: summary.trim() || null,
-      content: content.trim(),
-    });
-    setSaveMessage("Wijzigingen opgeslagen.");
-  }
 
   async function handleStatusChange(status: SuggestionStatus) {
     await updateSuggestion.mutateAsync({ id: suggestionId, status });
-    setSaveMessage(`Status gewijzigd naar ${suggestionStatusLabel(status).toLowerCase()}.`);
+    setActionMessage(`Status gewijzigd naar ${suggestionStatusLabel(status).toLowerCase()}.`);
   }
 
   async function handleDelete() {
@@ -121,62 +161,13 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Suggestie bewerken</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Titel</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => {
-                setTitle(e.target.value);
-                setSaveMessage(null);
-              }}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="summary">Samenvatting</Label>
-            <Input
-              id="summary"
-              value={summary}
-              onChange={(e) => {
-                setSummary(e.target.value);
-                setSaveMessage(null);
-              }}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="content">Artikelinhoud</Label>
-            <textarea
-              id="content"
-              value={content}
-              onChange={(e) => {
-                setContent(e.target.value);
-                setSaveMessage(null);
-              }}
-              rows={12}
-              className="flex min-h-[200px] w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            />
-          </div>
+      {actionMessage ? <p className="text-sm text-muted-foreground">{actionMessage}</p> : null}
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              onClick={handleSave}
-              disabled={
-                updateSuggestion.isPending || !isDirty || !title.trim() || !content.trim()
-              }
-            >
-              Opslaan
-            </Button>
-            {saveMessage ? (
-              <p className="text-sm text-muted-foreground">{saveMessage}</p>
-            ) : null}
-          </div>
-        </CardContent>
-      </Card>
+      <SuggestionEditForm
+        key={`${suggestion.id}-${suggestion.updated_at}`}
+        suggestion={suggestion}
+        onSaved={setActionMessage}
+      />
 
       <Card>
         <CardHeader>
