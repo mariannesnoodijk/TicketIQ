@@ -11,6 +11,11 @@ import { cn } from "@/lib/utils";
 const quickLinks = [
   { href: "/dashboard/tickets", label: "Tickets bekijken", description: "Overzicht en filters" },
   {
+    href: "/dashboard/analyze",
+    label: "AI-analyse starten",
+    description: "Detecteer patronen en genereer suggesties",
+  },
+  {
     href: "/dashboard/categories",
     label: "Categorieën beheren",
     description: "Organiseer tickets per thema",
@@ -26,8 +31,8 @@ export function DashboardContent({ email }: { email: string | undefined }) {
       <div className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">
-          Welkom terug{email ? `, ${email}` : ""}. Importeer tickets en organiseer ze met
-          categorieën en labels.
+          Welkom terug{email ? `, ${email}` : ""}. Importeer tickets, analyseer patronen met AI
+          en organiseer ze met categorieën en labels.
         </p>
       </div>
 
