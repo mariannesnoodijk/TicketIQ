@@ -46,4 +46,18 @@
 - **Beslissing:** vijf tabellen: `categories`, `tickets`, `labels`, `ticket_labels` (M:N), `ai_suggestions`. Elke entiteit heeft `user_id → auth.users`. `tickets` heeft `external_id` + `UNIQUE(user_id, external_id)` voor idempotente import, `raw_payload jsonb` voor API-data, en `ticket_created_at` naast `imported_at`. `ai_suggestions` heeft `status`, `summary` en `metadata jsonb` voor AI-redenering/duplicate-check. RLS via `auth.uid() = user_id`; `ticket_labels` via EXISTS op tickets + labels.
 - **Alternatieven:** labels als `text[]` op tickets — afgevallen (geen herbruikbaar vocabulaire, lastige statistieken). Aparte `help_articles`-tabel — uitgesteld; goedgekeurde suggesties (`status = approved`) dienen als documentatiebibliotheek. `ai_suggestion_tickets` junction — uitgesteld naar PR4/5.
 - **AI-rol:** schema ontworpen en gemigreerd met Cursor; security-checklist (UPDATE met WITH CHECK, geen `auth.role()`) toegepast.
-- **Gevolgen:** migraties in `supabase/migrations/`; TypeScript types gegenereerd. CRUD-hooks en DummyJSON-import volgen in PR4.
+- **Gevolgen:** migraties in `supabase/migrations/`; TypeScript types gegenereerd. CRUD-hooks en DummyJSON-import gebouwd in PR4.
+
+### Ticket-import via server-side API route
+- **Context:** PR4 vereist ticket-ingestie uit DummyJSON en CRUD met React Query. Import van ~500 tickets moet idempotent zijn en labels uit de bron automatisch koppelen.
+- **Beslissing:** geauthenticeerde POST `/api/tickets/import` haalt DummyJSON op server-side op, mapt velden naar `tickets`, slaat bestaande `external_id`s over, insert in batches van 50, en maakt `labels` + `ticket_labels` aan voor bronlabels. Client-side `useImportTickets` mutation invalideert React Query cache.
+- **Alternatieven:** client-side fetch naar DummyJSON — afgevallen (CORS-risico, zwaardere client). Overschrijven bij herimport — afgevallen (sneller overslaan, voorspelbaarder gedrag).
+- **AI-rol:** import-flow en hook-structuur ontworpen en geïmplementeerd met Cursor.
+- **Gevolgen:** dashboard-importknop; tickets-UI met filters; 11 standaard categorieën seedbaar via knop op `/dashboard/categories`.
+
+### React Query hooks per entiteit
+- **Context:** eindopdracht 2.2 vereist CRUD met React Query inclusief cache-invalidatie.
+- **Beslissing:** één hook-bestand per domein (`useCategories`, `useLabels`, `useTickets`, `useTicketLabels` + `useAiSuggestions`), gecentraliseerde `queryKeys` in `src/lib/queryKeys.ts`, Supabase browser-client in hooks, mutations invalidates gerelateerde queries.
+- **Alternatieven:** één groot `useTicketIQ`-hook — afgevallen (moeilijker te onderhouden). Server Actions voor reads — afgevallen (React Query patroon vereist client-side fetching met cache).
+- **AI-rol:** hook-structuur en invalidatie-patronen opgezet met Cursor.
+- **Gevolgen:** herbruikbare data-laag voor PR5 (AI-agent) en PR6 (suggesties-dashboard).
