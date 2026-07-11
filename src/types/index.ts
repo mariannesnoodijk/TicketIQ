@@ -1,1 +1,21 @@
-export type { Database } from "./database";
+export type { Database, Tables, TablesInsert, TablesUpdate } from "./database";
+export type {
+  AiSuggestion,
+  AiSuggestionInsert,
+  AiSuggestionMetadata,
+  AiSuggestionUpdate,
+  Category,
+  CategoryInsert,
+  CategoryUpdate,
+  Label,
+  LabelInsert,
+  LabelUpdate,
+  SuggestionStatus,
+  Ticket,
+  TicketInsert,
+  TicketLabel,
+  TicketLabelInsert,
+  TicketPriority,
+  TicketStatus,
+  TicketUpdate,
+} from "./ticketiq";
