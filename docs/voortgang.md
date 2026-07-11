@@ -7,8 +7,9 @@
 
 Uitgangspunt: casus **TicketIQ** goedgekeurd. Project bevat een werkende Next.js 16 +
 TypeScript + Tailwind v4 opzet volgens de voorgeschreven repo-structuur (`src/`, `.cursor/rules`,
-`.skills`, `docs`). Auth, database, React Query, externe API en AI-agent zijn nog niet gebouwd
-(alleen placeholders). Supabase-project bestaat; GitHub (public), Vercel en Skills.sh nog te doen.
+`.agents/skills`, `docs`). Auth, database, React Query, externe API en AI-agent zijn nog niet
+volledig gebouwd (database/AI nog open). Supabase-project bestaat; GitHub (public), Vercel
+en Skills.sh zijn opgezet (PR1).
 
 ## Deelopdracht 1 – Broncode Next.js project (25%)
 
@@ -18,18 +19,18 @@ TypeScript + Tailwind v4 opzet volgens de voorgeschreven repo-structuur (`src/`,
 - [ ] Agent-based flow met werkende `maxSteps` meerstaps-aanpak (1.3)
 - [~] Schone, gestructureerde, onderhoudbare code; logische scheiding server/client/utils/data (1.4)
 - [ ] Minimaal 20 kleine commits met zinvolle messages (1.5)
-- [ ] Minimaal 5 pull requests gemerged naar `main` (1.5)
+- [~] Minimaal 5 pull requests gemerged naar `main` (1.5)
 - [x] Repository volgens voorgeschreven structuur
 - [ ] Gedeployed op Vercel
 - [ ] `README.md` met heldere installatie-instructies
-- [ ] Minimaal 4 kernfunctionaliteiten (auth + 1 AI + 2 casus-specifiek)
+- [~] Minimaal 4 kernfunctionaliteiten (auth + 1 AI + 2 casus-specifiek)
 
 ## Deelopdracht 2 – Supabase backend (15%)
 
 - [ ] Databaseschema met minimaal 4 tabellen (2.1)
 - [ ] Passende relaties (foreign keys) en constraints (PK, not null, unique) (2.1)
 - [ ] CRUD-operaties met React Query voor relevante entiteiten (2.2)
-- [ ] Supabase Auth: registreren, inloggen, correcte sessieafhandeling (2.3)
+- [~] Supabase Auth: registreren, inloggen, correcte sessieafhandeling (2.3)
 - [ ] RLS ingeschakeld op relevante tabellen (2.3)
 - [ ] Werkende policies: gebruiker benadert alleen eigen data (2.3)
 - [ ] Supabase REST API base URL in `README.md`
@@ -63,17 +64,17 @@ TypeScript + Tailwind v4 opzet volgens de voorgeschreven repo-structuur (`src/`,
 
 ## Overige inhoudelijke eisen (Quickscan)
 
-- [ ] GitHub repository op **public**
-- [ ] Skills.sh met minimaal 2 actieve skills (waaronder `vercel-react-best-practices`)
+- [x] GitHub repository op **public**
+- [x] Skills.sh met minimaal 2 actieve skills (waaronder `vercel-react-best-practices`)
 - [ ] Vercel AI SDK met werkende AI Agent
 - [ ] Minimaal 1 externe API via **Tool Calling**
 - [ ] Streaming responses in de chat-interface
-- [ ] Architectuurbeslissingen met AI-hulp gedocumenteerd
+- [~] Architectuurbeslissingen met AI-hulp gedocumenteerd
 
 ## Casus (vooraf, ter goedkeuring docent)
 
-- [ ] Probleembeschrijving (max 250 woorden)
-- [ ] AI-interpretatie beschreven
-- [ ] Gekozen API + documentatielink
-- [ ] 4 kernfunctionaliteiten benoemd (1 = auth, ≥1 = AI)
-- [ ] Goedgekeurd door docent
+- [x] Probleembeschrijving (max 250 woorden)
+- [x] AI-interpretatie beschreven
+- [x] Gekozen API + documentatielink
+- [x] 4 kernfunctionaliteiten benoemd (1 = auth, ≥1 = AI)
+- [x] Goedgekeurd door docent

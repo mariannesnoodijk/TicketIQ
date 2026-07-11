@@ -26,3 +26,17 @@
 - **Alternatieven:** de opdracht letterlijk volgen met `.skills/` — afgevallen omdat de tooling die map niet meer gebruikt, waardoor de skills niet actief zouden zijn.
 - **AI-rol:** skills opgezocht en geïnstalleerd via Cursor; discrepantie tussen opdracht-tekst en tooling gesignaleerd en de veilige optie gekozen.
 - **Gevolgen:** reproduceerbaar te installeren met `npx skills experimental_install` (herstelt vanuit `skills-lock.json`). Voldoet aan de eis van minimaal 2 actieve skills incl. `vercel-react-best-practices`.
+
+### Supabase Auth: middleware + server actions
+- **Context:** PR2 vereist registreren, inloggen, sessiebeheer en routebescherming volgens de Supabase SSR-aanpak voor Next.js App Router.
+- **Beslissing:** `@supabase/ssr` met drie clients (`client.ts`, `server.ts`, `middleware.ts`), root `middleware.ts` voor sessie-refresh en redirects, en server actions voor login/registratie/logout. Auth callback op `/auth/callback` voor PKCE/e-mailbevestiging.
+- **Alternatieven:** client-side-only auth — afgevallen omdat RLS en server components dan geen betrouwbare sessie hebben.
+- **AI-rol:** auth-flow ontworpen en geïmplementeerd met Cursor; gebaseerd op Supabase SSR-documentatie.
+- **Gevolgen:** `/dashboard` is beschermd; login/register redirecten ingelogde gebruikers. E-mailbevestiging kan later in Supabase Dashboard worden ingeschakeld zonder codewijziging (alleen UX-melding na registratie).
+
+### E-mailbevestiging tijdelijk uit tijdens development
+- **Context:** Supabase kan verplichte e-mailbevestiging afdwingen; handig voor productie, maar traag tijdens development.
+- **Beslissing:** tijdens development **Confirm email = uit**; vóór inlevering **Confirm email = aan**. De callback-route en registratiemelding ondersteunen beide modi al.
+- **Alternatieven:** meteen confirm aan — afgevallen voor snellere iteratie tijdens bouwen.
+- **AI-rol:** keuze besproken en vastgelegd; implementatie ondersteunt beide flows via `data.session` na `signUp`.
+- **Gevolgen:** bij confirm uit logt registratie direct in; bij confirm aan toont het formulier een “check je e-mail”-melding.
