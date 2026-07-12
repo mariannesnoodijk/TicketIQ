@@ -1,32 +1,25 @@
-export const ANALYZE_LIMIT_OPTIONS = [50, 100, 200, 500] as const;
+import {
+  getTicketLimitLabel,
+  parseTicketDisplayLimit,
+  TICKET_LIMIT_ALL,
+  TICKET_LIMIT_OPTIONS,
+  type TicketDisplayLimit,
+} from "@/lib/tickets/limits";
 
-export const ANALYZE_LIMIT_ALL = "all" as const;
+export const ANALYZE_LIMIT_OPTIONS = TICKET_LIMIT_OPTIONS;
+export const ANALYZE_LIMIT_ALL = TICKET_LIMIT_ALL;
+export type AnalyzeTicketLimit = TicketDisplayLimit;
 
-export type AnalyzeTicketLimit =
-  | (typeof ANALYZE_LIMIT_OPTIONS)[number]
-  | typeof ANALYZE_LIMIT_ALL;
-
-export function parseAnalyzeTicketLimit(value: string): AnalyzeTicketLimit {
-  if (value === ANALYZE_LIMIT_ALL) {
-    return ANALYZE_LIMIT_ALL;
-  }
-
-  const numeric = Number(value);
-  if (ANALYZE_LIMIT_OPTIONS.includes(numeric as (typeof ANALYZE_LIMIT_OPTIONS)[number])) {
-    return numeric as AnalyzeTicketLimit;
-  }
-
-  return 50;
-}
+export const parseAnalyzeTicketLimit = parseTicketDisplayLimit;
 
 export function getAnalyzeLimitLabel(limit: AnalyzeTicketLimit, importedCount?: number): string {
-  if (limit === ANALYZE_LIMIT_ALL) {
+  if (limit === TICKET_LIMIT_ALL) {
     return importedCount !== undefined
       ? `Alle geïmporteerde tickets (${importedCount})`
       : "Alle geïmporteerde tickets";
   }
 
-  return `${limit} tickets`;
+  return getTicketLimitLabel(limit);
 }
 
 export function buildAnalyzePrompt(limit: AnalyzeTicketLimit): string {

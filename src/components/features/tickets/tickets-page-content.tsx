@@ -21,6 +21,13 @@ import { useLabels } from "@/hooks/useLabels";
 import { useTickets } from "@/hooks/useTickets";
 import { UNCATEGORIZED_CATEGORY_FILTER } from "@/lib/tickets/constants";
 import {
+  DEFAULT_TICKET_DISPLAY_LIMIT,
+  getNextTicketLimit,
+  getTicketLimitLabel,
+  getVisibleTicketCount,
+  type TicketDisplayLimit,
+} from "@/lib/tickets/limits";
+import {
   hasActiveTicketFilters,
   parseTicketFiltersFromSearchParams,
 } from "@/lib/tickets/filterUrls";
@@ -41,10 +48,19 @@ export function TicketsPageContent() {
   const [filters, setFilters] = useState(() =>
     parseTicketFiltersFromSearchParams(searchParams)
   );
+  const [displayLimit, setDisplayLimit] = useState<TicketDisplayLimit>(
+    DEFAULT_TICKET_DISPLAY_LIMIT
+  );
 
   useEffect(() => {
     setFilters(parseTicketFiltersFromSearchParams(searchParams));
   }, [searchParams]);
+
+  const filterKey = useMemo(() => JSON.stringify(filters), [filters]);
+
+  useEffect(() => {
+    setDisplayLimit(DEFAULT_TICKET_DISPLAY_LIMIT);
+  }, [filterKey]);
 
   const { data: tickets, isLoading, error } = useTickets(filters);
   const { data: categories } = useCategories();
@@ -54,6 +70,12 @@ export function TicketsPageContent() {
     () => new Map((categories ?? []).map((c) => [c.id, c.name])),
     [categories]
   );
+
+  const totalCount = tickets?.length ?? 0;
+  const visibleCount = getVisibleTicketCount(displayLimit, totalCount);
+  const visibleTickets = tickets?.slice(0, visibleCount) ?? [];
+  const nextLimit = getNextTicketLimit(displayLimit);
+  const canShowMore = nextLimit !== null && visibleCount < totalCount;
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10">
@@ -179,7 +201,7 @@ export function TicketsPageContent() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tickets.map((ticket) => (
+              {visibleTickets.map((ticket) => (
                 <TableRow key={ticket.id}>
                   <TableCell className="max-w-xs truncate font-medium">{ticket.subject}</TableCell>
                   <TableCell>
@@ -206,6 +228,21 @@ export function TicketsPageContent() {
               ))}
             </TableBody>
           </Table>
+          <div className="flex flex-col gap-3 border-t border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground">
+              {visibleCount} van {totalCount} tickets
+            </p>
+            {canShowMore && nextLimit ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setDisplayLimit(nextLimit)}
+              >
+                Toon meer — {getTicketLimitLabel(nextLimit, totalCount)}
+              </Button>
+            ) : null}
+          </div>
         </div>
       )}
     </div>

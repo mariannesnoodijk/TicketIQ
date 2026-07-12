@@ -19,7 +19,7 @@ Leidend principe: **jouw meningen sturen de backlog**; audit/guidelines vullen a
 | **W2** | `/dashboard` | Hoog | **done** | Donut: betere tooltip + klik → tickets van die categorie |
 | **W3** | `/dashboard/home` + `/dashboard` | Hoog | **done** | Home met chat-conciërge; dashboard = statistieken; analyze weg |
 | **W4** | `/dashboard` + registratie | Normaal | **done** | Welkom met naam; korte intro op aparte regel; naamveld bij registratie |
-| **W5** | `/dashboard/tickets` | Laag | open | Paginering / “toon meer” i.p.v. alle tickets |
+| **W5** | `/dashboard/tickets` | Laag | **done** | “Toon meer” met stappen 50/100/200/500/alle + teller X van Y |
 
 ### W1 – Analytics (detail)
 
@@ -47,7 +47,7 @@ Leidend principe: **jouw meningen sturen de backlog**; audit/guidelines vullen a
 ## Voortgang & volgorde
 
 ```
-W2 ✓ → W4 ✓ → W1 ✓ → W3 ✓ → W5
+W2 ✓ → W4 ✓ → W1 ✓ → W3 ✓ → W5 ✓
 ```
 
 Audit-items (mobile nav, skeletons, …) komen **na** jouw wensen, tenzij expliciet prioriteit.
@@ -132,9 +132,24 @@ Audit-items (mobile nav, skeletons, …) komen **na** jouw wensen, tenzij explic
 
 ---
 
+## W5 – Tickets “toon meer” (afgerond 12 jul 2026)
+
+**Gedaan:**
+
+- Start met 50 tickets; knop **Toon meer** doorloopt 100 · 200 · 500 · alle
+- Teller onder tabel: **X van Y tickets**
+- Limiet reset naar 50 bij filterwijziging
+- Gedeelde limiet-constants in `lib/tickets/limits.ts` (zelfde stappen als AI-analyse)
+
+**Bestanden:** `limits.ts`, `tickets-page-content.tsx`, `analyzePrompt.ts`
+
+**Akkoord:** Marianne (12 jul 2026)
+
+---
+
 ## Volgende stap
 
-**W5** — tickets paginering / “toon meer”
+**Audit & polish** — zie backlog hieronder (A1–A5)
 
 ### Routes en huidige staat
 
@@ -143,7 +158,7 @@ Audit-items (mobile nav, skeletons, …) komen **na** jouw wensen, tenzij explic
 | `/` | `page.tsx` | Hoog | Basic hero |
 | `/dashboard/home` | `home-page-content.tsx` | Hoog | Landing + AI-chat |
 | `/dashboard` | `dashboard-content.tsx` | Hoog | Stats + charts |
-| `/dashboard/tickets` | `tickets-page-content.tsx` | Midden | URL-filter categoryId; paginering W5 |
+| `/dashboard/tickets` | `tickets-page-content.tsx` | Midden | URL-filter categoryId; “toon meer” + teller |
 | `/dashboard/analyze` | redirect | — | → `/dashboard/home` |
 | `/dashboard/suggestions` | `suggestions-page-content.tsx` | Hoog | |
 | Overige | auth, categories, labels | Laag | |
@@ -179,9 +194,10 @@ Quick wins (ellipsis, loading-teksten, aria-hidden) staan in backlog fase 4. Zie
 | 11 jul 2026 | Home vs dashboard | Home = chat; dashboard = statistieken; analyze redirect | Marianne |
 | 11 jul 2026 | Analyze limiet | 50, 100, 200, 500, alle geïmporteerd | Marianne |
 | 11 jul 2026 | W3 chat UX | Inklapbare stappen, hybride fetch, limieten, user/AI bubbles | Marianne + Agent |
+| 12 jul 2026 | W5 tickets | “Toon meer” 50/100/200/500/alle; teller X van Y | Marianne |
 
 ---
 
 ## Volgende stap
 
-**W5** — tickets paginering / “toon meer”
+**Audit & polish** — A1 mobile navigatie, A2 PageHeader, …
