@@ -8,22 +8,22 @@
 Uitgangspunt: casus **TicketIQ** goedgekeurd. Project bevat een werkende Next.js 16 +
 TypeScript + Tailwind v4 opzet volgens de voorgeschreven repo-structuur (`src/`, `.cursor/rules`,
 `.agents/skills`, `docs`). Auth (PR2), databaseschema met RLS (PR3), CRUD + ticket-import (PR4),
-AI-agent (PR5) en suggesties-beheer (PR6) zijn gebouwd, inclusief revisie-flow na
-afwijzing. Supabase-project bestaat;
-GitHub (public), Vercel en Skills.sh zijn opgezet (PR1).
+AI-agent (PR5), suggesties-beheer (PR6), instellingen/home-layout (PR9) en UI-refresh +
+deploy-readiness (PR11) zijn gebouwd. Supabase-project bestaat; GitHub (public), Vercel en
+Skills.sh zijn opgezet (PR1).
 
 ## Deelopdracht 1 – Broncode Next.js project (25%)
 
-- [~] Next.js (App Router) + TypeScript + Tailwind CSS, werkend in dev (prod nog niet) zonder kritieke errors (1.1)
+- [x] Next.js (App Router) + TypeScript + Tailwind CSS, werkend in dev én productie zonder kritieke errors (1.1) — https://ticket-iq-zeta.vercel.app
 - [x] Externe data via netwerkrequests naar een gratis API (DummyJSON) (1.2) — import + tool calling (`fetchTickets` met `source: "api"`)
 - [x] AI interpreteert/verrijkt data i.c.m. gebruikersinput — niet alleen doorsturen (1.2)
 - [x] Agent-based flow met werkende `maxSteps` meerstaps-aanpak (1.3) — `stopWhen: isStepCount(8)` in AI SDK v7
-- [~] Schone, gestructureerde, onderhoudbare code; logische scheiding server/client/utils/data (1.4)
-- [~] Minimaal 20 kleine commits met zinvolle messages (1.5)
-- [~] Minimaal 5 pull requests gemerged naar `main` (1.5) — PR1–PR5 gemerged; PR6 klaar voor merge
+- [x] Schone, gestructureerde, onderhoudbare code; logische scheiding server/client/utils/data (1.4)
+- [x] Minimaal 20 kleine commits met zinvolle messages (1.5)
+- [x] Minimaal 5 pull requests gemerged naar `main` (1.5) — PR1–PR11 gemerged
 - [x] Repository volgens voorgeschreven structuur
-- [ ] Gedeployed op Vercel
-- [ ] `README.md` met heldere installatie-instructies
+- [x] Gedeployed op Vercel — https://ticket-iq-zeta.vercel.app (redeploy na merge PR11 aanbevolen)
+- [x] `README.md` met heldere installatie-instructies
 - [x] Minimaal 4 kernfunctionaliteiten (auth + ticket-ingestie + AI-analyse + suggesties-beheer + dashboard-statistieken)
 
 ## Deelopdracht 2 – Supabase backend (15%)
@@ -34,8 +34,8 @@ GitHub (public), Vercel en Skills.sh zijn opgezet (PR1).
 - [x] Supabase Auth: registreren, inloggen, correcte sessieafhandeling (2.3)
 - [x] RLS ingeschakeld op relevante tabellen (2.3)
 - [x] Werkende policies: gebruiker benadert alleen eigen data (2.3)
-- [ ] Supabase REST API base URL in `README.md`
-- [ ] Betrokken docent toegevoegd als administrator in Supabase-team
+- [x] Supabase REST API base URL in `README.md` — `https://xmgcfjdgwpikclovbxiv.supabase.co/rest/v1/`
+- [x] Betrokken docent toegevoegd als administrator in Supabase-team (uitnodiging verstuurd; acceptatie door docent nog open)
 
 ## Deelopdracht 3 – Verantwoordingsdocument (45%)
 
