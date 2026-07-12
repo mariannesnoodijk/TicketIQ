@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { AnalyticsPeriodSelector } from "@/components/features/dashboard/analytics-period-selector";
+import { PageHeader } from "@/components/layout/page-header";
 import { SuggestionStatusChart } from "@/components/features/suggestions/suggestion-status-chart";
 import {
   Badge,
@@ -54,13 +55,11 @@ export function SuggestionsPageContent() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">AI-helpcenter-artikelen</h1>
-        <p className="text-muted-foreground">
-          Bekijk en beheer helpcenter-artikelen die de AI op basis van je supporttickets heeft
-          voorgesteld. Open een artikel om te bewerken of goed te keuren.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Helpcenter"
+        title="AI-voorstellen"
+        description="Bekijk en beheer helpcenter-artikelen die de AI op basis van je supporttickets heeft voorgesteld. Open een artikel om te bewerken of goed te keuren."
+      />
 
       <AnalyticsPeriodSelector
         value={period}

@@ -14,6 +14,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/layout/page-header";
 import {
   useAiSuggestion,
   useDeleteAiSuggestion,
@@ -357,31 +358,29 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-10">
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-2">
-          <Link
-            href="/dashboard/suggestions"
-            className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "-ml-2 inline-flex")}
+      <PageHeader
+        eyebrow="Helpcenter"
+        title={suggestion.title}
+        backHref="/dashboard/suggestions"
+        size="compact"
+        actions={
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleDelete}
+            disabled={deleteSuggestion.isPending}
           >
-            ← Terug
-          </Link>
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={suggestionStatusBadgeVariant(suggestion.status)}>
-              {suggestionStatusLabel(suggestion.status)}
-            </Badge>
-            {suggestion.categories ? (
-              <Badge variant="outline">{suggestion.categories.name}</Badge>
-            ) : null}
-          </div>
-        </div>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={handleDelete}
-          disabled={deleteSuggestion.isPending}
-        >
-          Verwijderen
-        </Button>
+            Verwijderen
+          </Button>
+        }
+      />
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant={suggestionStatusBadgeVariant(suggestion.status)}>
+          {suggestionStatusLabel(suggestion.status)}
+        </Badge>
+        {suggestion.categories ? (
+          <Badge variant="outline">{suggestion.categories.name}</Badge>
+        ) : null}
       </div>
 
       {actionFeedback ? <ActionFeedbackBanner feedback={actionFeedback} /> : null}

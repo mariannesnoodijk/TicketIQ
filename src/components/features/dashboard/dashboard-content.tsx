@@ -10,6 +10,7 @@ import { TicketWeekdayChart } from "@/components/features/dashboard/ticket-weekd
 import { TopOrganizationsChart } from "@/components/features/dashboard/top-organizations-chart";
 import { CategorizeTicketsButton } from "@/components/features/tickets/categorize-tickets-button";
 import { ImportTicketsButton } from "@/components/features/tickets/import-tickets-button";
+import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { useSuggestionStatusStats } from "@/hooks/useSuggestionStatusStats";
@@ -53,16 +54,11 @@ export function DashboardContent() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10">
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-primary">Dashboard</p>
-        <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-          Statistieken
-        </h1>
-        <p className="max-w-2xl text-muted-foreground">
-          Bekijk trends in je supporttickets, importeer nieuwe data en spring snel door naar tickets,
-          helpcenter-artikelen of de AI-assistent op Home.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Dashboard"
+        title="Statistieken"
+        description="Bekijk trends in je supporttickets, importeer nieuwe data en spring snel door naar tickets, helpcenter-artikelen of de AI-assistent op Home."
+      />
 
       <AnalyticsPeriodSelector value={period} onChange={setPeriod} />
 

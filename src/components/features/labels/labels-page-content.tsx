@@ -3,6 +3,7 @@
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 
+import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,13 +33,11 @@ export function LabelsPageContent() {
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-10">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Labels</h1>
-        <p className="text-muted-foreground">
-          Beheer labels om tickets te taggen. Labels uit de DummyJSON-import worden automatisch
-          aangemaakt.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Labels"
+        title="Beheer"
+        description="Beheer labels om tickets te taggen. Labels uit de DummyJSON-import worden automatisch aangemaakt."
+      />
 
       <Card>
         <CardHeader>

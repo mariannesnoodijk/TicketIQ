@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import { PageHeader } from "@/components/layout/page-header";
 import { Badge, priorityBadgeVariant, statusBadgeVariant } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,12 +80,11 @@ export function TicketsPageContent() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Tickets</h1>
-        <p className="text-muted-foreground">
-          Blader door geïmporteerde supporttickets en filter op status, categorie of label.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Tickets"
+        title="Overzicht"
+        description="Blader door geïmporteerde supporttickets en filter op status, categorie of label."
+      />
 
       <div className="grid gap-4 rounded-xl border border-border bg-card p-4 md:grid-cols-4">
         <div className="space-y-2">
