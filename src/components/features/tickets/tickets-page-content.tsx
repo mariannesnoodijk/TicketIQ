@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { TableSkeleton } from "@/components/ui/content-skeletons";
 import { Badge, priorityBadgeVariant, statusBadgeVariant } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -150,7 +151,7 @@ export function TicketsPageContent() {
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Tickets laden…</p>
+        <TableSkeleton rows={8} columns={6} />
       ) : error ? (
         <p className="text-sm text-destructive">Kon tickets niet laden.</p>
       ) : !tickets?.length ? (

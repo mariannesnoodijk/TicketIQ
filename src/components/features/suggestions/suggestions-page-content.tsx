@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import { AnalyticsPeriodSelector } from "@/components/features/dashboard/analytics-period-selector";
 import { PageHeader } from "@/components/layout/page-header";
+import { TableSkeleton } from "@/components/ui/content-skeletons";
 import { SuggestionStatusChart } from "@/components/features/suggestions/suggestion-status-chart";
 import {
   Badge,
@@ -106,7 +107,7 @@ export function SuggestionsPageContent() {
 
       <div className="rounded-xl border border-border bg-card">
         {isLoading ? (
-          <p className="p-6 text-sm text-muted-foreground">Artikelen laden…</p>
+          <TableSkeleton rows={6} columns={4} />
         ) : error ? (
           <p className="p-6 text-sm text-destructive">Kon helpcenter-artikelen niet laden.</p>
         ) : !suggestions?.length ? (

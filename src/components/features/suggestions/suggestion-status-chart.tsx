@@ -13,6 +13,7 @@ import {
 
 import { ChartPeriodRange } from "@/components/features/dashboard/chart-period-range";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PieChartSkeleton } from "@/components/ui/content-skeletons";
 import type { SuggestionStatusDistribution } from "@/hooks/useSuggestionStatusStats";
 import { formatPeriodDateRange } from "@/lib/analytics/dateLabels";
 import type { AnalyticsPeriod } from "@/lib/analytics/period";
@@ -107,7 +108,7 @@ export function SuggestionStatusChart({
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Statistieken laden…</p>
+          <PieChartSkeleton />
         ) : !data?.total ? (
           <p className="text-sm text-muted-foreground">
             Nog geen AI-helpcenter-artikelen in deze periode. Pas de periode aan of start een

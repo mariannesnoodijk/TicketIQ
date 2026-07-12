@@ -13,6 +13,7 @@ import {
 
 import { ChartPeriodRange } from "@/components/features/dashboard/chart-period-range";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartAreaSkeleton } from "@/components/ui/content-skeletons";
 import type { VolumePoint } from "@/lib/analytics/aggregateTickets";
 import { formatPeriodDateRange } from "@/lib/analytics/dateLabels";
 import { getVolumeBucketUnit, type AnalyticsPeriod } from "@/lib/analytics/period";
@@ -78,7 +79,7 @@ export function TicketVolumeChart({
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Statistieken laden…</p>
+          <ChartAreaSkeleton />
         ) : !data?.length ? (
           <p className="text-sm text-muted-foreground">
             Geen tickets met een datum in deze periode. Pas de periode aan of importeer tickets.

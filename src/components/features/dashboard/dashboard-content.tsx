@@ -11,8 +11,9 @@ import { TopOrganizationsChart } from "@/components/features/dashboard/top-organ
 import { CategorizeTicketsButton } from "@/components/features/tickets/categorize-tickets-button";
 import { ImportTicketsButton } from "@/components/features/tickets/import-tickets-button";
 import { PageHeader } from "@/components/layout/page-header";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useSuggestionStatusStats } from "@/hooks/useSuggestionStatusStats";
 import { useTicketAnalytics } from "@/hooks/useTicketAnalytics";
 import { useDashboardStats } from "@/hooks/useTickets";
@@ -67,7 +68,11 @@ export function DashboardContent() {
           <CardHeader className="pb-2">
             <CardDescription>Tickets ({periodLabel.toLowerCase()})</CardDescription>
             <CardTitle className="text-3xl tabular-nums">
-              {isAnalyticsLoading ? "—" : (analytics?.ticketCount ?? 0)}
+              {isAnalyticsLoading ? (
+                <Skeleton className="h-9 w-16" />
+              ) : (
+                (analytics?.ticketCount ?? 0)
+              )}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -84,9 +89,11 @@ export function DashboardContent() {
               </CardDescription>
               <CardTitle className="text-3xl tabular-nums">
                 {isDashboardStatsLoading ||
-                (item.label === "AI-helpcenter-artikelen" && isSuggestionStatsLoading)
-                  ? "—"
-                  : (item.value ?? 0)}
+                (item.label === "AI-helpcenter-artikelen" && isSuggestionStatsLoading) ? (
+                  <Skeleton className="h-9 w-16" />
+                ) : (
+                  (item.value ?? 0)
+                )}
               </CardTitle>
             </CardHeader>
           </Card>

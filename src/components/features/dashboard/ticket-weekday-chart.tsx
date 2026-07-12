@@ -13,6 +13,7 @@ import {
 
 import { ChartPeriodRange } from "@/components/features/dashboard/chart-period-range";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartAreaSkeleton } from "@/components/ui/content-skeletons";
 import type { WeekdayPoint } from "@/lib/analytics/aggregateTickets";
 import { formatPeriodDateRange, formatWeekdayInPeriod } from "@/lib/analytics/dateLabels";
 import { getPeriodLabel, type AnalyticsPeriod } from "@/lib/analytics/period";
@@ -74,7 +75,7 @@ export function TicketWeekdayChart({ data, period, isLoading }: TicketWeekdayCha
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Statistieken laden…</p>
+          <ChartAreaSkeleton />
         ) : !data?.some((point) => point.count > 0) ? (
           <p className="text-sm text-muted-foreground">Geen datums beschikbaar in {periodLabel.toLowerCase()}.</p>
         ) : (

@@ -10,25 +10,6 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
-type StatCardsSkeletonProps = {
-  count?: number;
-};
-
-export function StatCardsSkeleton({ count = 4 }: StatCardsSkeletonProps) {
-  return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {Array.from({ length: count }).map((_, index) => (
-        <Card key={index}>
-          <CardHeader className="gap-3 pb-2">
-            <Skeleton className="h-4 w-28" />
-            <Skeleton className="h-9 w-16" />
-          </CardHeader>
-        </Card>
-      ))}
-    </div>
-  );
-}
-
 type TableSkeletonProps = {
   rows?: number;
   columns?: number;

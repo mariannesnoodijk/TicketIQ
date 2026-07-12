@@ -7,6 +7,7 @@ import { AgentChatMessages } from "@/components/features/analysis/agent-chat-mes
 import { AgentChatWelcome } from "@/components/features/analysis/agent-chat-welcome";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChatPanelSkeleton } from "@/components/ui/content-skeletons";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { useAgentChat } from "@/hooks/useAgentChat";
@@ -27,7 +28,7 @@ type AgentChatPanelProps = {
 export function AgentChatPanel({ displayName }: AgentChatPanelProps) {
   const [input, setInput] = useState("");
   const [ticketLimit, setTicketLimit] = useState<AnalyzeTicketLimit>(50);
-  const { data: stats } = useDashboardStats();
+  const { data: stats, isLoading: isStatsLoading } = useDashboardStats();
 
   const { messages, sendMessage, status, error, clearChat } = useAgentChat();
 
@@ -52,6 +53,10 @@ export function AgentChatPanel({ displayName }: AgentChatPanelProps) {
     if (confirm("Chatgeschiedenis wissen en opnieuw beginnen?")) {
       clearChat();
     }
+  }
+
+  if (isStatsLoading) {
+    return <ChatPanelSkeleton />;
   }
 
   return (
