@@ -68,28 +68,24 @@ export function PieChartSkeleton() {
 
 export function ChatPanelSkeleton() {
   return (
-    <div className="flex flex-col gap-4">
-      <Card>
-        <CardHeader className="gap-3">
-          <Skeleton className="h-6 w-32" />
-          <Skeleton className="h-4 w-full max-w-md" />
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-end">
-          <Skeleton className="h-10 w-48" />
-          <Skeleton className="h-10 w-36" />
-        </CardContent>
-      </Card>
-      <Card className="min-h-[28rem]">
-        <CardHeader className="gap-3 pb-3">
-          <Skeleton className="h-5 w-28" />
-          <Skeleton className="h-4 w-full max-w-lg" />
-        </CardHeader>
-        <CardContent className="flex flex-1 flex-col gap-4">
-          <Skeleton className="h-24 w-full rounded-xl" />
-          <Skeleton className="h-24 w-4/5 rounded-xl" />
-          <Skeleton className="mt-auto h-10 w-full" />
-        </CardContent>
-      </Card>
-    </div>
+    <Card className="flex min-h-[32rem] flex-col lg:min-h-[36rem]">
+      <CardHeader className="space-y-4 pb-3">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-28" />
+            <Skeleton className="h-4 w-full max-w-lg" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Skeleton className="h-9 w-40" />
+            <Skeleton className="h-9 w-24" />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="flex flex-1 flex-col gap-4">
+        <Skeleton className="h-24 w-full rounded-xl" />
+        <Skeleton className="h-24 w-4/5 rounded-xl" />
+        <Skeleton className="mt-auto h-10 w-full" />
+      </CardContent>
+    </Card>
   );
 }

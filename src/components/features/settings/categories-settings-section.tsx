@@ -3,7 +3,6 @@
 import { Loader2, Trash2 } from "lucide-react";
 import { useState } from "react";
 
-import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,7 +22,7 @@ import {
   useSeedDefaultCategories,
 } from "@/hooks/useCategories";
 
-export function CategoriesPageContent() {
+export function CategoriesSettingsSection() {
   const { data: categories, isLoading, error } = useCategories();
   const createCategory = useCreateCategory();
   const deleteCategory = useDeleteCategory();
@@ -50,13 +49,7 @@ export function CategoriesPageContent() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-10">
-      <PageHeader
-        eyebrow="Categorieën"
-        title="Beheer"
-        description="Beheer categorieën om tickets te organiseren. Gebruik de standaard set of voeg eigen categorieën toe."
-      />
-
+    <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
           <CardTitle>Standaard categorieën</CardTitle>
@@ -86,18 +79,18 @@ export function CategoriesPageContent() {
         <CardContent>
           <form onSubmit={handleCreate} className="flex flex-col gap-4 sm:flex-row sm:items-end">
             <div className="flex-1 space-y-2">
-              <Label htmlFor="name">Naam</Label>
+              <Label htmlFor="category-name">Naam</Label>
               <Input
-                id="name"
+                id="category-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Bijv. Verlof & Verzuim"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="color">Kleur</Label>
+              <Label htmlFor="category-color">Kleur</Label>
               <Input
-                id="color"
+                id="category-color"
                 type="color"
                 value={color}
                 onChange={(e) => setColor(e.target.value)}

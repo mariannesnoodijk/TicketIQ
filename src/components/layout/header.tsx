@@ -15,8 +15,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard", exact: true },
   { href: "/dashboard/tickets", label: "Tickets" },
   { href: "/dashboard/suggestions", label: "Helpcenter (AI)" },
-  { href: "/dashboard/categories", label: "Categorieën" },
-  { href: "/dashboard/labels", label: "Labels" },
+  { href: "/dashboard/instellingen", label: "Instellingen" },
 ];
 
 function isNavItemActive(pathname: string, href: string, exact?: boolean) {

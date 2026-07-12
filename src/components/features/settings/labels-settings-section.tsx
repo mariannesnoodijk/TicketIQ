@@ -3,7 +3,6 @@
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 
-import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,7 +17,7 @@ import {
 } from "@/components/ui/table";
 import { useCreateLabel, useDeleteLabel, useLabels } from "@/hooks/useLabels";
 
-export function LabelsPageContent() {
+export function LabelsSettingsSection() {
   const { data: labels, isLoading, error } = useLabels();
   const createLabel = useCreateLabel();
   const deleteLabel = useDeleteLabel();
@@ -32,13 +31,7 @@ export function LabelsPageContent() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-10">
-      <PageHeader
-        eyebrow="Labels"
-        title="Beheer"
-        description="Beheer labels om tickets te taggen. Labels uit de DummyJSON-import worden automatisch aangemaakt."
-      />
-
+    <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
           <CardTitle>Nieuw label</CardTitle>
