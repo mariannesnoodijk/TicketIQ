@@ -5,7 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { LogoutButton } from "@/components/features/auth/logout-button";
+import { AccountMenu, MobileAccountPanel } from "@/components/layout/account-menu";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -66,32 +67,36 @@ export function Header() {
           ) : null}
         </div>
 
-        <nav className="flex shrink-0 items-center gap-2 sm:gap-3" aria-label="Account">
+        <nav className="flex shrink-0 items-center gap-1 sm:gap-2" aria-label="Account">
           {user ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="sm:hidden"
-              aria-expanded={mobileNavOpen}
-              aria-controls="mobile-nav"
-              aria-label={mobileNavOpen ? "Menu sluiten" : "Menu openen"}
-              onClick={() => setMobileNavOpen((open) => !open)}
-            >
-              {mobileNavOpen ? (
-                <X className="size-5" aria-hidden="true" />
-              ) : (
-                <Menu className="size-5" aria-hidden="true" />
-              )}
-            </Button>
+            <>
+              <ThemeToggle compact className="hidden sm:inline-flex" />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="sm:hidden"
+                aria-expanded={mobileNavOpen}
+                aria-controls="mobile-nav"
+                aria-label={mobileNavOpen ? "Menu sluiten" : "Menu openen"}
+                onClick={() => setMobileNavOpen((open) => !open)}
+              >
+                {mobileNavOpen ? (
+                  <X className="size-5" aria-hidden="true" />
+                ) : (
+                  <Menu className="size-5" aria-hidden="true" />
+                )}
+              </Button>
+            </>
           ) : null}
 
           {loading ? (
             <span className="text-sm text-muted-foreground">Laden…</span>
           ) : user ? (
-            <LogoutButton />
+            <AccountMenu user={user} className="hidden sm:block" />
           ) : (
             <>
+              <ThemeToggle compact />
               <Link
                 href="/login"
                 className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
@@ -136,6 +141,7 @@ export function Header() {
                   </Link>
                 );
               })}
+              <MobileAccountPanel user={user} />
             </div>
           </div>
         </nav>
