@@ -149,7 +149,40 @@ Audit-items (mobile nav, skeletons, …) komen **na** jouw wensen, tenzij explic
 
 ## Volgende stap
 
-**Audit & polish** — zie backlog hieronder (A1–A5)
+**Audit & polish afgerond (12 jul 2026)** — PR `#8 feat/ui-audit` → merge naar `main`.
+
+---
+
+## Audit & polish (A1–A5, afgerond 12 jul 2026)
+
+| # | Taak | Status | Commit(s) |
+|---|------|--------|-----------|
+| A1 | Mobile navigatie (hamburger + slide-down) | **done** | `38768d8` |
+| A2 | PageHeader + eyebrows overal | **done** | `7f52186`, `1b0d576` |
+| A3 | Loading skeletons (demo-pagina's) | **done** | `0104f62`, `c6eb457` |
+| A4 | Select component (native wrapper) | **done** | `5d43011`, `1ca2522` |
+| A5 | Guidelines quick wins | **done** | zie git log |
+
+### A5 – Guidelines quick wins (detail)
+
+- `…` i.p.v. `...` in loading-teksten en placeholders
+- `aria-hidden` op decoratieve iconen (Loader2, Trash2, Bot, User, …)
+- `touch-manipulation` op buttons; `color-scheme` voor dark mode
+- `prefers-reduced-motion`: spin-animaties uitgeschakeld
+- Skip link “Naar hoofdinhoud” op ingelogde layout
+- `spellCheck={false}` op e-mailvelden; `text-balance` op auth-koppen
+
+---
+
+## Backlog – audit & polish (secundair)
+
+| # | Taak | Status |
+|---|------|--------|
+| A1 | Mobile navigatie | **done** |
+| A2 | PageHeader component | **done** |
+| A3 | Loading skeletons | **done** |
+| A4 | Gestileerde Select | **done** |
+| A5 | Guidelines quick wins | **done** |
 
 ### Routes en huidige staat
 
@@ -165,19 +198,7 @@ Audit-items (mobile nav, skeletons, …) komen **na** jouw wensen, tenzij explic
 
 ### Guidelines-audit (referentie)
 
-Quick wins (ellipsis, loading-teksten, aria-hidden) staan in backlog fase 4. Zie eerdere audit in git history indien nodig.
-
----
-
-## Backlog – audit & polish (secundair)
-
-| # | Taak | Status |
-|---|------|--------|
-| A1 | Mobile navigatie | open |
-| A2 | PageHeader component | open |
-| A3 | Loading skeletons | open |
-| A4 | Gestileerde Select | open |
-| A5 | Guidelines quick wins | open |
+Quick wins uitgevoerd in A5 — zie sectie “Audit & polish (A1–A5)” hierboven.
 
 ---
 
@@ -195,9 +216,12 @@ Quick wins (ellipsis, loading-teksten, aria-hidden) staan in backlog fase 4. Zie
 | 11 jul 2026 | Analyze limiet | 50, 100, 200, 500, alle geïmporteerd | Marianne |
 | 11 jul 2026 | W3 chat UX | Inklapbare stappen, hybride fetch, limieten, user/AI bubbles | Marianne + Agent |
 | 12 jul 2026 | W5 tickets | “Toon meer” 50/100/200/500/alle; teller X van Y | Marianne |
+| 12 jul 2026 | Audit A1–A5 | Hamburger nav; PageHeader B; Select native; skeletons demo-only | Marianne |
 
 ---
 
-## Volgende stap
+## Volgende stap (project)
 
-**Audit & polish** — A1 mobile navigatie, A2 PageHeader, …
+- PR `#8 feat/ui-audit` mergen
+- Vercel deploy + README
+- Verantwoordingsdocument + presentatie
