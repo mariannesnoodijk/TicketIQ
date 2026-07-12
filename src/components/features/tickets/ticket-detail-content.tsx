@@ -9,6 +9,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/layout/page-header";
+import { Select } from "@/components/ui/select";
 import { useCategories } from "@/hooks/useCategories";
 import { useLabels } from "@/hooks/useLabels";
 import {
@@ -104,9 +105,8 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
-              <select
+              <Select
                 id="status"
-                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
                 value={ticket.status}
                 onChange={(e) =>
                   updateTicket.mutate({ id: ticketId, status: e.target.value })
@@ -115,13 +115,12 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
                 <option value="open">Open</option>
                 <option value="pending">In behandeling</option>
                 <option value="closed">Gesloten</option>
-              </select>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="priority">Prioriteit</Label>
-              <select
+              <Select
                 id="priority"
-                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
                 value={ticket.priority}
                 onChange={(e) =>
                   updateTicket.mutate({ id: ticketId, priority: e.target.value })
@@ -131,13 +130,12 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
                 <option value="normal">Normaal</option>
                 <option value="high">Hoog</option>
                 <option value="urgent">Urgent</option>
-              </select>
+              </Select>
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="category">Categorie</Label>
-              <select
+              <Select
                 id="category"
-                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
                 value={ticket.category_id ?? ""}
                 onChange={(e) =>
                   updateTicket.mutate({
@@ -152,7 +150,7 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
                     {c.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
 
@@ -202,8 +200,8 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
 
           {availableLabels.length > 0 ? (
             <div className="flex gap-2">
-              <select
-                className="flex h-10 flex-1 rounded-lg border border-input bg-background px-3 text-sm"
+              <Select
+                className="flex-1"
                 value={selectedLabelId}
                 onChange={(e) => setSelectedLabelId(e.target.value)}
               >
@@ -213,7 +211,7 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
                     {l.name}
                   </option>
                 ))}
-              </select>
+              </Select>
               <Button onClick={handleAddLabel} disabled={!selectedLabelId || addLabel.isPending}>
                 Toevoegen
               </Button>

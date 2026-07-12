@@ -15,6 +15,7 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -87,9 +88,8 @@ export function SuggestionsPageContent() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="status">Status</Label>
-          <select
+          <Select
             id="status"
-            className="flex h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
             value={filters.status ?? ""}
             onChange={(e) =>
               setFilters((f) => ({ ...f, status: e.target.value || undefined }))
@@ -100,7 +100,7 @@ export function SuggestionsPageContent() {
             <option value="approved">Goedgekeurd</option>
             <option value="rejected">Afgewezen</option>
             <option value="draft">Concept</option>
-          </select>
+          </Select>
         </div>
       </div>
 

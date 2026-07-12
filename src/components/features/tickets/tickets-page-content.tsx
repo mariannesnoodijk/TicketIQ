@@ -9,6 +9,7 @@ import { Badge, priorityBadgeVariant, statusBadgeVariant } from "@/components/ui
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -98,9 +99,8 @@ export function TicketsPageContent() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="status">Status</Label>
-          <select
+          <Select
             id="status"
-            className="flex h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
             value={filters.status ?? ""}
             onChange={(e) =>
               setFilters((f) => ({ ...f, status: e.target.value || undefined }))
@@ -110,13 +110,12 @@ export function TicketsPageContent() {
             <option value="open">Open</option>
             <option value="pending">In behandeling</option>
             <option value="closed">Gesloten</option>
-          </select>
+          </Select>
         </div>
         <div className="space-y-2">
           <Label htmlFor="category">Categorie</Label>
-          <select
+          <Select
             id="category"
-            className="flex h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
             value={filters.categoryId ?? ""}
             onChange={(e) =>
               setFilters((f) => ({ ...f, categoryId: e.target.value || undefined }))
@@ -129,13 +128,12 @@ export function TicketsPageContent() {
                 {c.name}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="space-y-2">
           <Label htmlFor="label">Label</Label>
-          <select
+          <Select
             id="label"
-            className="flex h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
             value={filters.labelId ?? ""}
             onChange={(e) =>
               setFilters((f) => ({ ...f, labelId: e.target.value || undefined }))
@@ -147,7 +145,7 @@ export function TicketsPageContent() {
                 {l.name}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
 

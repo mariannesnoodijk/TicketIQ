@@ -8,6 +8,7 @@ import { AgentChatWelcome } from "@/components/features/analysis/agent-chat-welc
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { useAgentChat } from "@/hooks/useAgentChat";
 import { useDashboardStats } from "@/hooks/useTickets";
 import {
@@ -67,11 +68,11 @@ export function AgentChatPanel({ displayName }: AgentChatPanelProps) {
             <label htmlFor="ticket-limit" className="text-sm font-medium">
               Aantal tickets
             </label>
-            <select
+            <Select
               id="ticket-limit"
               value={String(ticketLimit)}
               onChange={(event) => setTicketLimit(parseAnalyzeTicketLimit(event.target.value))}
-              className="flex h-10 w-full min-w-[12rem] rounded-lg border border-input bg-background px-3 text-sm"
+              className="min-w-48"
               disabled={isLoading || !hasTickets}
             >
               {ANALYZE_LIMIT_OPTIONS.map((limit) => (
@@ -82,7 +83,7 @@ export function AgentChatPanel({ displayName }: AgentChatPanelProps) {
               <option value={ANALYZE_LIMIT_ALL}>
                 {getAnalyzeLimitLabel(ANALYZE_LIMIT_ALL, stats?.tickets)}
               </option>
-            </select>
+            </Select>
           </div>
           <div className="flex flex-wrap gap-2 sm:self-end">
             <Button onClick={handleAnalyze} disabled={isLoading || !hasTickets}>
