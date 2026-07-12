@@ -8,6 +8,8 @@ import { Badge, priorityBadgeVariant, statusBadgeVariant } from "@/components/ui
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/layout/page-header";
+import { Select } from "@/components/ui/select";
 import { useCategories } from "@/hooks/useCategories";
 import { useLabels } from "@/hooks/useLabels";
 import {
@@ -38,7 +40,7 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
   const [selectedLabelId, setSelectedLabelId] = useState("");
 
   if (isLoading) {
-    return <p className="px-4 py-10 text-sm text-muted-foreground">Ticket laden...</p>;
+    return <p className="px-4 py-10 text-sm text-muted-foreground">Ticket laden…</p>;
   }
 
   if (error || !ticket) {
@@ -74,23 +76,25 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-10">
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-2">
-          <Link
-            href="/dashboard/tickets"
-            className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "-ml-2 inline-flex")}
+      <PageHeader
+        eyebrow="Tickets"
+        title={ticket.subject}
+        backHref="/dashboard/tickets"
+        size="compact"
+        actions={
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleDelete}
+            disabled={deleteTicket.isPending}
           >
-            ← Terug
-          </Link>
-          <h1 className="text-2xl font-semibold tracking-tight">{ticket.subject}</h1>
-          <div className="flex flex-wrap gap-2">
-            <Badge variant={statusBadgeVariant(ticket.status)}>{ticket.status}</Badge>
-            <Badge variant={priorityBadgeVariant(ticket.priority)}>{ticket.priority}</Badge>
-          </div>
-        </div>
-        <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleteTicket.isPending}>
-          Verwijderen
-        </Button>
+            Verwijderen
+          </Button>
+        }
+      />
+      <div className="flex flex-wrap gap-2">
+        <Badge variant={statusBadgeVariant(ticket.status)}>{ticket.status}</Badge>
+        <Badge variant={priorityBadgeVariant(ticket.priority)}>{ticket.priority}</Badge>
       </div>
 
       <Card>
@@ -101,9 +105,8 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
-              <select
+              <Select
                 id="status"
-                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
                 value={ticket.status}
                 onChange={(e) =>
                   updateTicket.mutate({ id: ticketId, status: e.target.value })
@@ -112,13 +115,12 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
                 <option value="open">Open</option>
                 <option value="pending">In behandeling</option>
                 <option value="closed">Gesloten</option>
-              </select>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="priority">Prioriteit</Label>
-              <select
+              <Select
                 id="priority"
-                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
                 value={ticket.priority}
                 onChange={(e) =>
                   updateTicket.mutate({ id: ticketId, priority: e.target.value })
@@ -128,13 +130,12 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
                 <option value="normal">Normaal</option>
                 <option value="high">Hoog</option>
                 <option value="urgent">Urgent</option>
-              </select>
+              </Select>
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="category">Categorie</Label>
-              <select
+              <Select
                 id="category"
-                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
                 value={ticket.category_id ?? ""}
                 onChange={(e) =>
                   updateTicket.mutate({
@@ -149,7 +150,7 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
                     {c.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
 
@@ -199,18 +200,18 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
 
           {availableLabels.length > 0 ? (
             <div className="flex gap-2">
-              <select
-                className="flex h-10 flex-1 rounded-lg border border-input bg-background px-3 text-sm"
+              <Select
+                className="flex-1"
                 value={selectedLabelId}
                 onChange={(e) => setSelectedLabelId(e.target.value)}
               >
-                <option value="">Label toevoegen...</option>
+                <option value="">Label toevoegen…</option>
                 {availableLabels.map((l) => (
                   <option key={l.id} value={l.id}>
                     {l.name}
                   </option>
                 ))}
-              </select>
+              </Select>
               <Button onClick={handleAddLabel} disabled={!selectedLabelId || addLabel.isPending}>
                 Toevoegen
               </Button>

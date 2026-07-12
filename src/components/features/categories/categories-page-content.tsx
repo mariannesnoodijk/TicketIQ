@@ -3,6 +3,7 @@
 import { Loader2, Trash2 } from "lucide-react";
 import { useState } from "react";
 
+import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -50,13 +51,11 @@ export function CategoriesPageContent() {
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-10">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Categorieën</h1>
-        <p className="text-muted-foreground">
-          Beheer categorieën om tickets te organiseren. Gebruik de standaard set of voeg eigen
-          categorieën toe.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Categorieën"
+        title="Beheer"
+        description="Beheer categorieën om tickets te organiseren. Gebruik de standaard set of voeg eigen categorieën toe."
+      />
 
       <Card>
         <CardHeader>
@@ -69,8 +68,8 @@ export function CategoriesPageContent() {
           <Button onClick={handleSeed} disabled={seedDefaults.isPending} variant="outline">
             {seedDefaults.isPending ? (
               <>
-                <Loader2 className="size-4 animate-spin" />
-                Bezig...
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                Bezig…
               </>
             ) : (
               "Standaard categorieën aanmaken"
@@ -114,7 +113,7 @@ export function CategoriesPageContent() {
 
       <div className="rounded-xl border border-border bg-card">
         {isLoading ? (
-          <p className="p-6 text-sm text-muted-foreground">Categorieën laden...</p>
+          <p className="p-6 text-sm text-muted-foreground">Categorieën laden…</p>
         ) : error ? (
           <p className="p-6 text-sm text-destructive">Kon categorieën niet laden.</p>
         ) : !categories?.length ? (
@@ -138,6 +137,7 @@ export function CategoriesPageContent() {
                     <span
                       className="inline-block size-4 rounded-full border border-border"
                       style={{ backgroundColor: category.color ?? "#6366f1" }}
+                      aria-hidden="true"
                     />
                   </TableCell>
                   <TableCell className="text-right">
@@ -152,7 +152,7 @@ export function CategoriesPageContent() {
                       disabled={deleteCategory.isPending}
                       aria-label={`Verwijder ${category.name}`}
                     >
-                      <Trash2 className="size-4" />
+                      <Trash2 className="size-4" aria-hidden="true" />
                     </Button>
                   </TableCell>
                 </TableRow>

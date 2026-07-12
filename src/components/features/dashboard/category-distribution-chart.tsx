@@ -13,6 +13,7 @@ import {
 
 import { ChartPeriodRange } from "@/components/features/dashboard/chart-period-range";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PieChartSkeleton } from "@/components/ui/content-skeletons";
 import type { CategoryDistribution } from "@/hooks/useTicketCategoryStats";
 import { formatPeriodDateRange } from "@/lib/analytics/dateLabels";
 import type { AnalyticsPeriod } from "@/lib/analytics/period";
@@ -110,7 +111,7 @@ export function CategoryDistributionChart({
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Statistieken laden…</p>
+          <PieChartSkeleton />
         ) : !data?.total ? (
           <p className="text-sm text-muted-foreground">
             Nog geen tickets. Importeer eerst tickets om de verdeling te zien.

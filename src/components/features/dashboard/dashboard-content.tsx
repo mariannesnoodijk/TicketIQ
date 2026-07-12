@@ -10,8 +10,10 @@ import { TicketWeekdayChart } from "@/components/features/dashboard/ticket-weekd
 import { TopOrganizationsChart } from "@/components/features/dashboard/top-organizations-chart";
 import { CategorizeTicketsButton } from "@/components/features/tickets/categorize-tickets-button";
 import { ImportTicketsButton } from "@/components/features/tickets/import-tickets-button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/layout/page-header";
 import { buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useSuggestionStatusStats } from "@/hooks/useSuggestionStatusStats";
 import { useTicketAnalytics } from "@/hooks/useTicketAnalytics";
 import { useDashboardStats } from "@/hooks/useTickets";
@@ -53,16 +55,11 @@ export function DashboardContent() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10">
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-primary">Dashboard</p>
-        <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-          Statistieken
-        </h1>
-        <p className="max-w-2xl text-muted-foreground">
-          Bekijk trends in je supporttickets, importeer nieuwe data en spring snel door naar tickets,
-          helpcenter-artikelen of de AI-assistent op Home.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Dashboard"
+        title="Statistieken"
+        description="Bekijk trends in je supporttickets, importeer nieuwe data en spring snel door naar tickets, helpcenter-artikelen of de AI-assistent op Home."
+      />
 
       <AnalyticsPeriodSelector value={period} onChange={setPeriod} />
 
@@ -71,7 +68,11 @@ export function DashboardContent() {
           <CardHeader className="pb-2">
             <CardDescription>Tickets ({periodLabel.toLowerCase()})</CardDescription>
             <CardTitle className="text-3xl tabular-nums">
-              {isAnalyticsLoading ? "—" : (analytics?.ticketCount ?? 0)}
+              {isAnalyticsLoading ? (
+                <Skeleton className="h-9 w-16" />
+              ) : (
+                (analytics?.ticketCount ?? 0)
+              )}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -88,9 +89,11 @@ export function DashboardContent() {
               </CardDescription>
               <CardTitle className="text-3xl tabular-nums">
                 {isDashboardStatsLoading ||
-                (item.label === "AI-helpcenter-artikelen" && isSuggestionStatsLoading)
-                  ? "—"
-                  : (item.value ?? 0)}
+                (item.label === "AI-helpcenter-artikelen" && isSuggestionStatsLoading) ? (
+                  <Skeleton className="h-9 w-16" />
+                ) : (
+                  (item.value ?? 0)
+                )}
               </CardTitle>
             </CardHeader>
           </Card>

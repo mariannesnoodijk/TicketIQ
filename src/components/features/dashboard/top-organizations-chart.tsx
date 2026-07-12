@@ -13,6 +13,7 @@ import {
 
 import { ChartPeriodRange } from "@/components/features/dashboard/chart-period-range";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartAreaSkeleton } from "@/components/ui/content-skeletons";
 import type { OrganizationPoint } from "@/lib/analytics/aggregateTickets";
 import { formatPeriodDateRange } from "@/lib/analytics/dateLabels";
 import type { AnalyticsPeriod } from "@/lib/analytics/period";
@@ -70,7 +71,7 @@ export function TopOrganizationsChart({ data, period, isLoading }: TopOrganizati
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Statistieken laden…</p>
+          <ChartAreaSkeleton />
         ) : !data?.length ? (
           <p className="text-sm text-muted-foreground">
             Geen organisatiegegevens in deze periode.

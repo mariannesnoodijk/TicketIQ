@@ -31,8 +31,8 @@ export function ImportTicketsButton() {
       <Button onClick={handleImport} disabled={importTickets.isPending}>
         {importTickets.isPending ? (
           <>
-            <Loader2 className="size-4 animate-spin" />
-            Importeren...
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            Importeren…
           </>
         ) : (
           "Importeer tickets uit DummyJSON"

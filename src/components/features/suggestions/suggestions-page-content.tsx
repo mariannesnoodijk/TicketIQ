@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { AnalyticsPeriodSelector } from "@/components/features/dashboard/analytics-period-selector";
+import { PageHeader } from "@/components/layout/page-header";
+import { TableSkeleton } from "@/components/ui/content-skeletons";
 import { SuggestionStatusChart } from "@/components/features/suggestions/suggestion-status-chart";
 import {
   Badge,
@@ -14,6 +16,7 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -54,13 +57,11 @@ export function SuggestionsPageContent() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">AI-helpcenter-artikelen</h1>
-        <p className="text-muted-foreground">
-          Bekijk en beheer helpcenter-artikelen die de AI op basis van je supporttickets heeft
-          voorgesteld. Open een artikel om te bewerken of goed te keuren.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Helpcenter"
+        title="AI-voorstellen"
+        description="Bekijk en beheer helpcenter-artikelen die de AI op basis van je supporttickets heeft voorgesteld. Open een artikel om te bewerken of goed te keuren."
+      />
 
       <AnalyticsPeriodSelector
         value={period}
@@ -79,7 +80,7 @@ export function SuggestionsPageContent() {
           <Label htmlFor="search">Zoeken</Label>
           <Input
             id="search"
-            placeholder="Titel..."
+            placeholder="Titel…"
             value={filters.search ?? ""}
             onChange={(e) =>
               setFilters((f) => ({ ...f, search: e.target.value || undefined }))
@@ -88,9 +89,8 @@ export function SuggestionsPageContent() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="status">Status</Label>
-          <select
+          <Select
             id="status"
-            className="flex h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
             value={filters.status ?? ""}
             onChange={(e) =>
               setFilters((f) => ({ ...f, status: e.target.value || undefined }))
@@ -101,13 +101,13 @@ export function SuggestionsPageContent() {
             <option value="approved">Goedgekeurd</option>
             <option value="rejected">Afgewezen</option>
             <option value="draft">Concept</option>
-          </select>
+          </Select>
         </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card">
         {isLoading ? (
-          <p className="p-6 text-sm text-muted-foreground">Artikelen laden…</p>
+          <TableSkeleton rows={6} columns={4} />
         ) : error ? (
           <p className="p-6 text-sm text-destructive">Kon helpcenter-artikelen niet laden.</p>
         ) : !suggestions?.length ? (

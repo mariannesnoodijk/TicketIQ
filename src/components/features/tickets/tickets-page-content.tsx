@@ -4,10 +4,13 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import { PageHeader } from "@/components/layout/page-header";
+import { TableSkeleton } from "@/components/ui/content-skeletons";
 import { Badge, priorityBadgeVariant, statusBadgeVariant } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -79,12 +82,11 @@ export function TicketsPageContent() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Tickets</h1>
-        <p className="text-muted-foreground">
-          Blader door geïmporteerde supporttickets en filter op status, categorie of label.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Tickets"
+        title="Overzicht"
+        description="Blader door geïmporteerde supporttickets en filter op status, categorie of label."
+      />
 
       <div className="grid gap-4 rounded-xl border border-border bg-card p-4 md:grid-cols-4">
         <div className="space-y-2">
@@ -98,9 +100,8 @@ export function TicketsPageContent() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="status">Status</Label>
-          <select
+          <Select
             id="status"
-            className="flex h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
             value={filters.status ?? ""}
             onChange={(e) =>
               setFilters((f) => ({ ...f, status: e.target.value || undefined }))
@@ -110,13 +111,12 @@ export function TicketsPageContent() {
             <option value="open">Open</option>
             <option value="pending">In behandeling</option>
             <option value="closed">Gesloten</option>
-          </select>
+          </Select>
         </div>
         <div className="space-y-2">
           <Label htmlFor="category">Categorie</Label>
-          <select
+          <Select
             id="category"
-            className="flex h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
             value={filters.categoryId ?? ""}
             onChange={(e) =>
               setFilters((f) => ({ ...f, categoryId: e.target.value || undefined }))
@@ -129,13 +129,12 @@ export function TicketsPageContent() {
                 {c.name}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="space-y-2">
           <Label htmlFor="label">Label</Label>
-          <select
+          <Select
             id="label"
-            className="flex h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
             value={filters.labelId ?? ""}
             onChange={(e) =>
               setFilters((f) => ({ ...f, labelId: e.target.value || undefined }))
@@ -147,12 +146,12 @@ export function TicketsPageContent() {
                 {l.name}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Tickets laden…</p>
+        <TableSkeleton rows={8} columns={6} />
       ) : error ? (
         <p className="text-sm text-destructive">Kon tickets niet laden.</p>
       ) : !tickets?.length ? (

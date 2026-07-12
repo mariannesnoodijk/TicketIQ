@@ -7,7 +7,9 @@ import { AgentChatMessages } from "@/components/features/analysis/agent-chat-mes
 import { AgentChatWelcome } from "@/components/features/analysis/agent-chat-welcome";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChatPanelSkeleton } from "@/components/ui/content-skeletons";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { useAgentChat } from "@/hooks/useAgentChat";
 import { useDashboardStats } from "@/hooks/useTickets";
 import {
@@ -26,7 +28,7 @@ type AgentChatPanelProps = {
 export function AgentChatPanel({ displayName }: AgentChatPanelProps) {
   const [input, setInput] = useState("");
   const [ticketLimit, setTicketLimit] = useState<AnalyzeTicketLimit>(50);
-  const { data: stats } = useDashboardStats();
+  const { data: stats, isLoading: isStatsLoading } = useDashboardStats();
 
   const { messages, sendMessage, status, error, clearChat } = useAgentChat();
 
@@ -53,6 +55,10 @@ export function AgentChatPanel({ displayName }: AgentChatPanelProps) {
     }
   }
 
+  if (isStatsLoading) {
+    return <ChatPanelSkeleton />;
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <Card>
@@ -67,11 +73,11 @@ export function AgentChatPanel({ displayName }: AgentChatPanelProps) {
             <label htmlFor="ticket-limit" className="text-sm font-medium">
               Aantal tickets
             </label>
-            <select
+            <Select
               id="ticket-limit"
               value={String(ticketLimit)}
               onChange={(event) => setTicketLimit(parseAnalyzeTicketLimit(event.target.value))}
-              className="flex h-10 w-full min-w-[12rem] rounded-lg border border-input bg-background px-3 text-sm"
+              className="min-w-48"
               disabled={isLoading || !hasTickets}
             >
               {ANALYZE_LIMIT_OPTIONS.map((limit) => (
@@ -82,18 +88,18 @@ export function AgentChatPanel({ displayName }: AgentChatPanelProps) {
               <option value={ANALYZE_LIMIT_ALL}>
                 {getAnalyzeLimitLabel(ANALYZE_LIMIT_ALL, stats?.tickets)}
               </option>
-            </select>
+            </Select>
           </div>
           <div className="flex flex-wrap gap-2 sm:self-end">
             <Button onClick={handleAnalyze} disabled={isLoading || !hasTickets}>
               {isLoading ? (
                 <>
-                  <Loader2 className="size-4 animate-spin" />
+                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
                   Analyseren…
                 </>
               ) : (
                 <>
-                  <Sparkles className="size-4" />
+                  <Sparkles className="size-4" aria-hidden="true" />
                   Analyseer tickets
                 </>
               )}
@@ -105,7 +111,7 @@ export function AgentChatPanel({ displayName }: AgentChatPanelProps) {
                 onClick={handleClearChat}
                 disabled={isLoading}
               >
-                <Trash2 className="size-4" />
+                <Trash2 className="size-4" aria-hidden="true" />
                 Nieuwe analyse
               </Button>
             ) : null}

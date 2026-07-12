@@ -16,7 +16,7 @@ export function RegisterForm() {
   return (
     <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
       <div className="mb-6 space-y-2 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Registreren</h1>
+        <h1 className="text-balance text-2xl font-semibold tracking-tight">Registreren</h1>
         <p className="text-sm text-muted-foreground">
           Maak een account aan om TicketIQ te gebruiken.
         </p>
@@ -48,6 +48,7 @@ export function RegisterForm() {
               type="email"
               autoComplete="email"
               placeholder="naam@bedrijf.nl"
+              spellCheck={false}
               required
             />
           </div>
