@@ -28,8 +28,12 @@ export function LabelsSettingsSection() {
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
-    await createLabel.mutateAsync({ name: name.trim() });
-    setName("");
+    try {
+      await createLabel.mutateAsync({ name: name.trim() });
+      setName("");
+    } catch {
+      // React Query houdt mutation.error bij; formulier blijft bruikbaar.
+    }
   }
 
   return (

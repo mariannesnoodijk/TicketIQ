@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { invalidateDashboardAnalytics } from "@/lib/analytics/invalidateDashboardAnalytics";
+import { parseFetchJson } from "@/lib/fetch-json";
 import { queryKeys } from "@/lib/queryKeys";
 
 type ImportResult = {
@@ -18,13 +19,13 @@ export function useImportTickets() {
   return useMutation({
     mutationFn: async (): Promise<ImportResult> => {
       const response = await fetch("/api/tickets/import", { method: "POST" });
+      const body = await parseFetchJson<ImportResult & { error?: string }>(response);
 
       if (!response.ok) {
-        const body = (await response.json()) as { error?: string };
         throw new Error(body.error ?? "Import mislukt");
       }
 
-      return response.json() as Promise<ImportResult>;
+      return body;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.tickets.lists() });

@@ -22,22 +22,11 @@ import {
   useReviseAiSuggestion,
   useUpdateAiSuggestion,
 } from "@/hooks/useAiSuggestions";
-import { getIntlLocale } from "@/lib/i18n/labels";
+import { formatDisplayDate } from "@/lib/i18n/labels";
 import type { AiSuggestionMetadata, SuggestionStatus } from "@/types";
 import { cn } from "@/lib/utils";
 
 type SuggestionWithCategory = NonNullable<ReturnType<typeof useAiSuggestion>["data"]>;
-
-function formatDate(
-  value: string | null,
-  locale: ReturnType<typeof useLocale>["locale"]
-) {
-  if (!value) return "—";
-  return new Intl.DateTimeFormat(getIntlLocale(locale), {
-    dateStyle: "full",
-    timeStyle: "short",
-  }).format(new Date(value));
-}
 
 type ActionFeedback = {
   message: string;
@@ -78,6 +67,7 @@ function SuggestionEditForm({
   const [title, setTitle] = useState(suggestion.title);
   const [summary, setSummary] = useState(suggestion.summary ?? "");
   const [content, setContent] = useState(suggestion.content);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const isDirty =
     title !== suggestion.title ||
@@ -85,13 +75,18 @@ function SuggestionEditForm({
     content !== suggestion.content;
 
   async function handleSave() {
-    await updateSuggestion.mutateAsync({
-      id: suggestion.id,
-      title: title.trim(),
-      summary: summary.trim() || null,
-      content: content.trim(),
-    });
-    onSaved();
+    setSaveError(null);
+    try {
+      await updateSuggestion.mutateAsync({
+        id: suggestion.id,
+        title: title.trim(),
+        summary: summary.trim() || null,
+        content: content.trim(),
+      });
+      onSaved();
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : t("common.unexpectedError"));
+    }
   }
 
   return (
@@ -135,6 +130,8 @@ function SuggestionEditForm({
             className="flex min-h-[280px] w-full rounded-lg border border-input bg-background px-3 py-2 font-mono text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
+
+        {saveError ? <p className="text-sm text-destructive">{saveError}</p> : null}
 
         <Button
           onClick={handleSave}
@@ -321,50 +318,67 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
   async function handleStatusChange(status: SuggestionStatus) {
     if (status === "rejected") return;
 
-    await updateSuggestion.mutateAsync({ id: suggestionId, status });
-    showFeedback(
-      t("suggestions.statusChanged", {
-        status: suggestionStatusLabel(status, locale).toLowerCase(),
-      })
-    );
+    try {
+      await updateSuggestion.mutateAsync({ id: suggestionId, status });
+      showFeedback(
+        t("suggestions.statusChanged", {
+          status: suggestionStatusLabel(status, locale).toLowerCase(),
+        })
+      );
+    } catch (error) {
+      showFeedback(error instanceof Error ? error.message : t("common.unexpectedError"));
+    }
   }
 
   async function handleReject(feedback: string) {
     const existingMetadata = (currentSuggestion.metadata ?? {}) as AiSuggestionMetadata;
 
-    await updateSuggestion.mutateAsync({
-      id: suggestionId,
-      status: "rejected",
-      metadata: {
-        ...existingMetadata,
-        revisionFeedback: feedback,
-        revisionHistory: [
-          ...(existingMetadata.revisionHistory ?? []),
-          {
-            feedback,
-            at: new Date().toISOString(),
-            action: "rejected",
-          },
-        ],
-      },
-    });
+    try {
+      await updateSuggestion.mutateAsync({
+        id: suggestionId,
+        status: "rejected",
+        metadata: {
+          ...existingMetadata,
+          revisionFeedback: feedback,
+          revisionHistory: [
+            ...(existingMetadata.revisionHistory ?? []),
+            {
+              feedback,
+              at: new Date().toISOString(),
+              action: "rejected",
+            },
+          ],
+        },
+      });
 
-    showFeedback(t("suggestions.rejectedSuccess"));
+      showFeedback(t("suggestions.rejectedSuccess"));
+    } catch (error) {
+      showFeedback(error instanceof Error ? error.message : t("common.unexpectedError"));
+    }
   }
 
   async function handleRevise(feedback: string) {
-    const result = await reviseSuggestion.mutateAsync({ id: suggestionId, feedback });
-    showFeedback(
-      t("suggestions.revisedSuccess", {
-        title: result.title ?? currentSuggestion.title,
-      })
-    );
+    try {
+      const result = await reviseSuggestion.mutateAsync({ id: suggestionId, feedback });
+      showFeedback(
+        t("suggestions.revisedSuccess", {
+          title: result.title ?? currentSuggestion.title,
+        })
+      );
+    } catch (error) {
+      showFeedback(error instanceof Error ? error.message : t("common.unexpectedError"));
+    }
   }
 
   async function handleDelete() {
     if (!confirm(t("suggestions.deleteConfirm"))) return;
-    await deleteSuggestion.mutateAsync(suggestionId);
-    router.push("/dashboard/suggestions");
+
+    try {
+      await deleteSuggestion.mutateAsync(suggestionId);
+      router.push("/dashboard/suggestions");
+    } catch (error) {
+      showFeedback(error instanceof Error ? error.message : t("common.unexpectedError"));
+    }
   }
 
   return (
@@ -445,10 +459,10 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-muted-foreground">
           <p>
-            {t("suggestions.created")} {formatDate(suggestion.created_at, locale)}
+            {t("suggestions.created")} {formatDisplayDate(suggestion.created_at, locale)}
           </p>
           <p>
-            {t("suggestions.updated")} {formatDate(suggestion.updated_at, locale)}
+            {t("suggestions.updated")} {formatDisplayDate(suggestion.updated_at, locale)}
           </p>
           {metadata?.revisionFeedback ? (
             <div className="space-y-1">
@@ -466,7 +480,7 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
                       {entry.action === "rejected"
                         ? t("suggestions.revisionRejected")
                         : t("suggestions.revisionRevised")}{" "}
-                      — {formatDate(entry.at, locale)}
+                      — {formatDisplayDate(entry.at, locale)}
                     </p>
                     <p className="whitespace-pre-wrap">{entry.feedback}</p>
                   </li>

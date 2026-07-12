@@ -18,19 +18,8 @@ import {
   useRemoveTicketLabel,
 } from "@/hooks/useTicketLabels";
 import { useDeleteTicket, useTicket, useUpdateTicket } from "@/hooks/useTickets";
-import { getIntlLocale, ticketPriorityLabel, ticketStatusLabel } from "@/lib/i18n/labels";
+import { formatDisplayDate, ticketPriorityLabel, ticketStatusLabel } from "@/lib/i18n/labels";
 import { cn } from "@/lib/utils";
-
-function formatDate(
-  value: string | null,
-  locale: ReturnType<typeof useLocale>["locale"]
-) {
-  if (!value) return "—";
-  return new Intl.DateTimeFormat(getIntlLocale(locale), {
-    dateStyle: "full",
-    timeStyle: "short",
-  }).format(new Date(value));
-}
 
 export function TicketDetailContent({ ticketId }: { ticketId: string }) {
   const { t, locale } = useLocale();
@@ -44,6 +33,7 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
   const removeLabel = useRemoveTicketLabel();
 
   const [selectedLabelId, setSelectedLabelId] = useState("");
+  const [actionError, setActionError] = useState<string | null>(null);
 
   if (isLoading) {
     return <p className="px-4 py-10 text-sm text-muted-foreground">{t("tickets.loadingDetail")}</p>;
@@ -70,14 +60,24 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
 
   async function handleDelete() {
     if (!confirm(t("tickets.deleteConfirm"))) return;
-    await deleteTicket.mutateAsync(ticketId);
-    router.push("/dashboard/tickets");
+    setActionError(null);
+    try {
+      await deleteTicket.mutateAsync(ticketId);
+      router.push("/dashboard/tickets");
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : t("common.unexpectedError"));
+    }
   }
 
   async function handleAddLabel() {
     if (!selectedLabelId) return;
-    await addLabel.mutateAsync({ ticketId, labelId: selectedLabelId });
-    setSelectedLabelId("");
+    setActionError(null);
+    try {
+      await addLabel.mutateAsync({ ticketId, labelId: selectedLabelId });
+      setSelectedLabelId("");
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : t("common.unexpectedError"));
+    }
   }
 
   return (
@@ -107,6 +107,8 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
           {ticketPriorityLabel(ticket.priority, locale)}
         </Badge>
       </div>
+
+      {actionError ? <p className="text-sm text-destructive">{actionError}</p> : null}
 
       <Card>
         <CardHeader>
@@ -167,7 +169,7 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
 
           <div className="space-y-2 text-sm text-muted-foreground">
             <p>
-              {t("tickets.received")} {formatDate(ticket.ticket_created_at, locale)}
+              {t("tickets.received")} {formatDisplayDate(ticket.ticket_created_at, locale)}
             </p>
             <p>
               {t("tickets.channel")} {ticket.channel ?? t("common.dash")}

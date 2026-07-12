@@ -6,6 +6,7 @@ import {
   articleContentValidationMessage,
 } from "@/lib/ai/articleContent";
 import { AGENT_MODEL } from "@/lib/ai/agent";
+import { AI_LIMITS, truncateForPrompt } from "@/lib/ai/limits";
 import { REVISE_SUGGESTION_INSTRUCTIONS } from "@/lib/ai/prompts";
 import { fetchSourceTicketsForSuggestion } from "@/lib/suggestions/fetchSourceTickets";
 import type { createClient } from "@/lib/supabase/server";
@@ -46,9 +47,10 @@ function buildRevisePrompt({
   const ticketBlock =
     sourceTickets.length > 0
       ? sourceTickets
+          .slice(0, AI_LIMITS.maxReviseSourceTickets)
           .map(
             (ticket) =>
-              `- [${ticket.externalId}] ${ticket.subject}\n  ${ticket.body ?? "(geen berichttekst)"}`
+              `- [${ticket.externalId}] ${ticket.subject}\n  ${truncateForPrompt(ticket.body ?? "(geen berichttekst)", AI_LIMITS.maxReviseTicketBodyChars)}`
           )
           .join("\n")
       : "(Geen bron-tickets beschikbaar in de database.)";
@@ -56,14 +58,14 @@ function buildRevisePrompt({
   return `Herschrijf dit helpcenter-artikel op basis van de feedback.
 
 ## Feedback van supportmedewerker
-${feedback}
+${truncateForPrompt(feedback, AI_LIMITS.maxUserMessageChars)}
 
 ## Huidige suggestie
 Titel: ${title}
 Samenvatting: ${summary ?? "(leeg)"}
 
 Inhoud:
-${content}
+${truncateForPrompt(content, AI_LIMITS.maxReviseArticleChars)}
 
 ## Bron-supporttickets
 ${ticketBlock}
@@ -106,6 +108,7 @@ export async function reviseSuggestionArticle(
     model: AGENT_MODEL,
     schema: revisedArticleSchema,
     system: REVISE_SUGGESTION_INSTRUCTIONS,
+    maxOutputTokens: AI_LIMITS.maxReviseOutputTokens,
     prompt: buildRevisePrompt({
       title: suggestion.title,
       summary: suggestion.summary,

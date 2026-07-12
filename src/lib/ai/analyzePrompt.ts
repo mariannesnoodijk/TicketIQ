@@ -1,56 +1,32 @@
+import { AI_LIMITS } from "@/lib/ai/limits";
+import { messages } from "@/lib/i18n";
+import { interpolate } from "@/lib/i18n/interpolate";
 import type { Locale } from "@/lib/i18n/types";
-import {
-  getTicketLimitLabel,
-  parseTicketDisplayLimit,
-  TICKET_LIMIT_ALL,
-  TICKET_LIMIT_OPTIONS,
-  type TicketDisplayLimit,
-} from "@/lib/tickets/limits";
 
-export const ANALYZE_LIMIT_OPTIONS = TICKET_LIMIT_OPTIONS;
-export const ANALYZE_LIMIT_ALL = TICKET_LIMIT_ALL;
-export type AnalyzeTicketLimit = TicketDisplayLimit;
+export const ANALYZE_LIMIT_OPTIONS = AI_LIMITS.analyzeTicketLimits;
 
-export const parseAnalyzeTicketLimit = parseTicketDisplayLimit;
+export type { AnalyzeTicketLimit } from "@/lib/ai/limits";
+export { parseAnalyzeTicketLimit } from "@/lib/ai/limits";
 
 export function getAnalyzeLimitLabel(
-  limit: AnalyzeTicketLimit,
-  importedCount?: number,
+  limit: (typeof ANALYZE_LIMIT_OPTIONS)[number],
+  _importedCount?: number,
   locale: Locale = "nl"
 ): string {
-  if (limit === TICKET_LIMIT_ALL) {
-    if (locale === "en") {
-      return importedCount !== undefined
-        ? `All imported tickets (${importedCount})`
-        : "All imported tickets";
-    }
-
-    return importedCount !== undefined
-      ? `Alle geïmporteerde tickets (${importedCount})`
-      : "Alle geïmporteerde tickets";
-  }
-
   if (locale === "en") {
     return `${limit} tickets`;
   }
 
-  return getTicketLimitLabel(limit, undefined, locale);
+  return interpolate(messages[locale].tickets.ticketCountLabel, { count: limit });
 }
 
-export function buildAnalyzePrompt(limit: AnalyzeTicketLimit, locale: Locale = "nl"): string {
+export function buildAnalyzePrompt(
+  limit: (typeof ANALYZE_LIMIT_OPTIONS)[number],
+  locale: Locale = "nl"
+): string {
   if (locale === "en") {
-    const fetchInstruction =
-      limit === ANALYZE_LIMIT_ALL
-        ? 'Call `fetchTickets` with `source: "database"` and `fetchAll: true` to fetch all imported support tickets.'
-        : `Call \`fetchTickets\` with \`source: "database"\` and \`limit: ${limit}\` to fetch the ${limit} most recent imported support tickets.`;
-
-    return `${fetchInstruction} Analyze these tickets: find recurring patterns, categorize them with assignTicketCategory, check for duplicates, and save up to 5 new help center suggestions. Then explain what you found.`;
+    return `Call \`fetchTickets\` with \`source: "database"\` and \`limit: ${limit}\` to fetch the ${limit} most recent imported support tickets. Analyze these tickets: find recurring patterns, categorize them with assignTicketCategory, check for duplicates, and save up to 5 new help center suggestions. Then explain what you found.`;
   }
 
-  const fetchInstruction =
-    limit === ANALYZE_LIMIT_ALL
-      ? 'Roep `fetchTickets` aan met `source: "database"` en `fetchAll: true` om alle geïmporteerde supporttickets op te halen.'
-      : `Roep \`fetchTickets\` aan met \`source: "database"\` en \`limit: ${limit}\` om de ${limit} meest recente geïmporteerde supporttickets op te halen.`;
-
-  return `${fetchInstruction} Analyseer deze tickets: zoek terugkerende patronen, categoriseer ze met assignTicketCategory, controleer op duplicaten en sla maximaal 5 nieuwe helpcenter-suggesties op. Leg daarna uit wat je hebt gevonden.`;
+  return `Roep \`fetchTickets\` aan met \`source: "database"\` en \`limit: ${limit}\` om de ${limit} meest recente geïmporteerde supporttickets op te halen. Analyseer deze tickets: zoek terugkerende patronen, categoriseer ze met assignTicketCategory, controleer op duplicaten en sla maximaal 5 nieuwe helpcenter-suggesties op. Leg daarna uit wat je hebt gevonden.`;
 }

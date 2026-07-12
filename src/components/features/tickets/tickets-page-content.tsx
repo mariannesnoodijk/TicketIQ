@@ -23,7 +23,7 @@ import {
 import { useCategories } from "@/hooks/useCategories";
 import { useLabels } from "@/hooks/useLabels";
 import { useTickets } from "@/hooks/useTickets";
-import { getIntlLocale, ticketPriorityLabel, ticketStatusLabel } from "@/lib/i18n/labels";
+import { formatDisplayDate, ticketPriorityLabel, ticketStatusLabel } from "@/lib/i18n/labels";
 import { UNCATEGORIZED_CATEGORY_FILTER } from "@/lib/tickets/constants";
 import {
   DEFAULT_TICKET_DISPLAY_LIMIT,
@@ -37,14 +37,6 @@ import {
   parseTicketFiltersFromSearchParams,
 } from "@/lib/tickets/filterUrls";
 import { cn } from "@/lib/utils";
-
-function formatDate(value: string | null, locale: ReturnType<typeof useLocale>["locale"]) {
-  if (!value) return "—";
-  return new Intl.DateTimeFormat(getIntlLocale(locale), {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
-}
 
 export function TicketsPageContent() {
   const { t, locale } = useLocale();
@@ -219,7 +211,7 @@ export function TicketsPageContent() {
                       ? (categoryMap.get(ticket.category_id) ?? t("common.dash"))
                       : t("common.dash")}
                   </TableCell>
-                  <TableCell>{formatDate(ticket.ticket_created_at, locale)}</TableCell>
+                  <TableCell>{formatDisplayDate(ticket.ticket_created_at, locale, { dateStyle: "medium", timeStyle: "short" })}</TableCell>
                   <TableCell className="text-right">
                     <Link
                       href={`/dashboard/tickets/${ticket.id}`}

@@ -14,13 +14,13 @@ import { Select } from "@/components/ui/select";
 import { useAgentChat } from "@/hooks/useAgentChat";
 import { useDashboardStats } from "@/hooks/useTickets";
 import {
-  ANALYZE_LIMIT_ALL,
   ANALYZE_LIMIT_OPTIONS,
   buildAnalyzePrompt,
   getAnalyzeLimitLabel,
   parseAnalyzeTicketLimit,
   type AnalyzeTicketLimit,
 } from "@/lib/ai/analyzePrompt";
+import { AI_LIMITS } from "@/lib/ai/limits";
 
 type AgentChatPanelProps = {
   displayName?: string;
@@ -79,9 +79,6 @@ function AnalyzeToolbar({
               {getAnalyzeLimitLabel(limit, undefined, locale)}
             </option>
           ))}
-          <option value={ANALYZE_LIMIT_ALL}>
-            {getAnalyzeLimitLabel(ANALYZE_LIMIT_ALL, ticketCount, locale)}
-          </option>
         </Select>
       </div>
       <div className="flex flex-wrap gap-2 sm:self-end">
@@ -122,7 +119,9 @@ function AnalyzeToolbar({
 export function AgentChatPanel({ displayName, sidePanelPresent = false }: AgentChatPanelProps) {
   const { t, locale } = useLocale();
   const [input, setInput] = useState("");
-  const [ticketLimit, setTicketLimit] = useState<AnalyzeTicketLimit>(50);
+  const [ticketLimit, setTicketLimit] = useState<AnalyzeTicketLimit>(
+    AI_LIMITS.defaultAnalyzeLimit
+  );
   const { data: stats, isLoading: isStatsLoading } = useDashboardStats();
 
   const { messages, sendMessage, status, error, clearChat } = useAgentChat();
@@ -137,7 +136,7 @@ export function AgentChatPanel({ displayName, sidePanelPresent = false }: AgentC
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const trimmed = input.trim();
+    const trimmed = input.trim().slice(0, AI_LIMITS.maxUserMessageChars);
     if (!trimmed || isLoading) return;
     void sendMessage({ text: trimmed });
     setInput("");
@@ -196,17 +195,21 @@ export function AgentChatPanel({ displayName, sidePanelPresent = false }: AgentC
           </p>
         ) : null}
 
-        <form onSubmit={handleSubmit} className="flex gap-2">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+          <div className="flex gap-2">
           <Input
             value={input}
             onChange={(event) => setInput(event.target.value)}
             placeholder={t("agentChat.placeholder")}
             disabled={isLoading}
+            maxLength={AI_LIMITS.maxUserMessageChars}
             className="flex-1"
           />
           <Button type="submit" variant="outline" disabled={isLoading || !input.trim()}>
             {t("common.send")}
           </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">{t("agentChat.scopeNote")}</p>
         </form>
       </CardContent>
     </Card>

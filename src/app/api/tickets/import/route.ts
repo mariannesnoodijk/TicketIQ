@@ -21,6 +21,13 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
 export async function POST() {
   try {
+    if (!process.env.NEXT_PUBLIC_DUMMYJSON_TICKETS_URL?.trim()) {
+      return NextResponse.json(
+        { error: "DummyJSON URL is niet geconfigureerd" },
+        { status: 503 }
+      );
+    }
+
     const supabase = await createClient();
     const {
       data: { user },
@@ -95,6 +102,7 @@ export async function POST() {
       total: mapped.length,
     });
   } catch (error) {
+    console.error("[import] POST failed:", error);
     const message = error instanceof Error ? error.message : "Import mislukt";
     return NextResponse.json({ error: message }, { status: 500 });
   }
@@ -117,20 +125,28 @@ async function linkSourceLabels(
 
   if (labelNames.size === 0) return;
 
-  const { data: existingLabels } = await supabase
+  const { data: existingLabels, error: existingLabelsError } = await supabase
     .from("labels")
     .select("id, name")
     .eq("user_id", userId)
     .in("name", [...labelNames]);
 
+  if (existingLabelsError) {
+    throw new Error(existingLabelsError.message);
+  }
+
   const labelByName = new Map((existingLabels ?? []).map((l) => [l.name, l.id]));
   const missingNames = [...labelNames].filter((name) => !labelByName.has(name));
 
   if (missingNames.length > 0) {
-    const { data: newLabels } = await supabase
+    const { data: newLabels, error: insertLabelsError } = await supabase
       .from("labels")
       .insert(missingNames.map((name) => ({ user_id: userId, name })))
       .select("id, name");
+
+    if (insertLabelsError) {
+      throw new Error(insertLabelsError.message);
+    }
 
     for (const label of newLabels ?? []) {
       labelByName.set(label.name, label.id);
@@ -151,9 +167,13 @@ async function linkSourceLabels(
   }
 
   if (links.length > 0) {
-    await supabase.from("ticket_labels").upsert(links, {
+    const { error: linkError } = await supabase.from("ticket_labels").upsert(links, {
       onConflict: "ticket_id,label_id",
       ignoreDuplicates: true,
     });
+
+    if (linkError) {
+      throw new Error(linkError.message);
+    }
   }
 }

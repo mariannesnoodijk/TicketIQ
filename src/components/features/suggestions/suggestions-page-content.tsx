@@ -28,21 +28,10 @@ import {
 } from "@/components/ui/table";
 import { useAiSuggestions } from "@/hooks/useAiSuggestions";
 import { useSuggestionStatusStats } from "@/hooks/useSuggestionStatusStats";
-import { getIntlLocale } from "@/lib/i18n/labels";
+import { formatDisplayDate } from "@/lib/i18n/labels";
 import { DEFAULT_ANALYTICS_PERIOD, type AnalyticsPeriod } from "@/lib/analytics/period";
 import { parseSuggestionFiltersFromSearchParams } from "@/lib/tickets/filterUrls";
 import { cn } from "@/lib/utils";
-
-function formatDate(
-  value: string | null,
-  locale: ReturnType<typeof useLocale>["locale"]
-) {
-  if (!value) return "—";
-  return new Intl.DateTimeFormat(getIntlLocale(locale), {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
-}
 
 export function SuggestionsPageContent() {
   const { t, locale } = useLocale();
@@ -161,7 +150,7 @@ export function SuggestionsPageContent() {
                     {suggestion.categories?.name ?? t("common.dash")}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {formatDate(suggestion.created_at, locale)}
+                    {formatDisplayDate(suggestion.created_at, locale, { dateStyle: "medium", timeStyle: "short" })}
                   </TableCell>
                 </TableRow>
               ))}

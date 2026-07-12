@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { invalidateDashboardAnalytics } from "@/lib/analytics/invalidateDashboardAnalytics";
+import { parseFetchJson } from "@/lib/fetch-json";
 import { queryKeys } from "@/lib/queryKeys";
 
 type CategorizeResult = {
@@ -15,13 +16,13 @@ export function useCategorizeTickets() {
   return useMutation({
     mutationFn: async (): Promise<CategorizeResult> => {
       const response = await fetch("/api/tickets/categorize", { method: "POST" });
+      const body = await parseFetchJson<CategorizeResult & { error?: string }>(response);
 
       if (!response.ok) {
-        const body = (await response.json()) as { error?: string };
         throw new Error(body.error ?? "Categorisatie mislukt");
       }
 
-      return response.json() as Promise<CategorizeResult>;
+      return body;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.tickets.lists() });

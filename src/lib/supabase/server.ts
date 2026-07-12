@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
+import { getSupabasePublicEnv } from "@/lib/env/public";
 import type { Database } from "@/types/database";
 
 /**
@@ -8,11 +9,16 @@ import type { Database } from "@/types/database";
  * Gebruikt de cookies van de ingelogde gebruiker zodat RLS-policies gelden.
  */
 export async function createClient() {
+  const supabaseEnv = getSupabasePublicEnv();
+  if (!supabaseEnv) {
+    throw new Error("Supabase is niet geconfigureerd");
+  }
+
   const cookieStore = await cookies();
 
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseEnv.url,
+    supabaseEnv.anonKey,
     {
       cookies: {
         getAll() {
