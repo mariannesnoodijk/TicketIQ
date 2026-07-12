@@ -22,11 +22,16 @@ import {
   useReviseAiSuggestion,
   useUpdateAiSuggestion,
 } from "@/hooks/useAiSuggestions";
-import { formatDisplayDate, suggestionStatusLabel } from "@/lib/i18n/labels";
+import { formatDisplayDate } from "@/lib/i18n/labels";
 import type { AiSuggestionMetadata, SuggestionStatus } from "@/types";
 import { cn } from "@/lib/utils";
 
 type SuggestionWithCategory = NonNullable<ReturnType<typeof useAiSuggestion>["data"]>;
+
+type ActionFeedback = {
+  message: string;
+  variant: "success" | "default";
+};
 
 function ActionFeedbackBanner({ feedback }: { feedback: ActionFeedback }) {
   const isSuccess = feedback.variant === "success";

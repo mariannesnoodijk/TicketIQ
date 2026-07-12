@@ -1,6 +1,7 @@
 import { AI_LIMITS } from "@/lib/ai/limits";
+import { messages } from "@/lib/i18n";
+import { interpolate } from "@/lib/i18n/interpolate";
 import type { Locale } from "@/lib/i18n/types";
-import { getTicketLimitLabel } from "@/lib/tickets/limits";
 
 export const ANALYZE_LIMIT_OPTIONS = AI_LIMITS.analyzeTicketLimits;
 
@@ -16,7 +17,7 @@ export function getAnalyzeLimitLabel(
     return `${limit} tickets`;
   }
 
-  return getTicketLimitLabel(limit, undefined, locale);
+  return interpolate(messages[locale].tickets.ticketCountLabel, { count: limit });
 }
 
 export function buildAnalyzePrompt(

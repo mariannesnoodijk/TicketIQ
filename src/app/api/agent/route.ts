@@ -14,6 +14,7 @@ import { checkAiRateLimit } from "@/lib/ai/rate-limit";
 import { prepareAgentMessages } from "@/lib/ai/trim-messages";
 import { parseJsonBody } from "@/lib/api/parse-json-body";
 import { createTranslator } from "@/lib/i18n";
+import { interpolate } from "@/lib/i18n/interpolate";
 import { isLocale } from "@/lib/i18n/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -71,7 +72,7 @@ export async function POST(request: Request) {
     if (!rateLimit.allowed) {
       return NextResponse.json(
         {
-          error: t("agentChat.rateLimited", {
+          error: interpolate(t("agentChat.rateLimited"), {
             minutes: Math.ceil(rateLimit.retryAfterSec / 60),
           }),
         },
