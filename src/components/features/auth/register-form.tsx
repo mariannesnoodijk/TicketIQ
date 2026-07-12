@@ -14,8 +14,9 @@ export function RegisterForm() {
   const [state, formAction, pending] = useActionState(register, initialState);
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-      <div className="mb-6 space-y-2 text-center">
+    <div className="surface-card rounded-2xl p-6 sm:p-8">
+      <div className="mb-6 space-y-2 text-center lg:text-left">
+        <p className="brand-logo text-lg font-bold lg:hidden">TicketIQ</p>
         <h1 className="text-balance text-2xl font-semibold tracking-tight">Registreren</h1>
         <p className="text-sm text-muted-foreground">
           Maak een account aan om TicketIQ te gebruiken.

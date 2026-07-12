@@ -35,12 +35,12 @@ export function Header() {
   }, [pathname]);
 
   return (
-    <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
         <div className="flex min-w-0 items-center gap-4 sm:gap-6">
           <Link
             href={user ? "/dashboard/home" : "/"}
-            className="shrink-0 text-lg font-semibold tracking-tight"
+            className="brand-logo shrink-0 text-lg font-bold tracking-tight"
           >
             TicketIQ
           </Link>

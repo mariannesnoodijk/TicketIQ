@@ -1,10 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { FolderTree, Sparkles, Tags, Ticket } from "lucide-react";
+import { useMemo, useState } from "react";
 
+import {
+  buildDashboardInsights,
+  DashboardInsights,
+} from "@/components/features/dashboard/dashboard-insights";
 import { AnalyticsPeriodSelector } from "@/components/features/dashboard/analytics-period-selector";
 import { CategoryDistributionChart } from "@/components/features/dashboard/category-distribution-chart";
+import { StatMetricCard } from "@/components/features/dashboard/stat-metric-card";
 import { TicketVolumeChart } from "@/components/features/dashboard/ticket-volume-chart";
 import { TicketWeekdayChart } from "@/components/features/dashboard/ticket-weekday-chart";
 import { TopOrganizationsChart } from "@/components/features/dashboard/top-organizations-chart";
@@ -13,15 +19,32 @@ import { ImportTicketsButton } from "@/components/features/tickets/import-ticket
 import { PageHeader } from "@/components/layout/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Reveal } from "@/components/ui/reveal";
 import { useSuggestionStatusStats } from "@/hooks/useSuggestionStatusStats";
 import { useTicketAnalytics } from "@/hooks/useTicketAnalytics";
 import { useDashboardStats } from "@/hooks/useTickets";
+import {
+  getApprovedSuggestionShare,
+  getBusiestWeekdayPoint,
+  getSuggestionStatusSegments,
+  getTopCategoryItem,
+  getVolumeSparkline,
+  getVolumeTrend,
+} from "@/lib/analytics/dashboard-metrics";
 import {
   DEFAULT_ANALYTICS_PERIOD,
   getPeriodLabel,
   type AnalyticsPeriod,
 } from "@/lib/analytics/period";
+import { getWeekdayFullLabel } from "@/lib/analytics/dateLabels";
+import {
+  getSuggestionsPeriodFilterUrl,
+  getSuggestionsStatusFilterUrl,
+  getTicketsCategoryFilterUrl,
+  getTicketsOrganizationFilterUrl,
+  getTicketsPeriodFilterUrl,
+  getTicketsWeekdayFilterUrl,
+} from "@/lib/tickets/filterUrls";
 import { cn } from "@/lib/utils";
 
 const quickLinks = [
@@ -52,52 +75,138 @@ export function DashboardContent() {
   const { data: suggestionStats, isLoading: isSuggestionStatsLoading } =
     useSuggestionStatusStats(period);
 
+  const ticketSparkline = useMemo(
+    () => getVolumeSparkline(analytics?.volumeSeries),
+    [analytics?.volumeSeries]
+  );
+  const ticketTrend = useMemo(
+    () => getVolumeTrend(analytics?.volumeSeries),
+    [analytics?.volumeSeries]
+  );
+  const busiestWeekdayPoint = useMemo(
+    () => getBusiestWeekdayPoint(analytics?.weekdaySeries),
+    [analytics?.weekdaySeries]
+  );
+  const topCategoryItem = useMemo(
+    () => getTopCategoryItem(analytics?.categoryDistribution),
+    [analytics?.categoryDistribution]
+  );
+  const topCategory = topCategoryItem?.name ?? null;
+  const approvedShare = useMemo(
+    () => getApprovedSuggestionShare(suggestionStats),
+    [suggestionStats]
+  );
+  const suggestionSegments = useMemo(
+    () => getSuggestionStatusSegments(suggestionStats),
+    [suggestionStats]
+  );
+  const topOrganization = analytics?.topOrganizations[0];
+  const insights = useMemo(
+    () =>
+      buildDashboardInsights({
+        busiestWeekdayFullLabel: busiestWeekdayPoint
+          ? getWeekdayFullLabel(busiestWeekdayPoint.weekday)
+          : null,
+        busiestWeekdayCount: busiestWeekdayPoint?.count ?? 0,
+        topOrganization: topOrganization?.name ?? null,
+        topOrganizationCount: topOrganization?.count ?? 0,
+        approvedShare,
+        periodLabel,
+        busiestWeekdayHref: busiestWeekdayPoint
+          ? getTicketsWeekdayFilterUrl(busiestWeekdayPoint.weekday, period)
+          : undefined,
+        topOrganizationHref: topOrganization
+          ? getTicketsOrganizationFilterUrl(topOrganization.name, period)
+          : undefined,
+        approvedHref: getSuggestionsStatusFilterUrl("approved", period),
+      }),
+    [approvedShare, busiestWeekdayPoint, period, periodLabel, topOrganization]
+  );
+
+  const categoriesHref = topCategoryItem
+    ? getTicketsCategoryFilterUrl(topCategoryItem.categoryId, period)
+    : "/dashboard/instellingen#categories";
+
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10">
-      <PageHeader
-        eyebrow="Dashboard"
-        title="Statistieken"
-        description="Bekijk trends in je supporttickets, importeer nieuwe data en spring snel door naar tickets, helpcenter-artikelen of de AI-assistent op Home."
-      />
+      <Reveal>
+        <PageHeader
+          eyebrow="Dashboard"
+          title="Statistieken"
+          description="Bekijk trends in je supporttickets, importeer nieuwe data en spring snel door naar tickets, helpcenter-artikelen of de AI-assistent op Home."
+        />
+      </Reveal>
 
-      <AnalyticsPeriodSelector value={period} onChange={setPeriod} />
+      <Reveal delay={80}>
+        <AnalyticsPeriodSelector value={period} onChange={setPeriod} />
+      </Reveal>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Tickets ({periodLabel.toLowerCase()})</CardDescription>
-            <CardTitle className="text-3xl tabular-nums">
-              {isAnalyticsLoading ? (
-                <Skeleton className="h-9 w-16" />
-              ) : (
-                (analytics?.ticketCount ?? 0)
-              )}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        {[
-          { label: "Categorieën", value: stats?.categories },
-          { label: "Labels", value: stats?.labels },
-          { label: "AI-helpcenter-artikelen", value: suggestionStats?.total },
-        ].map((item) => (
-          <Card key={item.label}>
-            <CardHeader className="pb-2">
-              <CardDescription>
-                {item.label}
-                {item.label === "AI-helpcenter-artikelen" ? ` (${periodLabel.toLowerCase()})` : ""}
-              </CardDescription>
-              <CardTitle className="text-3xl tabular-nums">
-                {isDashboardStatsLoading ||
-                (item.label === "AI-helpcenter-artikelen" && isSuggestionStatsLoading) ? (
-                  <Skeleton className="h-9 w-16" />
-                ) : (
-                  (item.value ?? 0)
-                )}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-        ))}
+      <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Reveal delay={120} className="h-full">
+          <StatMetricCard
+            label={`Tickets (${periodLabel.toLowerCase()})`}
+            value={analytics?.ticketCount ?? 0}
+            icon={Ticket}
+            tone="primary"
+            isLoading={isAnalyticsLoading}
+            sparkline={ticketSparkline}
+            trend={ticketTrend}
+            href={getTicketsPeriodFilterUrl(period)}
+            linkLabel={`Bekijk tickets in ${periodLabel.toLowerCase()}`}
+          />
+        </Reveal>
+        <Reveal delay={200} className="h-full">
+          <StatMetricCard
+            label="Categorieën"
+            value={stats?.categories ?? 0}
+            icon={FolderTree}
+            tone="teal"
+            isLoading={isDashboardStatsLoading}
+            hint={
+              topCategory ? `Meest voorkomend: ${topCategory}` : "Nog geen categorieën toegewezen"
+            }
+            href={categoriesHref}
+            linkLabel={
+              topCategoryItem
+                ? `Bekijk tickets in categorie ${topCategory}`
+                : "Beheer categorieën"
+            }
+          />
+        </Reveal>
+        <Reveal delay={280} className="h-full">
+          <StatMetricCard
+            label="Labels"
+            value={stats?.labels ?? 0}
+            icon={Tags}
+            tone="amber"
+            isLoading={isDashboardStatsLoading}
+            hint="Tags voor ticketsegmentatie"
+            href="/dashboard/instellingen#labels"
+            linkLabel="Beheer labels"
+          />
+        </Reveal>
+        <Reveal delay={360} className="h-full">
+          <StatMetricCard
+            label={`AI-artikelen (${periodLabel.toLowerCase()})`}
+            value={suggestionStats?.total ?? 0}
+            icon={Sparkles}
+            tone="rose"
+            isLoading={isSuggestionStatsLoading}
+            segments={suggestionSegments}
+            hint={
+              approvedShare !== null
+                ? `${approvedShare}% goedgekeurd in deze periode`
+                : undefined
+            }
+            href={getSuggestionsPeriodFilterUrl(period)}
+            linkLabel={`Bekijk AI-artikelen in ${periodLabel.toLowerCase()}`}
+          />
+        </Reveal>
       </div>
+
+      <Reveal delay={120}>
+        <DashboardInsights insights={insights} isLoading={isAnalyticsLoading} />
+      </Reveal>
 
       <TicketVolumeChart
         data={analytics?.volumeSeries}
