@@ -29,6 +29,18 @@ export function RegisterForm() {
       ) : (
         <form action={formAction} className="space-y-4">
           <div className="space-y-2">
+            <Label htmlFor="fullName">Naam</Label>
+            <Input
+              id="fullName"
+              name="fullName"
+              type="text"
+              autoComplete="name"
+              placeholder="Je voornaam"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="email">E-mailadres</Label>
             <Input
               id="email"
@@ -71,7 +83,7 @@ export function RegisterForm() {
           ) : null}
 
           <Button type="submit" className="w-full" disabled={pending}>
-            {pending ? "Account aanmaken..." : "Account aanmaken"}
+            {pending ? "Account aanmaken…" : "Account aanmaken"}
           </Button>
         </form>
       )}

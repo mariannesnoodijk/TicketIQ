@@ -19,7 +19,7 @@ export function createTicketIqAgent(supabase: SupabaseServerClient, userId: stri
     model: AGENT_MODEL,
     instructions: TICKET_IQ_AGENT_INSTRUCTIONS,
     tools: {
-      fetchTickets: createFetchTicketsTool(),
+      fetchTickets: createFetchTicketsTool(supabase, userId),
       assignTicketCategory: createAssignTicketCategoryTool(supabase, userId),
       findExistingSuggestions: createFindExistingSuggestionsTool(supabase, userId),
       saveSuggestion: createSaveSuggestionTool(supabase, userId),

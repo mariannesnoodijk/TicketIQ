@@ -2,8 +2,14 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import {
+  ticketMatchesOrganization,
+  ticketMatchesWeekday,
+} from "@/lib/analytics/aggregateTickets";
+import { invalidateDashboardAnalytics } from "@/lib/analytics/invalidateDashboardAnalytics";
 import { queryKeys, type TicketListFilters } from "@/lib/queryKeys";
 import { createClient } from "@/lib/supabase/client";
+import { UNCATEGORIZED_CATEGORY_FILTER } from "@/lib/tickets/constants";
 import type { TicketUpdate } from "@/types";
 
 const TICKET_SELECT = `
@@ -29,21 +35,43 @@ async function fetchTickets(filters: TicketListFilters) {
   if (filters.status) {
     query = query.eq("status", filters.status);
   }
-  if (filters.categoryId) {
+  if (filters.categoryId === UNCATEGORIZED_CATEGORY_FILTER) {
+    query = query.is("category_id", null);
+  } else if (filters.categoryId) {
     query = query.eq("category_id", filters.categoryId);
   }
   if (filters.search) {
     query = query.ilike("subject", `%${filters.search}%`);
   }
+  if (filters.createdFrom) {
+    query = query.gte("ticket_created_at", filters.createdFrom);
+  }
+  if (filters.createdTo) {
+    query = query.lte("ticket_created_at", filters.createdTo);
+  }
 
   const { data, error } = await query;
   if (error) throw error;
 
-  if (!filters.labelId) {
-    return { data: data ?? [] };
+  let results = data ?? [];
+
+  if (filters.weekday !== undefined) {
+    results = results.filter((ticket) =>
+      ticketMatchesWeekday(ticket.ticket_created_at, filters.weekday!)
+    );
   }
 
-  const filtered = (data ?? []).filter((ticket) =>
+  if (filters.organization) {
+    results = results.filter((ticket) =>
+      ticketMatchesOrganization(ticket.raw_payload, filters.organization!)
+    );
+  }
+
+  if (!filters.labelId) {
+    return { data: results };
+  }
+
+  const filtered = results.filter((ticket) =>
     ticket.ticket_labels?.some((tl) => tl.label_id === filters.labelId)
   );
 
@@ -99,7 +127,7 @@ export function useUpdateTicket() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.tickets.lists() });
       void queryClient.invalidateQueries({ queryKey: queryKeys.tickets.detail(data.id) });
       void queryClient.invalidateQueries({ queryKey: queryKeys.stats.dashboard });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.stats.categoryDistribution });
+      invalidateDashboardAnalytics(queryClient);
     },
   });
 }
@@ -116,7 +144,7 @@ export function useDeleteTicket() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.tickets.lists() });
       void queryClient.invalidateQueries({ queryKey: queryKeys.stats.dashboard });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.stats.categoryDistribution });
+      invalidateDashboardAnalytics(queryClient);
     },
   });
 }

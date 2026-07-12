@@ -1,5 +1,5 @@
-import { AnalyzePageContent } from "@/components/features/analysis/analyze-page-content";
+import { redirect } from "next/navigation";
 
 export default function AnalyzePage() {
-  return <AnalyzePageContent />;
+  redirect("/dashboard/home");
 }

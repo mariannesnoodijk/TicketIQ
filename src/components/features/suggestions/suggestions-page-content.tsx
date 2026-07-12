@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
+import { AnalyticsPeriodSelector } from "@/components/features/dashboard/analytics-period-selector";
+import { SuggestionStatusChart } from "@/components/features/suggestions/suggestion-status-chart";
 import {
   Badge,
   suggestionStatusBadgeVariant,
@@ -20,7 +23,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useAiSuggestions } from "@/hooks/useAiSuggestions";
-import type { AiSuggestionListFilters } from "@/lib/queryKeys";
+import { useSuggestionStatusStats } from "@/hooks/useSuggestionStatusStats";
+import { DEFAULT_ANALYTICS_PERIOD, type AnalyticsPeriod } from "@/lib/analytics/period";
+import { parseSuggestionFiltersFromSearchParams } from "@/lib/tickets/filterUrls";
 import { cn } from "@/lib/utils";
 
 function formatDate(value: string | null) {
@@ -32,18 +37,42 @@ function formatDate(value: string | null) {
 }
 
 export function SuggestionsPageContent() {
-  const [filters, setFilters] = useState<AiSuggestionListFilters>({});
+  const searchParams = useSearchParams();
+  const [period, setPeriod] = useState<AnalyticsPeriod>(DEFAULT_ANALYTICS_PERIOD);
+
+  const [filters, setFilters] = useState(() =>
+    parseSuggestionFiltersFromSearchParams(searchParams)
+  );
+
+  useEffect(() => {
+    setFilters(parseSuggestionFiltersFromSearchParams(searchParams));
+  }, [searchParams]);
+
   const { data: suggestions, isLoading, error } = useAiSuggestions(filters);
+  const { data: suggestionStats, isLoading: isSuggestionStatsLoading } =
+    useSuggestionStatusStats(period);
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10">
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">AI-suggesties</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">AI-helpcenter-artikelen</h1>
         <p className="text-muted-foreground">
-          Bekijk helpcenter-suggesties die de AI heeft gegenereerd. Open een suggestie om te
-          bewerken of goed te keuren.
+          Bekijk en beheer helpcenter-artikelen die de AI op basis van je supporttickets heeft
+          voorgesteld. Open een artikel om te bewerken of goed te keuren.
         </p>
       </div>
+
+      <AnalyticsPeriodSelector
+        value={period}
+        onChange={setPeriod}
+        description="Bepaal het datumbereik voor de verdeling van AI-voorgestelde helpcenter-artikelen hieronder."
+      />
+
+      <SuggestionStatusChart
+        data={suggestionStats}
+        isLoading={isSuggestionStatsLoading}
+        period={period}
+      />
 
       <div className="grid gap-4 rounded-xl border border-border bg-card p-4 md:grid-cols-2">
         <div className="space-y-2">
@@ -78,20 +107,20 @@ export function SuggestionsPageContent() {
 
       <div className="rounded-xl border border-border bg-card">
         {isLoading ? (
-          <p className="p-6 text-sm text-muted-foreground">Suggesties laden...</p>
+          <p className="p-6 text-sm text-muted-foreground">Artikelen laden…</p>
         ) : error ? (
-          <p className="p-6 text-sm text-destructive">Kon suggesties niet laden.</p>
+          <p className="p-6 text-sm text-destructive">Kon helpcenter-artikelen niet laden.</p>
         ) : !suggestions?.length ? (
           <div className="flex flex-col gap-3 p-6">
             <p className="text-sm text-muted-foreground">
-              Nog geen suggesties. Start een AI-analyse om helpcenter-artikelen te laten
-              genereren.
+              Nog geen AI-helpcenter-artikelen. Start een AI-analyse om artikelen te laten
+              genereren op basis van je tickets.
             </p>
             <Link
-              href="/dashboard/analyze"
+              href="/dashboard/home"
               className={cn(buttonVariants({ variant: "outline" }), "w-fit")}
             >
-              Naar AI-analyse
+              Naar AI-assistent
             </Link>
           </div>
         ) : (

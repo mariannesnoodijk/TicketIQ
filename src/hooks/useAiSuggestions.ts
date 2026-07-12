@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { invalidateDashboardAnalytics } from "@/lib/analytics/invalidateDashboardAnalytics";
 import { type AiSuggestionListFilters, queryKeys } from "@/lib/queryKeys";
 import { createClient } from "@/lib/supabase/client";
 import type { AiSuggestionInsert, AiSuggestionUpdate } from "@/types";
@@ -14,9 +15,7 @@ function invalidateSuggestionQueries(
 ) {
   void queryClient.invalidateQueries({ queryKey: queryKeys.aiSuggestions.lists() });
   void queryClient.invalidateQueries({ queryKey: queryKeys.stats.dashboard });
-  void queryClient.invalidateQueries({
-    queryKey: queryKeys.stats.suggestionStatusDistribution,
-  });
+  invalidateDashboardAnalytics(queryClient);
 
   if (suggestionId) {
     void queryClient.invalidateQueries({
@@ -42,6 +41,14 @@ export function useAiSuggestions(filters: AiSuggestionListFilters = {}) {
 
       if (filters.search?.trim()) {
         query = query.ilike("title", `%${filters.search.trim()}%`);
+      }
+
+      if (filters.createdFrom) {
+        query = query.gte("created_at", filters.createdFrom);
+      }
+
+      if (filters.createdTo) {
+        query = query.lte("created_at", filters.createdTo);
       }
 
       const { data, error } = await query;

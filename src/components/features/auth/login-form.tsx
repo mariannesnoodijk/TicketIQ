@@ -14,7 +14,7 @@ type LoginFormProps = {
   redirectTo?: string;
 };
 
-export function LoginForm({ redirectTo = "/dashboard" }: LoginFormProps) {
+export function LoginForm({ redirectTo = "/dashboard/home" }: LoginFormProps) {
   const [state, formAction, pending] = useActionState(login, initialState);
 
   return (

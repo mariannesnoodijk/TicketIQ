@@ -13,13 +13,14 @@ import {
 
 import { ChartPeriodRange } from "@/components/features/dashboard/chart-period-range";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { CategoryDistribution } from "@/hooks/useTicketCategoryStats";
+import type { SuggestionStatusDistribution } from "@/hooks/useSuggestionStatusStats";
 import { formatPeriodDateRange } from "@/lib/analytics/dateLabels";
 import type { AnalyticsPeriod } from "@/lib/analytics/period";
-import { getTicketsCategoryFilterUrl } from "@/lib/tickets/filterUrls";
+import { getSuggestionsStatusFilterUrl } from "@/lib/tickets/filterUrls";
+import type { SuggestionStatus } from "@/types";
 
-type CategoryDistributionChartProps = {
-  data: CategoryDistribution | undefined;
+type SuggestionStatusChartProps = {
+  data: SuggestionStatusDistribution | undefined;
   isLoading: boolean;
   period: AnalyticsPeriod;
 };
@@ -29,21 +30,21 @@ type ChartSlice = {
   value: number;
   percentage: number;
   color: string;
-  categoryId: string | null;
+  status: SuggestionStatus;
 };
 
-type CategoryTooltipProps = {
+type SuggestionTooltipProps = {
   active?: boolean;
   payload?: Array<{ payload?: ChartSlice }>;
   period: AnalyticsPeriod;
 };
 
-function CategoryTooltip({ active, payload, period }: CategoryTooltipProps) {
+function SuggestionTooltip({ active, payload, period }: SuggestionTooltipProps) {
   if (!active || !payload?.length) {
     return null;
   }
 
-  const slice = payload[0]?.payload as ChartSlice | undefined;
+  const slice = payload[0]?.payload;
   if (!slice) {
     return null;
   }
@@ -53,18 +54,18 @@ function CategoryTooltip({ active, payload, period }: CategoryTooltipProps) {
       <p className="font-medium text-popover-foreground">{slice.name}</p>
       <p className="mt-1 text-xs font-medium text-primary">{formatPeriodDateRange(period)}</p>
       <p className="mt-1 tabular-nums text-muted-foreground">
-        {slice.value} tickets · {slice.percentage}%
+        {slice.value} AI-helpcenter-artikelen · {slice.percentage}%
       </p>
-      <p className="mt-1 text-xs text-muted-foreground">Klik om tickets te bekijken</p>
+      <p className="mt-1 text-xs text-muted-foreground">Klik om artikelen met deze status te bekijken</p>
     </div>
   );
 }
 
-export function CategoryDistributionChart({
+export function SuggestionStatusChart({
   data,
   isLoading,
   period,
-}: CategoryDistributionChartProps) {
+}: SuggestionStatusChartProps) {
   const router = useRouter();
 
   const chartData: ChartSlice[] =
@@ -75,15 +76,11 @@ export function CategoryDistributionChart({
         value: item.count,
         percentage: item.percentage,
         color: item.color,
-        categoryId: item.categoryId,
+        status: item.status,
       })) ?? [];
 
-  function navigateToCategory(categoryId: string | null) {
-    router.push(getTicketsCategoryFilterUrl(categoryId, period));
-  }
-
   function handleSliceClick(slice: ChartSlice) {
-    navigateToCategory(slice.categoryId);
+    router.push(getSuggestionsStatusFilterUrl(slice.status, period));
   }
 
   function handleLegendClick(entry: { value?: string }) {
@@ -99,13 +96,13 @@ export function CategoryDistributionChart({
     <Card>
       <CardHeader className="gap-3">
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <CardTitle>Tickets per categorie</CardTitle>
+          <CardTitle>AI-helpcenter-artikelen per status</CardTitle>
           <ChartPeriodRange period={period} />
         </div>
         <CardDescription>
-          Verdeling van {isLoading ? "…" : (data?.total ?? 0)} tickets binnen{" "}
-          {dateRangeLabel.toLowerCase()}. Klik op een categorie in het diagram of de lijst om de
-          bijbehorende tickets te openen.
+          Verdeling van {isLoading ? "…" : (data?.total ?? 0)} door AI voorgestelde
+          helpcenter-artikelen binnen {dateRangeLabel.toLowerCase()}. Klik op een status om de
+          bijbehorende artikelen in de lijst hieronder te filteren.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -113,11 +110,8 @@ export function CategoryDistributionChart({
           <p className="text-sm text-muted-foreground">Statistieken laden…</p>
         ) : !data?.total ? (
           <p className="text-sm text-muted-foreground">
-            Nog geen tickets. Importeer eerst tickets om de verdeling te zien.
-          </p>
-        ) : chartData.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Tickets gevonden, maar nog geen categorieverdeling beschikbaar.
+            Nog geen AI-helpcenter-artikelen in deze periode. Pas de periode aan of start een
+            AI-analyse.
           </p>
         ) : (
           <div className="grid gap-6 lg:grid-cols-2">
@@ -145,7 +139,7 @@ export function CategoryDistributionChart({
                       <Cell key={entry.name} fill={entry.color} stroke="transparent" />
                     ))}
                   </Pie>
-                  <Tooltip content={<CategoryTooltip period={period} />} />
+                  <Tooltip content={<SuggestionTooltip period={period} />} />
                   <Legend
                     layout="vertical"
                     align="right"
@@ -164,9 +158,9 @@ export function CategoryDistributionChart({
               {data.items
                 .filter((item) => item.count > 0)
                 .map((item) => (
-                  <li key={item.categoryId ?? "uncategorized"}>
+                  <li key={item.status}>
                     <Link
-                      href={getTicketsCategoryFilterUrl(item.categoryId, period)}
+                      href={getSuggestionsStatusFilterUrl(item.status, period)}
                       className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 text-sm transition-colors hover:bg-accent/50"
                     >
                       <div className="flex min-w-0 items-center gap-2">

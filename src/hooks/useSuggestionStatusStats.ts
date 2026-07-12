@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { suggestionStatusLabel } from "@/components/ui/badge";
+import { getDateRangeForPeriod, type AnalyticsPeriod } from "@/lib/analytics/period";
 import { queryKeys } from "@/lib/queryKeys";
 import { createClient } from "@/lib/supabase/client";
 import type { SuggestionStatus } from "@/types";
@@ -29,17 +30,40 @@ const STATUS_COLORS: Record<SuggestionStatus, string> = {
   rejected: "#ef4444",
 };
 
-export function useSuggestionStatusStats() {
+function filterSuggestionsByPeriod(
+  suggestions: Array<{ status: string; created_at: string | null }>,
+  period: AnalyticsPeriod
+) {
+  const range = getDateRangeForPeriod(period);
+
+  if (!range.start) {
+    return suggestions;
+  }
+
+  const startMs = range.start.getTime();
+  const endMs = range.end.getTime();
+
+  return suggestions.filter((suggestion) => {
+    if (!suggestion.created_at) {
+      return false;
+    }
+
+    const time = new Date(suggestion.created_at).getTime();
+    return time >= startMs && time <= endMs;
+  });
+}
+
+export function useSuggestionStatusStats(period: AnalyticsPeriod) {
   const supabase = createClient();
 
   return useQuery({
-    queryKey: queryKeys.stats.suggestionStatusDistribution,
+    queryKey: queryKeys.stats.suggestionStatusDistribution(period),
     queryFn: async (): Promise<SuggestionStatusDistribution> => {
-      const { data, error } = await supabase.from("ai_suggestions").select("status");
+      const { data, error } = await supabase.from("ai_suggestions").select("status, created_at");
 
       if (error) throw error;
 
-      const suggestions = data ?? [];
+      const suggestions = filterSuggestionsByPeriod(data ?? [], period);
       const total = suggestions.length;
       const countByStatus = new Map<SuggestionStatus, number>();
 

@@ -6,7 +6,7 @@ type LoginPageProps = {
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
-  const redirectTo = params.redirect ?? "/dashboard";
+  const redirectTo = params.redirect ?? "/dashboard/home";
 
   return (
     <>

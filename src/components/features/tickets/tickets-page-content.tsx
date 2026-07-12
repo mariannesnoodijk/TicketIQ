@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
 import { Badge, priorityBadgeVariant, statusBadgeVariant } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -18,7 +19,18 @@ import {
 import { useCategories } from "@/hooks/useCategories";
 import { useLabels } from "@/hooks/useLabels";
 import { useTickets } from "@/hooks/useTickets";
-import type { TicketListFilters } from "@/lib/queryKeys";
+import { UNCATEGORIZED_CATEGORY_FILTER } from "@/lib/tickets/constants";
+import {
+  DEFAULT_TICKET_DISPLAY_LIMIT,
+  getNextTicketLimit,
+  getTicketLimitLabel,
+  getVisibleTicketCount,
+  type TicketDisplayLimit,
+} from "@/lib/tickets/limits";
+import {
+  hasActiveTicketFilters,
+  parseTicketFiltersFromSearchParams,
+} from "@/lib/tickets/filterUrls";
 import { cn } from "@/lib/utils";
 
 function formatDate(value: string | null) {
@@ -30,7 +42,26 @@ function formatDate(value: string | null) {
 }
 
 export function TicketsPageContent() {
-  const [filters, setFilters] = useState<TicketListFilters>({});
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [filters, setFilters] = useState(() =>
+    parseTicketFiltersFromSearchParams(searchParams)
+  );
+  const [displayLimit, setDisplayLimit] = useState<TicketDisplayLimit>(
+    DEFAULT_TICKET_DISPLAY_LIMIT
+  );
+
+  useEffect(() => {
+    setFilters(parseTicketFiltersFromSearchParams(searchParams));
+  }, [searchParams]);
+
+  const filterKey = useMemo(() => JSON.stringify(filters), [filters]);
+
+  useEffect(() => {
+    setDisplayLimit(DEFAULT_TICKET_DISPLAY_LIMIT);
+  }, [filterKey]);
+
   const { data: tickets, isLoading, error } = useTickets(filters);
   const { data: categories } = useCategories();
   const { data: labels } = useLabels();
@@ -39,6 +70,12 @@ export function TicketsPageContent() {
     () => new Map((categories ?? []).map((c) => [c.id, c.name])),
     [categories]
   );
+
+  const totalCount = tickets?.length ?? 0;
+  const visibleCount = getVisibleTicketCount(displayLimit, totalCount);
+  const visibleTickets = tickets?.slice(0, visibleCount) ?? [];
+  const nextLimit = getNextTicketLimit(displayLimit);
+  const canShowMore = nextLimit !== null && visibleCount < totalCount;
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10">
@@ -54,7 +91,7 @@ export function TicketsPageContent() {
           <Label htmlFor="search">Zoeken</Label>
           <Input
             id="search"
-            placeholder="Onderwerp..."
+            placeholder="Onderwerp…"
             value={filters.search ?? ""}
             onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value || undefined }))}
           />
@@ -86,6 +123,7 @@ export function TicketsPageContent() {
             }
           >
             <option value="">Alle categorieën</option>
+            <option value={UNCATEGORIZED_CATEGORY_FILTER}>Ongecategoriseerd</option>
             {(categories ?? []).map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -114,18 +152,40 @@ export function TicketsPageContent() {
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Tickets laden...</p>
+        <p className="text-sm text-muted-foreground">Tickets laden…</p>
       ) : error ? (
         <p className="text-sm text-destructive">Kon tickets niet laden.</p>
       ) : !tickets?.length ? (
         <div className="rounded-xl border border-dashed border-border p-10 text-center">
-          <p className="font-medium">Nog geen tickets</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Importeer tickets via het dashboard om te beginnen.
-          </p>
-          <Link href="/dashboard" className={cn(buttonVariants(), "mt-4")}>
-            Naar dashboard
-          </Link>
+          {hasActiveTicketFilters(filters) ? (
+            <>
+              <p className="font-medium">Geen tickets voor dit filter</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Pas de filters aan om andere tickets te bekijken.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-4"
+                onClick={() => {
+                  setFilters({});
+                  router.replace("/dashboard/tickets");
+                }}
+              >
+                Filters wissen
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="font-medium">Nog geen tickets</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Importeer tickets via het dashboard om te beginnen.
+              </p>
+              <Link href="/dashboard" className={cn(buttonVariants(), "mt-4")}>
+                Naar dashboard
+              </Link>
+            </>
+          )}
         </div>
       ) : (
         <div className="rounded-xl border border-border bg-card">
@@ -141,7 +201,7 @@ export function TicketsPageContent() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tickets.map((ticket) => (
+              {visibleTickets.map((ticket) => (
                 <TableRow key={ticket.id}>
                   <TableCell className="max-w-xs truncate font-medium">{ticket.subject}</TableCell>
                   <TableCell>
@@ -168,6 +228,21 @@ export function TicketsPageContent() {
               ))}
             </TableBody>
           </Table>
+          <div className="flex flex-col gap-3 border-t border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground">
+              {visibleCount} van {totalCount} tickets
+            </p>
+            {canShowMore && nextLimit ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setDisplayLimit(nextLimit)}
+              >
+                Toon meer — {getTicketLimitLabel(nextLimit, totalCount)}
+              </Button>
+            ) : null}
+          </div>
         </div>
       )}
     </div>

@@ -11,6 +11,7 @@ export type FetchedTicketSummary = {
 };
 
 export type FetchTicketsResult = {
+  source: "database" | "api";
   count: number;
   totalAvailable: number;
   tickets: FetchedTicketSummary[];

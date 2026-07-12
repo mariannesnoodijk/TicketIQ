@@ -9,10 +9,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
 const navItems = [
+  { href: "/dashboard/home", label: "Home" },
   { href: "/dashboard", label: "Dashboard", exact: true },
   { href: "/dashboard/tickets", label: "Tickets" },
-  { href: "/dashboard/suggestions", label: "Suggesties" },
-  { href: "/dashboard/analyze", label: "Analyse" },
+  { href: "/dashboard/suggestions", label: "Helpcenter (AI)" },
   { href: "/dashboard/categories", label: "Categorieën" },
   { href: "/dashboard/labels", label: "Labels" },
 ];
@@ -25,7 +25,10 @@ export function Header() {
     <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
         <div className="flex items-center gap-6">
-          <Link href={user ? "/dashboard" : "/"} className="text-lg font-semibold tracking-tight">
+          <Link
+            href={user ? "/dashboard/home" : "/"}
+            className="text-lg font-semibold tracking-tight"
+          >
             TicketIQ
           </Link>
 
@@ -34,7 +37,7 @@ export function Header() {
               {navItems.map((item) => {
                 const isActive = item.exact
                   ? pathname === item.href
-                  : pathname.startsWith(item.href);
+                  : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
                 return (
                   <Link

@@ -29,7 +29,7 @@ export async function login(
 ): Promise<AuthActionState> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const redirectTo = String(formData.get("redirect") ?? "/dashboard");
+  const redirectTo = String(formData.get("redirect") ?? "/dashboard/home");
 
   if (!email || !password) {
     return { error: "Vul je e-mailadres en wachtwoord in." };
@@ -43,7 +43,7 @@ export async function login(
   }
 
   revalidatePath("/", "layout");
-  redirect(redirectTo.startsWith("/") ? redirectTo : "/dashboard");
+  redirect(redirectTo.startsWith("/") ? redirectTo : "/dashboard/home");
 }
 
 export async function register(
@@ -53,6 +53,11 @@ export async function register(
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
+  const fullName = String(formData.get("fullName") ?? "").trim();
+
+  if (!fullName) {
+    return { error: "Vul je naam in." };
+  }
 
   if (!email || !password) {
     return { error: "Vul je e-mailadres en wachtwoord in." };
@@ -72,6 +77,9 @@ export async function register(
     password,
     options: {
       emailRedirectTo: `${getSiteOrigin()}/auth/callback`,
+      data: {
+        full_name: fullName,
+      },
     },
   });
 
@@ -88,7 +96,7 @@ export async function register(
   }
 
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  redirect("/dashboard/home");
 }
 
 export async function logout(): Promise<void> {

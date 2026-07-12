@@ -1,26 +1,31 @@
 "use client";
 
 import { Loader2, Sparkles, Trash2 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 
 import { AgentChatMessages } from "@/components/features/analysis/agent-chat-messages";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { AgentChatWelcome } from "@/components/features/analysis/agent-chat-welcome";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAgentChat } from "@/hooks/useAgentChat";
 import { useDashboardStats } from "@/hooks/useTickets";
-import { cn } from "@/lib/utils";
+import {
+  ANALYZE_LIMIT_ALL,
+  ANALYZE_LIMIT_OPTIONS,
+  buildAnalyzePrompt,
+  getAnalyzeLimitLabel,
+  parseAnalyzeTicketLimit,
+  type AnalyzeTicketLimit,
+} from "@/lib/ai/analyzePrompt";
 
-const LIMIT_OPTIONS = [50, 100] as const;
+type AgentChatPanelProps = {
+  displayName?: string;
+};
 
-function buildAnalyzePrompt(limit: number): string {
-  return `Analyseer de laatste ${limit} supporttickets. Zoek terugkerende patronen, categoriseer de tickets met assignTicketCategory, controleer op duplicaten en sla maximaal 5 nieuwe helpcenter-suggesties op. Leg daarna uit wat je hebt gevonden.`;
-}
-
-export function AnalyzePageContent() {
+export function AgentChatPanel({ displayName }: AgentChatPanelProps) {
   const [input, setInput] = useState("");
-  const [ticketLimit, setTicketLimit] = useState<(typeof LIMIT_OPTIONS)[number]>(50);
+  const [ticketLimit, setTicketLimit] = useState<AnalyzeTicketLimit>(50);
   const { data: stats } = useDashboardStats();
 
   const { messages, sendMessage, status, error, clearChat } = useAgentChat();
@@ -49,37 +54,12 @@ export function AnalyzePageContent() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-10">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">AI-analyse</h1>
-        <p className="text-muted-foreground">
-          De agent haalt tickets op via DummyJSON, categoriseert ze, detecteert terugkerende
-          problemen en genereert helpcenter-suggesties. De chat blijft bewaard bij navigatie.
-        </p>
-      </div>
-
-      {!hasTickets ? (
-        <Card className="border-amber-500/30 bg-amber-500/5">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Geen tickets gevonden</CardTitle>
-            <CardDescription>
-              Importeer eerst tickets zodat de agent je dataset kent. De analyse haalt daarnaast
-              ook live data op via DummyJSON.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/dashboard" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
-              Ga naar dashboard om te importeren
-            </Link>
-          </CardContent>
-        </Card>
-      ) : null}
-
+    <div className="flex flex-col gap-4">
       <Card>
         <CardHeader>
           <CardTitle>Start analyse</CardTitle>
           <CardDescription>
-            Kies hoeveel tickets de agent ophaalt en start de meerstaps-analyse.
+            Kies hoeveel geïmporteerde tickets de agent analyseert en start de meerstaps-analyse.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-end">
@@ -89,22 +69,23 @@ export function AnalyzePageContent() {
             </label>
             <select
               id="ticket-limit"
-              value={ticketLimit}
-              onChange={(event) =>
-                setTicketLimit(Number(event.target.value) as (typeof LIMIT_OPTIONS)[number])
-              }
-              className="flex h-10 w-full min-w-[8rem] rounded-lg border border-input bg-background px-3 text-sm"
-              disabled={isLoading}
+              value={String(ticketLimit)}
+              onChange={(event) => setTicketLimit(parseAnalyzeTicketLimit(event.target.value))}
+              className="flex h-10 w-full min-w-[12rem] rounded-lg border border-input bg-background px-3 text-sm"
+              disabled={isLoading || !hasTickets}
             >
-              {LIMIT_OPTIONS.map((limit) => (
+              {ANALYZE_LIMIT_OPTIONS.map((limit) => (
                 <option key={limit} value={limit}>
-                  {limit} tickets
+                  {getAnalyzeLimitLabel(limit)}
                 </option>
               ))}
+              <option value={ANALYZE_LIMIT_ALL}>
+                {getAnalyzeLimitLabel(ANALYZE_LIMIT_ALL, stats?.tickets)}
+              </option>
             </select>
           </div>
           <div className="flex flex-wrap gap-2 sm:self-end">
-            <Button onClick={handleAnalyze} disabled={isLoading}>
+            <Button onClick={handleAnalyze} disabled={isLoading || !hasTickets}>
               {isLoading ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
@@ -134,14 +115,25 @@ export function AnalyzePageContent() {
 
       <Card className="flex min-h-[28rem] flex-col">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Analyse &amp; chat</CardTitle>
+          <CardTitle className="text-base">AI-assistent</CardTitle>
           <CardDescription>
-            Streaming antwoord met zichtbare tool-calls (ophalen, categoriseren, duplicaatcheck,
-            opslaan). Blijft bewaard bij tabwissel en pagina-refresh.
+            Stel vragen over je tickets of start een analyse. Tool-stappen verschijnen hier
+            tijdens het verwerken.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-1 flex-col gap-4">
-          <AgentChatMessages messages={messages} isLoading={isLoading} />
+          <AgentChatMessages
+            messages={messages}
+            isLoading={isLoading}
+            emptyContent={
+              <AgentChatWelcome
+                displayName={displayName}
+                hasTickets={hasTickets}
+                isLoading={isLoading}
+                onStartAnalyze={handleAnalyze}
+              />
+            }
+          />
 
           {error ? (
             <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
@@ -153,7 +145,7 @@ export function AnalyzePageContent() {
             <Input
               value={input}
               onChange={(event) => setInput(event.target.value)}
-              placeholder="Stel een vervolgvraag over de analyse…"
+              placeholder="Stel een vraag of geef een opdracht aan de AI-assistent…"
               disabled={isLoading}
               className="flex-1"
             />

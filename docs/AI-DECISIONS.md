@@ -83,6 +83,13 @@
 - **AI-rol:** pagina’s en hooks opgezet met Cursor; UI-patronen hergebruikt van tickets/categorieën.
 - **Gevolgen:** volledige CRUD-UI voor alle 5 tabellen; vier kernfunctionaliteiten compleet; goedgekeurde suggesties (`status = approved`) dienen als helpcenter-bibliotheek zoals in het datamodel-besluit bedoeld.
 
+### Hybride fetchTickets: database + DummyJSON via tool calling
+- **Context:** W3-analyse moet geïmporteerde tickets kunnen analyseren (limieten 50–500/alle), maar de eindopdracht vereist ook externe API via tool calling. Een puur Supabase-only `fetchTickets` is UX-vriendelijk maar zwakker verdedigbaar bij beoordeling.
+- **Beslissing:** één `fetchTickets`-tool met parameter `source: "database" | "api"`. Standaard analyse (Analyseer-knop + prompt) gebruikt `source: "database"`. Live DummyJSON blijft beschikbaar via `source: "api"` (vrij chatten of demo). Import-route blijft aparte ingestie-stap.
+- **Alternatieven:** alleen DummyJSON in agent — afgevallen (geen “alle geïmporteerde tickets”, categorisatie koppelt aan DB). Twee aparte tools — afgevallen (agent kiest soms verkeerde tool). Altijd eerst API dan DB — afgevallen (onnodige latency in normale flow).
+- **AI-rol:** hybride ontwerp besproken en geïmplementeerd met Cursor; prompts en UI-labels afgestemd op beide bronnen.
+- **Gevolgen:** normale UX ongewijzigd; verantwoording kan tool calling naar DummyJSON én database-gedreven analyse tonen. `assignTicketCategory`/`saveSuggestion` blijven DB-gekoppeld — volledige analyse vereist import.
+
 ### Revisie-flow na afwijzing (optie A)
 - **Context:** afgewezen suggesties hadden geen feedbackloop; artikelteksten waren vaak te dun (verwijzingen naar handleiding i.p.v. stappen). `fetchTickets` kapte bodies af op 400 tekens; `saveSuggestion` accepteerde vanaf 50 tekens.
 - **Beslissing:** vaste markdown-structuur voor artikelen (`articleContent.ts`) met validatie (min. 400 tekens, stappen/secties verplicht). Agent-prompt aangescherpt. Bij afwijzen: verplichte feedback in `metadata.revisionFeedback` + `revisionHistory`. Dedicated `POST /api/suggestions/[id]/revise` met `generateObject` (niet de analyse-agent): laadt volledige bron-tickets uit Supabase, herschrijft titel/samenvatting/inhoud, zet status op `draft`. UI: “Afwijzen met feedback” + “Nieuw artikel laten schrijven” op detailpagina.
