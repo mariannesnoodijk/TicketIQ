@@ -24,10 +24,11 @@ export const queryKeys = {
     dashboard: ["dashboard-stats"] as const,
     /** @deprecated gebruik ticketAnalytics(period) */
     categoryDistribution: ["category-distribution"] as const,
-    ticketAnalytics: (period: string) => ["ticket-analytics", period] as const,
+    ticketAnalytics: (period: string, locale: string) =>
+      ["ticket-analytics", period, locale] as const,
     ticketAnalyticsRoot: ["ticket-analytics"] as const,
-    suggestionStatusDistribution: (period: string) =>
-      ["suggestion-status-distribution", period] as const,
+    suggestionStatusDistribution: (period: string, locale: string) =>
+      ["suggestion-status-distribution", period, locale] as const,
     suggestionStatusRoot: ["suggestion-status-distribution"] as const,
   },
 } as const;

@@ -3,9 +3,10 @@
 import Link from "next/link";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { useLocale } from "@/components/providers/locale-provider";
 import { buttonVariants } from "@/components/ui/button";
 import { useDashboardStats } from "@/hooks/useTickets";
-import { HOME_NAV_ACTIONS } from "@/lib/home/nav-actions";
+import { getHomeNavActions } from "@/lib/home/nav-actions";
 import { cn } from "@/lib/utils";
 
 type HomeIntroPanelProps = {
@@ -14,24 +15,28 @@ type HomeIntroPanelProps = {
 };
 
 export function HomeIntroPanel({ displayName, className }: HomeIntroPanelProps) {
+  const { t, locale } = useLocale();
   const { data: stats } = useDashboardStats();
   const hasTickets = (stats?.tickets ?? 0) > 0;
+  const navActions = getHomeNavActions(locale);
 
   return (
     <aside className={cn("flex w-full flex-col gap-8", className)}>
       <PageHeader
-        eyebrow="Home"
-        title={displayName ? `Welkom terug, ${displayName}` : "Welkom terug"}
-        description="Je AI-assistent voor supporttickets en helpcenter-artikelen. Stel vragen, start een analyse of ga direct naar een onderdeel."
+        eyebrow={t("home.eyebrow")}
+        title={
+          displayName ? t("home.welcomeNamed", { name: displayName }) : t("home.welcome")
+        }
+        description={t("home.introDescription")}
         className="w-full"
       />
 
-      <nav aria-label="Snelle links" className="flex w-full flex-col gap-3">
+      <nav aria-label={t("home.quickLinksAria")} className="flex w-full flex-col gap-3">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Snel naar
+          {t("home.quickLinks")}
         </p>
         <ul className="flex w-full flex-col gap-2">
-          {HOME_NAV_ACTIONS.map((action) => (
+          {navActions.map((action) => (
             <li key={action.href} className="w-full">
               <Link
                 href={action.href}
@@ -57,8 +62,7 @@ export function HomeIntroPanel({ displayName, className }: HomeIntroPanelProps) 
 
       {!hasTickets ? (
         <p className="w-full rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-sm leading-relaxed text-muted-foreground">
-          Je hebt nog geen tickets. Importeer eerst tickets via het dashboard voordat je een
-          analyse start.
+          {t("home.noTicketsWarning")}
         </p>
       ) : null}
     </aside>

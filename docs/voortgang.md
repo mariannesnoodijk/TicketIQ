@@ -17,7 +17,8 @@ Skills.sh zijn opgezet (PR1).
 - [x] Next.js (App Router) + TypeScript + Tailwind CSS, werkend in dev én productie zonder kritieke errors (1.1) — https://ticket-iq-zeta.vercel.app
 - [x] Externe data via netwerkrequests naar een gratis API (DummyJSON) (1.2) — import + tool calling (`fetchTickets` met `source: "api"`)
 - [x] AI interpreteert/verrijkt data i.c.m. gebruikersinput — niet alleen doorsturen (1.2)
-- [x] Agent-based flow met werkende `maxSteps` meerstaps-aanpak (1.3) — `stopWhen: isStepCount(8)` in AI SDK v7
+- [x] Agent-based flow met werkende `maxSteps` meerstaps-aanpak (1.3) — `stopWhen: isStepCount(10)` in AI SDK v7
+- [x] Geautomatiseerde tests voor kernlogica (validatie, mapping, filters, prompts) — Vitest in `src/**/*.test.ts`
 - [x] Schone, gestructureerde, onderhoudbare code; logische scheiding server/client/utils/data (1.4)
 - [x] Minimaal 20 kleine commits met zinvolle messages (1.5)
 - [x] Minimaal 5 pull requests gemerged naar `main` (1.5) — PR1–PR11 gemerged
@@ -70,6 +71,7 @@ Skills.sh zijn opgezet (PR1).
 - [x] Vercel AI SDK met werkende AI Agent
 - [x] Minimaal 1 externe API via **Tool Calling**
 - [x] Streaming responses in de chat-interface
+- [x] NL/ENG taalwissel volledig in UI (header, auth, dashboard, tickets, suggesties, instellingen, AI-chat) + locale-aware AI-agent prompts en server-validatie
 - [x] Architectuurbeslissingen met AI-hulp gedocumenteerd
 
 ## Casus (vooraf, ter goedkeuring docent)

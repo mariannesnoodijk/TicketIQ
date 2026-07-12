@@ -3,10 +3,12 @@
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
+import { useLocale } from "@/components/providers/locale-provider";
 import { Button } from "@/components/ui/button";
 import { useImportTickets } from "@/hooks/useImportTickets";
 
 export function ImportTicketsButton() {
+  const { t } = useLocale();
   const importTickets = useImportTickets();
   const [message, setMessage] = useState<string | null>(null);
 
@@ -16,13 +18,18 @@ export function ImportTicketsButton() {
       const result = await importTickets.mutateAsync();
       const backfilledPart =
         result.backfilled && result.backfilled > 0
-          ? ` ${result.backfilled} bestaande tickets gecategoriseerd.`
+          ? t("tickets.importBackfilled", { backfilled: result.backfilled })
           : "";
       setMessage(
-        `${result.imported} tickets geïmporteerd, ${result.skipped} overgeslagen (totaal ${result.total}).${backfilledPart}`
+        t("tickets.importSuccessTotal", {
+          imported: result.imported,
+          skipped: result.skipped,
+          total: result.total,
+          backfilled: backfilledPart,
+        })
       );
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Import mislukt");
+      setMessage(error instanceof Error ? error.message : t("tickets.importFailed"));
     }
   }
 
@@ -32,10 +39,10 @@ export function ImportTicketsButton() {
         {importTickets.isPending ? (
           <>
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-            Importeren…
+            {t("tickets.importing")}
           </>
         ) : (
-          "Importeer tickets uit DummyJSON"
+          t("tickets.import")
         )}
       </Button>
       {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}

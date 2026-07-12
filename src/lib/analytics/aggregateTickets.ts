@@ -1,6 +1,10 @@
 import type { CategoryDistribution, CategoryDistributionItem } from "@/hooks/useTicketCategoryStats";
 import type { DateRange, VolumeBucketUnit } from "@/lib/analytics/period";
 import { formatVolumeBucketDateRange } from "@/lib/analytics/dateLabels";
+import { getIntlLocale } from "@/lib/i18n/labels";
+import { messages } from "@/lib/i18n";
+import { interpolate } from "@/lib/i18n/interpolate";
+import type { Locale } from "@/lib/i18n/types";
 
 const UNCATEGORIZED_COLOR = "#94a3b8";
 
@@ -65,14 +69,14 @@ export function filterTicketsByDateRange(
   });
 }
 
-function getOrganizationName(rawPayload: unknown): string {
+function getOrganizationName(rawPayload: unknown, locale: Locale): string {
   if (!rawPayload || typeof rawPayload !== "object") {
-    return "Onbekend";
+    return messages[locale].common.unknown;
   }
 
   const name = (rawPayload as { organisatie_naam?: unknown }).organisatie_naam;
   if (typeof name !== "string" || !name.trim()) {
-    return "Onbekend";
+    return messages[locale].common.unknown;
   }
 
   return name.trim();
@@ -94,25 +98,34 @@ function formatMonthKey(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
-function formatDayLabel(key: string): string {
+function formatDayLabel(key: string, locale: Locale): string {
   const date = new Date(`${key}T12:00:00`);
-  return new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "short" }).format(date);
+  return new Intl.DateTimeFormat(getIntlLocale(locale), { day: "numeric", month: "short" }).format(
+    date
+  );
 }
 
-function formatWeekLabel(key: string): string {
+function formatWeekLabel(key: string, locale: Locale): string {
   const date = new Date(`${key}T12:00:00`);
-  return `Wk ${new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "short" }).format(date)}`;
+  const formatted = new Intl.DateTimeFormat(getIntlLocale(locale), {
+    day: "numeric",
+    month: "short",
+  }).format(date);
+  return interpolate(messages[locale].analytics.weekLabel, { week: formatted });
 }
 
-function formatMonthLabel(key: string): string {
+function formatMonthLabel(key: string, locale: Locale): string {
   const [year, month] = key.split("-");
   const date = new Date(Number(year), Number(month) - 1, 1);
-  return new Intl.DateTimeFormat("nl-NL", { month: "short", year: "numeric" }).format(date);
+  return new Intl.DateTimeFormat(getIntlLocale(locale), { month: "short", year: "numeric" }).format(
+    date
+  );
 }
 
 export function buildVolumeSeries(
   tickets: TicketAnalyticsRow[],
-  unit: VolumeBucketUnit
+  unit: VolumeBucketUnit,
+  locale: Locale = "nl"
 ): VolumePoint[] {
   const counts = new Map<string, number>();
 
@@ -136,21 +149,23 @@ export function buildVolumeSeries(
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([key, count]) => ({
       bucketKey: key,
-      dateRangeLabel: formatVolumeBucketDateRange(key, unit),
+      dateRangeLabel: formatVolumeBucketDateRange(key, unit, locale),
       label:
         unit === "day"
-          ? formatDayLabel(key)
+          ? formatDayLabel(key, locale)
           : unit === "week"
-            ? formatWeekLabel(key)
-            : formatMonthLabel(key),
+            ? formatWeekLabel(key, locale)
+            : formatMonthLabel(key, locale),
       count,
     }));
 }
 
-const WEEKDAY_LABELS = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"] as const;
-
-export function buildWeekdayDistribution(tickets: TicketAnalyticsRow[]): WeekdayPoint[] {
+export function buildWeekdayDistribution(
+  tickets: TicketAnalyticsRow[],
+  locale: Locale = "nl"
+): WeekdayPoint[] {
   const counts = new Map<number, number>();
+  const weekdayLabels = messages[locale].analytics.weekdaysShort;
 
   for (const ticket of tickets) {
     const date = getTicketDate(ticket);
@@ -163,7 +178,7 @@ export function buildWeekdayDistribution(tickets: TicketAnalyticsRow[]): Weekday
     counts.set(weekday, (counts.get(weekday) ?? 0) + 1);
   }
 
-  return WEEKDAY_LABELS.map((label, weekday) => ({
+  return weekdayLabels.map((label, weekday) => ({
     weekday,
     label,
     count: counts.get(weekday) ?? 0,
@@ -172,12 +187,13 @@ export function buildWeekdayDistribution(tickets: TicketAnalyticsRow[]): Weekday
 
 export function buildTopOrganizations(
   tickets: TicketAnalyticsRow[],
+  locale: Locale = "nl",
   limit = 8
 ): OrganizationPoint[] {
   const counts = new Map<string, number>();
 
   for (const ticket of tickets) {
-    const name = getOrganizationName(ticket.raw_payload);
+    const name = getOrganizationName(ticket.raw_payload, locale);
     counts.set(name, (counts.get(name) ?? 0) + 1);
   }
 
@@ -189,7 +205,8 @@ export function buildTopOrganizations(
 
 export function buildCategoryDistribution(
   tickets: TicketAnalyticsRow[],
-  categories: CategoryRow[]
+  categories: CategoryRow[],
+  locale: Locale = "nl"
 ): CategoryDistribution {
   const total = tickets.length;
   const countByCategoryId = new Map<string | null, number>();
@@ -215,7 +232,7 @@ export function buildCategoryDistribution(
   if (uncategorizedCount > 0) {
     items.push({
       categoryId: null,
-      name: "Ongecategoriseerd",
+      name: messages[locale].common.uncategorized,
       color: UNCATEGORIZED_COLOR,
       count: uncategorizedCount,
       percentage: total > 0 ? Math.round((uncategorizedCount / total) * 100) : 0,
@@ -227,8 +244,8 @@ export function buildCategoryDistribution(
   return { total, items };
 }
 
-export function getTicketOrganizationName(rawPayload: unknown): string {
-  return getOrganizationName(rawPayload);
+export function getTicketOrganizationName(rawPayload: unknown, locale: Locale = "nl"): string {
+  return getOrganizationName(rawPayload, locale);
 }
 
 export function ticketMatchesWeekday(
@@ -250,5 +267,5 @@ export function ticketMatchesWeekday(
 }
 
 export function ticketMatchesOrganization(rawPayload: unknown, organization: string): boolean {
-  return getOrganizationName(rawPayload) === organization;
+  return getOrganizationName(rawPayload, "nl") === organization;
 }

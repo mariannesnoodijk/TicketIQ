@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { createTranslator } from "@/lib/i18n";
+import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n/types";
 import { createClient } from "@/lib/supabase/server";
 
 export type AuthActionState = {
@@ -23,16 +25,23 @@ function getSiteOrigin(): string {
   return "http://localhost:3000";
 }
 
+function getLocaleFromFormData(formData: FormData) {
+  const raw = String(formData.get("locale") ?? "");
+  return isLocale(raw) ? raw : DEFAULT_LOCALE;
+}
+
 export async function login(
   _prevState: AuthActionState,
   formData: FormData
 ): Promise<AuthActionState> {
+  const locale = getLocaleFromFormData(formData);
+  const t = createTranslator(locale);
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const redirectTo = String(formData.get("redirect") ?? "/dashboard/home");
 
   if (!email || !password) {
-    return { error: "Vul je e-mailadres en wachtwoord in." };
+    return { error: t("auth.errorEmailPasswordRequired") };
   }
 
   const supabase = await createClient();
@@ -50,25 +59,27 @@ export async function register(
   _prevState: AuthActionState,
   formData: FormData
 ): Promise<AuthActionState> {
+  const locale = getLocaleFromFormData(formData);
+  const t = createTranslator(locale);
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
   const fullName = String(formData.get("fullName") ?? "").trim();
 
   if (!fullName) {
-    return { error: "Vul je naam in." };
+    return { error: t("auth.errorNameRequired") };
   }
 
   if (!email || !password) {
-    return { error: "Vul je e-mailadres en wachtwoord in." };
+    return { error: t("auth.errorEmailPasswordRequired") };
   }
 
   if (password.length < 8) {
-    return { error: "Je wachtwoord moet minimaal 8 tekens bevatten." };
+    return { error: t("auth.errorPasswordMinLength") };
   }
 
   if (password !== confirmPassword) {
-    return { error: "De wachtwoorden komen niet overeen." };
+    return { error: t("auth.errorPasswordMismatch") };
   }
 
   const supabase = await createClient();
@@ -90,8 +101,7 @@ export async function register(
   if (!data.session) {
     return {
       success: true,
-      message:
-        "Account aangemaakt. Bevestig je e-mailadres via de link in je inbox voordat je inlogt.",
+      message: t("auth.registerSuccessEmailConfirm"),
     };
   }
 

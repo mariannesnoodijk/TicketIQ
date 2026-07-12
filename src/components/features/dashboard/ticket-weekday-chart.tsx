@@ -12,6 +12,7 @@ import {
 } from "recharts";
 
 import { ChartPeriodRange } from "@/components/features/dashboard/chart-period-range";
+import { useLocale } from "@/components/providers/locale-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartAreaSkeleton } from "@/components/ui/content-skeletons";
 import type { WeekdayPoint } from "@/lib/analytics/aggregateTickets";
@@ -32,6 +33,8 @@ type WeekdayTooltipProps = {
 };
 
 function WeekdayTooltip({ active, payload, period }: WeekdayTooltipProps) {
+  const { t, locale } = useLocale();
+
   if (!active || !payload?.length) {
     return null;
   }
@@ -43,16 +46,22 @@ function WeekdayTooltip({ active, payload, period }: WeekdayTooltipProps) {
 
   return (
     <div className="rounded-lg border border-border bg-popover px-3 py-2 text-sm shadow-md">
-      <p className="text-xs font-medium text-primary">{formatWeekdayInPeriod(point.weekday, period)}</p>
-      <p className="mt-1 font-medium text-popover-foreground">{point.count} tickets</p>
-      <p className="mt-1 text-xs text-muted-foreground">Klik om tickets op deze weekdag te bekijken</p>
+      <p className="text-xs font-medium text-primary">
+        {formatWeekdayInPeriod(point.weekday, period, locale)}
+      </p>
+      <p className="mt-1 font-medium text-popover-foreground">
+        {t("analytics.chartTicketsCount", { count: point.count })}
+      </p>
+      <p className="mt-1 text-xs text-muted-foreground">{t("analytics.weekdayClickHint")}</p>
     </div>
   );
 }
 
 export function TicketWeekdayChart({ data, period, isLoading }: TicketWeekdayChartProps) {
+  const { t, locale } = useLocale();
   const router = useRouter();
-  const periodLabel = getPeriodLabel(period);
+  const periodLabel = getPeriodLabel(period, locale);
+  const dateRangeLabel = formatPeriodDateRange(period, locale);
 
   function handleBarClick(point: WeekdayPoint) {
     if (point.count === 0) {
@@ -65,19 +74,20 @@ export function TicketWeekdayChart({ data, period, isLoading }: TicketWeekdayCha
     <Card id="weekday-chart" className="scroll-mt-24">
       <CardHeader className="gap-3">
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <CardTitle>Tickets per weekdag</CardTitle>
-          <ChartPeriodRange period={period} />
+          <CardTitle>{t("analytics.weekdayTitle")}</CardTitle>
+          <ChartPeriodRange period={period} locale={locale} />
         </div>
         <CardDescription>
-          Drukste dagen binnen {formatPeriodDateRange(period).toLowerCase()}. Filter op weekdag +
-          periode bij klik.
+          {t("analytics.weekdayDescriptionLong", { range: dateRangeLabel.toLowerCase() })}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <ChartAreaSkeleton />
         ) : !data?.some((point) => point.count > 0) ? (
-          <p className="text-sm text-muted-foreground">Geen datums beschikbaar in {periodLabel.toLowerCase()}.</p>
+          <p className="text-sm text-muted-foreground">
+            {t("analytics.weekdayEmpty", { range: periodLabel.toLowerCase() })}
+          </p>
         ) : (
           <div className="h-64 min-w-0">
             <ResponsiveContainer width="100%" height="100%">

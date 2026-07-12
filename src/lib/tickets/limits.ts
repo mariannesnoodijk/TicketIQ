@@ -1,3 +1,7 @@
+import { messages } from "@/lib/i18n";
+import { interpolate } from "@/lib/i18n/interpolate";
+import type { Locale } from "@/lib/i18n/types";
+
 export const TICKET_LIMIT_OPTIONS = [50, 100, 200, 500] as const;
 
 export const TICKET_LIMIT_ALL = "all" as const;
@@ -23,15 +27,18 @@ export function parseTicketDisplayLimit(value: string): TicketDisplayLimit {
 
 export function getTicketLimitLabel(
   limit: TicketDisplayLimit,
-  totalCount?: number
+  totalCount?: number,
+  locale: Locale = "nl"
 ): string {
+  const dict = messages[locale].tickets;
+
   if (limit === TICKET_LIMIT_ALL) {
     return totalCount !== undefined
-      ? `Alle tickets (${totalCount})`
-      : "Alle tickets";
+      ? interpolate(dict.limitAllWithCount, { count: totalCount })
+      : dict.allTickets;
   }
 
-  return `${limit} tickets`;
+  return interpolate(dict.ticketCountLabel, { count: limit });
 }
 
 export function getNextTicketLimit(

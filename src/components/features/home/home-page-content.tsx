@@ -3,6 +3,7 @@
 import { AgentChatPanel } from "@/components/features/analysis/agent-chat-panel";
 import { HomeIntroPanel } from "@/components/features/home/home-intro-panel";
 import { PageHeader } from "@/components/layout/page-header";
+import { useLocale } from "@/components/providers/locale-provider";
 import { Reveal } from "@/components/ui/reveal";
 
 type HomePageContentProps = {
@@ -10,13 +11,17 @@ type HomePageContentProps = {
 };
 
 export function HomePageContent({ displayName }: HomePageContentProps) {
+  const { t } = useLocale();
+
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-6 lg:py-10">
       <Reveal className="mb-6 lg:hidden">
         <PageHeader
-          eyebrow="Home"
-          title={displayName ? `Welkom terug, ${displayName}` : "Welkom terug"}
-          description="Je AI-assistent voor supporttickets en helpcenter-artikelen."
+          eyebrow={t("home.eyebrow")}
+          title={
+            displayName ? t("home.welcomeNamed", { name: displayName }) : t("home.welcome")
+          }
+          description={t("home.description")}
         />
       </Reveal>
 

@@ -1,23 +1,33 @@
 import type { AnalyticsPeriod, DateRange, VolumeBucketUnit } from "@/lib/analytics/period";
 import { getDateRangeForPeriod } from "@/lib/analytics/period";
+import { getIntlLocale } from "@/lib/i18n/labels";
+import { messages } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/types";
 
-const mediumDateFormatter = new Intl.DateTimeFormat("nl-NL", { dateStyle: "medium" });
-const longDateFormatter = new Intl.DateTimeFormat("nl-NL", { dateStyle: "long" });
-const monthYearFormatter = new Intl.DateTimeFormat("nl-NL", {
-  month: "long",
-  year: "numeric",
-});
-
-export function formatDateRangeLabel(range: DateRange): string {
-  if (!range.start) {
-    return "Alle beschikbare data";
-  }
-
-  return `${mediumDateFormatter.format(range.start)} – ${mediumDateFormatter.format(range.end)}`;
+function createDateFormatters(locale: Locale) {
+  const intlLocale = getIntlLocale(locale);
+  return {
+    medium: new Intl.DateTimeFormat(intlLocale, { dateStyle: "medium" }),
+    long: new Intl.DateTimeFormat(intlLocale, { dateStyle: "long" }),
+    monthYear: new Intl.DateTimeFormat(intlLocale, { month: "long", year: "numeric" }),
+  };
 }
 
-export function formatPeriodDateRange(period: AnalyticsPeriod, now: Date = new Date()): string {
-  return formatDateRangeLabel(getDateRangeForPeriod(period, now));
+export function formatDateRangeLabel(range: DateRange, locale: Locale = "nl"): string {
+  if (!range.start) {
+    return messages[locale].common.allAvailableData;
+  }
+
+  const formatters = createDateFormatters(locale);
+  return `${formatters.medium.format(range.start)} – ${formatters.medium.format(range.end)}`;
+}
+
+export function formatPeriodDateRange(
+  period: AnalyticsPeriod,
+  locale: Locale = "nl",
+  now: Date = new Date()
+): string {
+  return formatDateRangeLabel(getDateRangeForPeriod(period, now), locale);
 }
 
 export function getVolumeBucketDateRange(
@@ -46,39 +56,39 @@ export function getVolumeBucketDateRange(
 
 export function formatVolumeBucketDateRange(
   bucketKey: string,
-  unit: VolumeBucketUnit
+  unit: VolumeBucketUnit,
+  locale: Locale = "nl"
 ): string {
   const { createdFrom, createdTo } = getVolumeBucketDateRange(bucketKey, unit);
   const start = new Date(createdFrom);
   const end = new Date(createdTo);
+  const formatters = createDateFormatters(locale);
 
   if (unit === "day") {
-    return longDateFormatter.format(start);
+    return formatters.long.format(start);
   }
 
   if (unit === "week") {
-    return `${mediumDateFormatter.format(start)} – ${mediumDateFormatter.format(end)}`;
+    return `${formatters.medium.format(start)} – ${formatters.medium.format(end)}`;
   }
 
-  return monthYearFormatter.format(start);
+  return formatters.monthYear.format(start);
 }
 
-export const WEEKDAY_FULL_LABELS = [
-  "Maandag",
-  "Dinsdag",
-  "Woensdag",
-  "Donderdag",
-  "Vrijdag",
-  "Zaterdag",
-  "Zondag",
-] as const;
-
-export function getWeekdayFullLabel(weekday: number): string {
-  return WEEKDAY_FULL_LABELS[weekday] ?? "Onbekend";
+export function getWeekdayFullLabel(weekday: number, locale: Locale = "nl"): string {
+  const labels = messages[locale].analytics.weekdaysFull;
+  return labels[weekday] ?? messages[locale].common.unknown;
 }
 
-export function formatWeekdayInPeriod(weekday: number, period: AnalyticsPeriod): string {
-  const day = getWeekdayFullLabel(weekday);
-  const range = formatPeriodDateRange(period);
+export function formatWeekdayInPeriod(
+  weekday: number,
+  period: AnalyticsPeriod,
+  locale: Locale = "nl"
+): string {
+  const day = getWeekdayFullLabel(weekday, locale);
+  const range = formatPeriodDateRange(period, locale);
   return `${day} · ${range}`;
 }
+
+/** @deprecated Use getWeekdayFullLabel(weekday, locale) */
+export const WEEKDAY_FULL_LABELS = messages.nl.analytics.weekdaysFull;

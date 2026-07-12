@@ -3,8 +3,9 @@
 import { Bot, Sparkles } from "lucide-react";
 import Link from "next/link";
 
+import { useLocale } from "@/components/providers/locale-provider";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { HOME_NAV_ACTIONS } from "@/lib/home/nav-actions";
+import { getHomeNavActions } from "@/lib/home/nav-actions";
 import { cn } from "@/lib/utils";
 
 type AgentChatWelcomeProps = {
@@ -12,7 +13,6 @@ type AgentChatWelcomeProps = {
   hasTickets: boolean;
   isLoading: boolean;
   onStartAnalyze: () => void;
-  /** When true, intro/nav is shown in the desktop sidebar instead */
   sidePanelPresent?: boolean;
 };
 
@@ -23,7 +23,11 @@ export function AgentChatWelcome({
   onStartAnalyze,
   sidePanelPresent = false,
 }: AgentChatWelcomeProps) {
-  const greeting = displayName ? `Hoi ${displayName}!` : "Welkom bij TicketIQ!";
+  const { t, locale } = useLocale();
+  const navActions = getHomeNavActions(locale);
+  const greeting = displayName
+    ? t("agentChat.welcomeNamed", { name: displayName })
+    : t("agentChat.welcome");
 
   return (
     <div className="flex flex-1 flex-col gap-4 rounded-xl border border-primary/20 bg-accent/20 px-4 py-5">
@@ -33,33 +37,32 @@ export function AgentChatWelcome({
         </div>
         <div className="min-w-0 flex-1 space-y-3">
           <div>
-            <p className="text-xs font-medium text-muted-foreground">TicketIQ AI</p>
+            <p className="text-xs font-medium text-muted-foreground">{t("agentChat.brand")}</p>
             <p className="mt-1 text-sm font-medium">{greeting}</p>
           </div>
 
           {sidePanelPresent ? (
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Stel een vraag of start een analyse met de knop rechtsboven in de chat.
+              {t("agentChat.welcomeSidePanel")}
             </p>
           ) : (
             <>
               <p className="text-sm leading-relaxed text-muted-foreground">
-                Ik help je supporttickets te analyseren en AI-helpcenter-artikelen voor te stellen.
-                Dit kun je doen:
+                {t("agentChat.welcomeIntro")}
               </p>
 
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <span className="font-medium text-foreground">In deze chat:</span> tickets
-                  analyseren, patronen vinden en helpcenter-artikelen laten genereren
+                  <span className="font-medium text-foreground">{t("agentChat.welcomeInChat")}</span>{" "}
+                  {t("agentChat.welcomeInChatDesc")}
                 </li>
                 <li>
-                  <span className="font-medium text-foreground">Dashboard:</span> statistieken en
-                  trends bekijken
+                  <span className="font-medium text-foreground">{t("agentChat.welcomeDashboard")}</span>{" "}
+                  {t("agentChat.welcomeDashboardDesc")}
                 </li>
                 <li>
-                  <span className="font-medium text-foreground">Tickets &amp; helpcenter:</span>{" "}
-                  resultaten beheren en goedkeuren
+                  <span className="font-medium text-foreground">{t("agentChat.welcomeManage")}</span>{" "}
+                  {t("agentChat.welcomeManageDesc")}
                 </li>
               </ul>
             </>
@@ -72,15 +75,14 @@ export function AgentChatWelcome({
                 sidePanelPresent && "lg:hidden"
               )}
             >
-              Je hebt nog geen tickets. Importeer eerst tickets via het dashboard voordat je een
-              analyse start.
+              {t("home.noTicketsWarning")}
             </p>
           ) : null}
         </div>
       </div>
 
       <div className={cn("flex flex-wrap gap-2 pl-11", sidePanelPresent && "lg:hidden")}>
-        {HOME_NAV_ACTIONS.map((action) => (
+        {navActions.map((action) => (
           <Link
             key={action.href}
             href={action.href}
@@ -97,11 +99,11 @@ export function AgentChatWelcome({
         {hasTickets ? (
           <Button size="sm" onClick={onStartAnalyze} disabled={isLoading} className="gap-2">
             <Sparkles className="size-4" aria-hidden />
-            Start analyse
+            {t("agentChat.startAnalysis")}
           </Button>
         ) : (
           <Link href="/dashboard" className={cn(buttonVariants({ size: "sm" }), "gap-2")}>
-            Tickets importeren
+            {t("agentChat.importTickets")}
           </Link>
         )}
       </div>

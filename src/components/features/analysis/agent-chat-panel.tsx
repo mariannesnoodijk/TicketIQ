@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { AgentChatMessages } from "@/components/features/analysis/agent-chat-messages";
 import { AgentChatWelcome } from "@/components/features/analysis/agent-chat-welcome";
+import { useLocale } from "@/components/providers/locale-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChatPanelSkeleton } from "@/components/ui/content-skeletons";
@@ -49,6 +50,8 @@ function AnalyzeToolbar({
   ticketCount,
   compact = false,
 }: AnalyzeToolbarProps) {
+  const { t, locale } = useLocale();
+
   return (
     <div
       className={
@@ -60,7 +63,7 @@ function AnalyzeToolbar({
       <div className={compact ? "flex min-w-0 flex-1 items-center gap-2 sm:flex-initial" : "space-y-2"}>
         {!compact ? (
           <label htmlFor="ticket-limit" className="text-sm font-medium">
-            Aantal tickets
+            {t("agentChat.ticketCountLabel")}
           </label>
         ) : null}
         <Select
@@ -69,15 +72,15 @@ function AnalyzeToolbar({
           onChange={(event) => onTicketLimitChange(parseAnalyzeTicketLimit(event.target.value))}
           className={compact ? "min-w-0 flex-1 sm:min-w-40" : "min-w-48"}
           disabled={isLoading || !hasTickets}
-          aria-label="Aantal tickets voor analyse"
+          aria-label={t("agentChat.ticketCountAria")}
         >
           {ANALYZE_LIMIT_OPTIONS.map((limit) => (
             <option key={limit} value={limit}>
-              {getAnalyzeLimitLabel(limit)}
+              {getAnalyzeLimitLabel(limit, undefined, locale)}
             </option>
           ))}
           <option value={ANALYZE_LIMIT_ALL}>
-            {getAnalyzeLimitLabel(ANALYZE_LIMIT_ALL, ticketCount)}
+            {getAnalyzeLimitLabel(ANALYZE_LIMIT_ALL, ticketCount, locale)}
           </option>
         </Select>
       </div>
@@ -90,12 +93,12 @@ function AnalyzeToolbar({
           {isLoading ? (
             <>
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-              Analyseren…
+              {t("agentChat.analyzing")}
             </>
           ) : (
             <>
               <Sparkles className="size-4" aria-hidden="true" />
-              {compact ? "Analyseer" : "Analyseer tickets"}
+              {compact ? t("agentChat.analyze") : t("agentChat.analyzeTickets")}
             </>
           )}
         </Button>
@@ -108,7 +111,7 @@ function AnalyzeToolbar({
             disabled={isLoading}
           >
             <Trash2 className="size-4" aria-hidden="true" />
-            {compact ? "Wissen" : "Nieuwe analyse"}
+            {compact ? t("agentChat.clear") : t("agentChat.newAnalysis")}
           </Button>
         ) : null}
       </div>
@@ -117,6 +120,7 @@ function AnalyzeToolbar({
 }
 
 export function AgentChatPanel({ displayName, sidePanelPresent = false }: AgentChatPanelProps) {
+  const { t, locale } = useLocale();
   const [input, setInput] = useState("");
   const [ticketLimit, setTicketLimit] = useState<AnalyzeTicketLimit>(50);
   const { data: stats, isLoading: isStatsLoading } = useDashboardStats();
@@ -128,7 +132,7 @@ export function AgentChatPanel({ displayName, sidePanelPresent = false }: AgentC
   const hasMessages = messages.length > 0;
 
   function handleAnalyze() {
-    void sendMessage({ text: buildAnalyzePrompt(ticketLimit) });
+    void sendMessage({ text: buildAnalyzePrompt(ticketLimit, locale) });
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -141,7 +145,7 @@ export function AgentChatPanel({ displayName, sidePanelPresent = false }: AgentC
 
   function handleClearChat() {
     if (!hasMessages) return;
-    if (confirm("Chatgeschiedenis wissen en opnieuw beginnen?")) {
+    if (confirm(t("agentChat.clearConfirm"))) {
       clearChat();
     }
   }
@@ -155,11 +159,8 @@ export function AgentChatPanel({ displayName, sidePanelPresent = false }: AgentC
       <CardHeader className="space-y-4 pb-3">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
-            <CardTitle className="text-base">AI-assistent</CardTitle>
-            <CardDescription className="mt-1">
-              Stel vragen over je tickets of start een analyse. Tool-stappen verschijnen tijdens het
-              verwerken.
-            </CardDescription>
+            <CardTitle className="text-base">{t("agentChat.title")}</CardTitle>
+            <CardDescription className="mt-1">{t("agentChat.description")}</CardDescription>
           </div>
           <AnalyzeToolbar
             ticketLimit={ticketLimit}
@@ -199,12 +200,12 @@ export function AgentChatPanel({ displayName, sidePanelPresent = false }: AgentC
           <Input
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            placeholder="Stel een vraag of geef een opdracht aan de AI-assistent…"
+            placeholder={t("agentChat.placeholder")}
             disabled={isLoading}
             className="flex-1"
           />
           <Button type="submit" variant="outline" disabled={isLoading || !input.trim()}>
-            Verstuur
+            {t("common.send")}
           </Button>
         </form>
       </CardContent>

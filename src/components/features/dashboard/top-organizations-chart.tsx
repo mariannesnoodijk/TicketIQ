@@ -12,6 +12,7 @@ import {
 } from "recharts";
 
 import { ChartPeriodRange } from "@/components/features/dashboard/chart-period-range";
+import { useLocale } from "@/components/providers/locale-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartAreaSkeleton } from "@/components/ui/content-skeletons";
 import type { OrganizationPoint } from "@/lib/analytics/aggregateTickets";
@@ -32,6 +33,8 @@ type OrganizationTooltipProps = {
 };
 
 function OrganizationTooltip({ active, payload, period }: OrganizationTooltipProps) {
+  const { t, locale } = useLocale();
+
   if (!active || !payload?.length) {
     return null;
   }
@@ -44,15 +47,19 @@ function OrganizationTooltip({ active, payload, period }: OrganizationTooltipPro
   return (
     <div className="rounded-lg border border-border bg-popover px-3 py-2 text-sm shadow-md">
       <p className="max-w-xs font-medium text-popover-foreground">{point.name}</p>
-      <p className="mt-1 text-xs font-medium text-primary">{formatPeriodDateRange(period)}</p>
-      <p className="mt-1 tabular-nums text-muted-foreground">{point.count} tickets</p>
-      <p className="mt-1 text-xs text-muted-foreground">Klik om tickets van deze organisatie te bekijken</p>
+      <p className="mt-1 text-xs font-medium text-primary">{formatPeriodDateRange(period, locale)}</p>
+      <p className="mt-1 tabular-nums text-muted-foreground">
+        {t("analytics.chartTicketsCount", { count: point.count })}
+      </p>
+      <p className="mt-1 text-xs text-muted-foreground">{t("analytics.orgClickHint")}</p>
     </div>
   );
 }
 
 export function TopOrganizationsChart({ data, period, isLoading }: TopOrganizationsChartProps) {
+  const { t, locale } = useLocale();
   const router = useRouter();
+  const dateRangeLabel = formatPeriodDateRange(period, locale);
 
   function handleBarClick(point: OrganizationPoint) {
     router.push(getTicketsOrganizationFilterUrl(point.name, period));
@@ -62,20 +69,18 @@ export function TopOrganizationsChart({ data, period, isLoading }: TopOrganizati
     <Card>
       <CardHeader className="gap-3">
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <CardTitle>Meest actieve organisaties</CardTitle>
-          <ChartPeriodRange period={period} />
+          <CardTitle>{t("analytics.orgTitle")}</CardTitle>
+          <ChartPeriodRange period={period} locale={locale} />
         </div>
         <CardDescription>
-          Top organisaties binnen {formatPeriodDateRange(period).toLowerCase()}.
+          {t("analytics.orgDescription", { range: dateRangeLabel.toLowerCase() })}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <ChartAreaSkeleton />
         ) : !data?.length ? (
-          <p className="text-sm text-muted-foreground">
-            Geen organisatiegegevens in deze periode.
-          </p>
+          <p className="text-sm text-muted-foreground">{t("analytics.orgEmpty")}</p>
         ) : (
           <div className="h-64 min-w-0">
             <ResponsiveContainer width="100%" height="100%">

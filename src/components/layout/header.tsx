@@ -3,21 +3,15 @@
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { AccountMenu, MobileAccountPanel } from "@/components/layout/account-menu";
+import { LanguageToggle } from "@/components/layout/language-toggle";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { useTranslations } from "@/components/providers/locale-provider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-
-const navItems = [
-  { href: "/dashboard/home", label: "Home" },
-  { href: "/dashboard", label: "Dashboard", exact: true },
-  { href: "/dashboard/tickets", label: "Tickets" },
-  { href: "/dashboard/suggestions", label: "Helpcenter (AI)" },
-  { href: "/dashboard/instellingen", label: "Instellingen" },
-];
 
 function isNavItemActive(pathname: string, href: string, exact?: boolean) {
   return exact
@@ -28,7 +22,19 @@ function isNavItemActive(pathname: string, href: string, exact?: boolean) {
 export function Header() {
   const { user, loading } = useAuth();
   const pathname = usePathname();
+  const t = useTranslations();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  const navItems = useMemo(
+    () => [
+      { href: "/dashboard/home", label: t("nav.home") },
+      { href: "/dashboard", label: t("nav.dashboard"), exact: true },
+      { href: "/dashboard/tickets", label: t("nav.tickets") },
+      { href: "/dashboard/suggestions", label: t("nav.suggestions") },
+      { href: "/dashboard/instellingen", label: t("nav.settings") },
+    ],
+    [t]
+  );
 
   useEffect(() => {
     setMobileNavOpen(false);
@@ -46,7 +52,7 @@ export function Header() {
           </Link>
 
           {user ? (
-            <nav className="hidden items-center gap-1 sm:flex" aria-label="Hoofdnavigatie">
+            <nav className="hidden items-center gap-1 sm:flex" aria-label={t("nav.main")}>
               {navItems.map((item) => {
                 const isActive = isNavItemActive(pathname, item.href, item.exact);
 
@@ -67,7 +73,9 @@ export function Header() {
           ) : null}
         </div>
 
-        <nav className="flex shrink-0 items-center gap-1 sm:gap-2" aria-label="Account">
+        <nav className="flex shrink-0 items-center gap-1 sm:gap-2" aria-label={t("nav.account")}>
+          <LanguageToggle compact className="hidden sm:inline-flex" />
+
           {user ? (
             <>
               <ThemeToggle compact className="hidden sm:inline-flex" />
@@ -78,7 +86,7 @@ export function Header() {
                 className="sm:hidden"
                 aria-expanded={mobileNavOpen}
                 aria-controls="mobile-nav"
-                aria-label={mobileNavOpen ? "Menu sluiten" : "Menu openen"}
+                aria-label={mobileNavOpen ? t("nav.closeMenu") : t("nav.openMenu")}
                 onClick={() => setMobileNavOpen((open) => !open)}
               >
                 {mobileNavOpen ? (
@@ -91,7 +99,7 @@ export function Header() {
           ) : null}
 
           {loading ? (
-            <span className="text-sm text-muted-foreground">Laden…</span>
+            <span className="text-sm text-muted-foreground">{t("auth.loading")}</span>
           ) : user ? (
             <AccountMenu user={user} className="hidden sm:block" />
           ) : (
@@ -101,10 +109,10 @@ export function Header() {
                 href="/login"
                 className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
               >
-                Inloggen
+                {t("auth.login")}
               </Link>
               <Link href="/register" className={cn(buttonVariants({ size: "sm" }))}>
-                Registreren
+                {t("auth.register")}
               </Link>
             </>
           )}
@@ -114,7 +122,7 @@ export function Header() {
       {user ? (
         <nav
           id="mobile-nav"
-          aria-label="Mobiele navigatie"
+          aria-label={t("nav.mobile")}
           aria-hidden={!mobileNavOpen}
           className={cn(
             "grid overflow-hidden border-t border-border transition-[grid-template-rows] duration-200 ease-out sm:hidden",

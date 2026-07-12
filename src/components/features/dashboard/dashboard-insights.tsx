@@ -3,8 +3,12 @@
 import { Building2, CalendarDays, TrendingUp } from "lucide-react";
 import Link from "next/link";
 
+import { useTranslations } from "@/components/providers/locale-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { messages } from "@/lib/i18n";
+import { interpolate } from "@/lib/i18n/interpolate";
+import type { Locale } from "@/lib/i18n/types";
 import { cn } from "@/lib/utils";
 
 export type DashboardInsight = {
@@ -24,6 +28,8 @@ type DashboardInsightsProps = {
 };
 
 export function DashboardInsights({ insights, isLoading, className }: DashboardInsightsProps) {
+  const t = useTranslations();
+
   return (
     <div className={cn("grid items-stretch gap-4 sm:grid-cols-3", className)}>
       {insights.map((insight) => {
@@ -64,7 +70,7 @@ export function DashboardInsights({ insights, isLoading, className }: DashboardI
               </div>
               {insight.href ? (
                 <p className="mt-2 shrink-0 text-xs font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-                  Bekijken →
+                  {t("common.viewArrow")}
                 </p>
               ) : null}
             </CardContent>
@@ -84,7 +90,7 @@ export function DashboardInsights({ insights, isLoading, className }: DashboardI
             key={insight.label}
             href={insight.href}
             className="group block h-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-label={insight.linkLabel ?? `Bekijk ${insight.label}`}
+            aria-label={insight.linkLabel ?? t("common.viewLabel", { label: insight.label })}
           >
             {card}
           </Link>
@@ -94,57 +100,71 @@ export function DashboardInsights({ insights, isLoading, className }: DashboardI
   );
 }
 
-function formatTicketCount(count: number): string {
-  return count === 1 ? "1 ticket" : `${count} tickets`;
+function formatTicketCount(count: number, locale: Locale): string {
+  const dict = messages[locale].dashboard;
+  return count === 1
+    ? interpolate(dict.ticketCount, { count })
+    : interpolate(dict.ticketCountPlural, { count });
 }
 
-export function buildDashboardInsights(input: {
-  busiestWeekdayFullLabel: string | null;
-  busiestWeekdayCount: number;
-  topOrganization: string | null;
-  topOrganizationCount: number;
-  approvedShare: number | null;
-  periodLabel: string;
-  busiestWeekdayHref?: string;
-  topOrganizationHref?: string;
-  approvedHref?: string;
-}): DashboardInsight[] {
+export function buildDashboardInsights(
+  input: {
+    busiestWeekdayFullLabel: string | null;
+    busiestWeekdayCount: number;
+    topOrganization: string | null;
+    topOrganizationCount: number;
+    approvedShare: number | null;
+    periodLabel: string;
+    busiestWeekdayHref?: string;
+    topOrganizationHref?: string;
+    approvedHref?: string;
+  },
+  locale: Locale
+): DashboardInsight[] {
+  const d = messages[locale].dashboard;
+  const common = messages[locale].common;
+
   return [
     {
-      label: "Drukste dag",
-      value: input.busiestWeekdayFullLabel ?? "—",
+      label: d.insightBusiestDay,
+      value: input.busiestWeekdayFullLabel ?? common.dash,
       detail: input.busiestWeekdayFullLabel
-        ? `${formatTicketCount(input.busiestWeekdayCount)} · meeste in ${input.periodLabel.toLowerCase()}`
-        : "Nog geen ticketdata",
+        ? interpolate(d.insightBusiestDetail, {
+            count: formatTicketCount(input.busiestWeekdayCount, locale),
+            period: input.periodLabel.toLowerCase(),
+          })
+        : d.noTicketData,
       icon: CalendarDays,
       tone: "bg-sky-500/12 text-sky-600 dark:text-sky-300",
       href: input.busiestWeekdayFullLabel ? input.busiestWeekdayHref : undefined,
       linkLabel: input.busiestWeekdayFullLabel
-        ? `Bekijk tickets op ${input.busiestWeekdayFullLabel.toLowerCase()}`
+        ? interpolate(d.viewTicketsOnDay, {
+            day: input.busiestWeekdayFullLabel.toLowerCase(),
+          })
         : undefined,
     },
     {
-      label: "Top organisatie",
-      value: input.topOrganization ?? "—",
+      label: d.insightTopOrg,
+      value: input.topOrganization ?? common.dash,
       detail:
         input.topOrganization && input.topOrganizationCount > 0
-          ? `${input.topOrganizationCount} tickets`
-          : "Nog geen organisaties",
+          ? interpolate(d.ticketCountPlural, { count: input.topOrganizationCount })
+          : d.insightNoOrganizations,
       icon: Building2,
       tone: "bg-violet-500/12 text-violet-600 dark:text-violet-300",
       href: input.topOrganization ? input.topOrganizationHref : undefined,
       linkLabel: input.topOrganization
-        ? `Bekijk tickets van ${input.topOrganization}`
+        ? interpolate(d.viewTicketsFromOrg, { name: input.topOrganization })
         : undefined,
     },
     {
-      label: "Goedgekeurd",
-      value: input.approvedShare !== null ? `${input.approvedShare}%` : "—",
-      detail: "Van alle AI-helpcenter-artikelen",
+      label: d.insightApproved,
+      value: input.approvedShare !== null ? `${input.approvedShare}%` : common.dash,
+      detail: d.insightApprovedDetail,
       icon: TrendingUp,
       tone: "bg-emerald-500/12 text-emerald-600 dark:text-emerald-300",
       href: input.approvedShare !== null ? input.approvedHref : undefined,
-      linkLabel: "Bekijk goedgekeurde AI-artikelen",
+      linkLabel: d.viewApprovedArticles,
     },
   ];
 }

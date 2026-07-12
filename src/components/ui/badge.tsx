@@ -76,17 +76,4 @@ export function suggestionStatusBadgeVariant(
   }
 }
 
-export function suggestionStatusLabel(status: string): string {
-  switch (status) {
-    case "approved":
-      return "Goedgekeurd";
-    case "pending":
-      return "In afwachting";
-    case "rejected":
-      return "Afgewezen";
-    case "draft":
-      return "Concept";
-    default:
-      return status;
-  }
-}
+export { suggestionStatusLabel } from "@/lib/i18n/labels";

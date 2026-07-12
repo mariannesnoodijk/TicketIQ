@@ -9,13 +9,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const redirectTo = params.redirect ?? "/dashboard/home";
 
   return (
-    <>
-      {params.error === "auth_callback_failed" ? (
-        <p className="mb-4 rounded-lg bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
-          Inloggen via de bevestigingslink is mislukt. Probeer opnieuw in te loggen.
-        </p>
-      ) : null}
-      <LoginForm redirectTo={redirectTo} />
-    </>
+    <LoginForm
+      redirectTo={redirectTo}
+      authCallbackFailed={params.error === "auth_callback_failed"}
+    />
   );
 }

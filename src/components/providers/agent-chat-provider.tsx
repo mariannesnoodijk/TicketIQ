@@ -12,6 +12,7 @@ import {
 } from "react";
 
 import { clearAgentChatMessages, loadAgentChatMessages, saveAgentChatMessages } from "@/lib/ai/chatStorage";
+import { getStoredLocale } from "@/lib/i18n/types";
 
 type AgentChatContextValue = {
   chat: Chat<UIMessage>;
@@ -38,6 +39,7 @@ export function AgentChatProvider({ children }: { children: ReactNode }) {
       messages: loadAgentChatMessages(),
       transport: new DefaultChatTransport({
         api: "/api/agent",
+        body: () => ({ locale: getStoredLocale() }),
       }),
     });
   }

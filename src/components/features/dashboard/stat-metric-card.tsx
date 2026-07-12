@@ -1,7 +1,10 @@
+"use client";
+
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { useTranslations } from "@/components/providers/locale-provider";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkline } from "@/components/ui/sparkline";
@@ -90,6 +93,7 @@ export function StatMetricCard({
   linkLabel,
   className,
 }: StatMetricCardProps) {
+  const t = useTranslations();
   const styles = toneStyles[tone];
   const hasSparkline = Boolean(sparkline && sparkline.length > 1);
   const hasSegments = Boolean(segments && segments.length > 0);
@@ -171,7 +175,7 @@ export function StatMetricCard({
 
         {href ? (
           <p className="mt-2 shrink-0 text-xs font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-            Bekijken →
+            {t("common.viewArrow")}
           </p>
         ) : null}
       </CardContent>
@@ -191,7 +195,7 @@ export function StatMetricCard({
         "group block h-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         wrapperClass
       )}
-      aria-label={linkLabel ?? `Bekijk ${label}`}
+      aria-label={linkLabel ?? t("common.viewLabel", { label })}
     >
       {card}
     </Link>

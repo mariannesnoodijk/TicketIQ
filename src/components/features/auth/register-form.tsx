@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 
 import { register, type AuthActionState } from "@/app/(auth)/actions";
+import { useLocale, useTranslations } from "@/components/providers/locale-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,15 +13,15 @@ const initialState: AuthActionState = {};
 
 export function RegisterForm() {
   const [state, formAction, pending] = useActionState(register, initialState);
+  const { locale } = useLocale();
+  const t = useTranslations();
 
   return (
     <div className="surface-card rounded-2xl p-6 sm:p-8">
       <div className="mb-6 space-y-2 text-center lg:text-left">
         <p className="brand-logo text-lg font-bold lg:hidden">TicketIQ</p>
-        <h1 className="text-balance text-2xl font-semibold tracking-tight">Registreren</h1>
-        <p className="text-sm text-muted-foreground">
-          Maak een account aan om TicketIQ te gebruiken.
-        </p>
+        <h1 className="text-balance text-2xl font-semibold tracking-tight">{t("auth.registerTitle")}</h1>
+        <p className="text-sm text-muted-foreground">{t("auth.registerSubtitle")}</p>
       </div>
 
       {state.success ? (
@@ -29,33 +30,34 @@ export function RegisterForm() {
         </p>
       ) : (
         <form action={formAction} className="space-y-4">
+          <input type="hidden" name="locale" value={locale} />
           <div className="space-y-2">
-            <Label htmlFor="fullName">Naam</Label>
+            <Label htmlFor="fullName">{t("auth.fullName")}</Label>
             <Input
               id="fullName"
               name="fullName"
               type="text"
               autoComplete="name"
-              placeholder="Je voornaam"
+              placeholder={t("auth.namePlaceholder")}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">E-mailadres</Label>
+            <Label htmlFor="email">{t("auth.email")}</Label>
             <Input
               id="email"
               name="email"
               type="email"
               autoComplete="email"
-              placeholder="naam@bedrijf.nl"
+              placeholder={t("auth.emailPlaceholder")}
               spellCheck={false}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Wachtwoord</Label>
+            <Label htmlFor="password">{t("auth.password")}</Label>
             <Input
               id="password"
               name="password"
@@ -67,7 +69,7 @@ export function RegisterForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Bevestig wachtwoord</Label>
+            <Label htmlFor="confirmPassword">{t("auth.confirmPassword")}</Label>
             <Input
               id="confirmPassword"
               name="confirmPassword"
@@ -85,15 +87,15 @@ export function RegisterForm() {
           ) : null}
 
           <Button type="submit" className="w-full" disabled={pending}>
-            {pending ? "Account aanmaken…" : "Account aanmaken"}
+            {pending ? t("auth.submitRegisterPending") : t("auth.submitRegister")}
           </Button>
         </form>
       )}
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
-        Heb je al een account?{" "}
+        {t("auth.hasAccount")}{" "}
         <Link href="/login" className="font-medium text-primary hover:underline">
-          Inloggen
+          {t("auth.login")}
         </Link>
       </p>
     </div>

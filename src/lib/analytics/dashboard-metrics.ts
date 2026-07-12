@@ -1,6 +1,9 @@
 import type { VolumePoint, WeekdayPoint } from "@/lib/analytics/aggregateTickets";
 import type { CategoryDistribution } from "@/hooks/useTicketCategoryStats";
 import type { SuggestionStatusDistribution } from "@/hooks/useSuggestionStatusStats";
+import { messages } from "@/lib/i18n";
+import { interpolate } from "@/lib/i18n/interpolate";
+import type { Locale } from "@/lib/i18n/types";
 
 export type MetricTrend = {
   direction: "up" | "down" | "neutral";
@@ -12,30 +15,34 @@ export function getVolumeSparkline(series: VolumePoint[] | undefined, maxPoints 
   return series.slice(-maxPoints).map((point) => point.count);
 }
 
-export function getVolumeTrend(series: VolumePoint[] | undefined): MetricTrend | null {
+export function getVolumeTrend(
+  series: VolumePoint[] | undefined,
+  locale: Locale = "nl"
+): MetricTrend | null {
   if (!series || series.length < 4) return null;
 
   const recent = series.slice(-2).reduce((sum, point) => sum + point.count, 0);
   const previous = series.slice(-4, -2).reduce((sum, point) => sum + point.count, 0);
+  const labels = messages[locale].analytics;
 
   if (previous === 0 && recent === 0) {
-    return { direction: "neutral", label: "Stabiel" };
+    return { direction: "neutral", label: labels.trendStable };
   }
 
   if (previous === 0) {
-    return { direction: "up", label: "Nieuwe activiteit" };
+    return { direction: "up", label: labels.trendNewActivity };
   }
 
   const change = Math.round(((recent - previous) / previous) * 100);
 
   if (change > 5) {
-    return { direction: "up", label: `+${change}% vs vorige periode` };
+    return { direction: "up", label: interpolate(labels.trendUp, { change }) };
   }
   if (change < -5) {
-    return { direction: "down", label: `${change}% vs vorige periode` };
+    return { direction: "down", label: interpolate(labels.trendDown, { change }) };
   }
 
-  return { direction: "neutral", label: "Stabiel t.o.v. vorige periode" };
+  return { direction: "neutral", label: labels.trendStablePeriod };
 }
 
 export function getBusiestWeekday(series: WeekdayPoint[] | undefined): string | null {

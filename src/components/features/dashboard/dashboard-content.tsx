@@ -17,6 +17,7 @@ import { TopOrganizationsChart } from "@/components/features/dashboard/top-organ
 import { CategorizeTicketsButton } from "@/components/features/tickets/categorize-tickets-button";
 import { ImportTicketsButton } from "@/components/features/tickets/import-tickets-button";
 import { PageHeader } from "@/components/layout/page-header";
+import { useLocale } from "@/components/providers/locale-provider";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Reveal } from "@/components/ui/reveal";
@@ -31,12 +32,12 @@ import {
   getVolumeSparkline,
   getVolumeTrend,
 } from "@/lib/analytics/dashboard-metrics";
+import { getWeekdayFullLabel } from "@/lib/analytics/dateLabels";
 import {
   DEFAULT_ANALYTICS_PERIOD,
   getPeriodLabel,
   type AnalyticsPeriod,
 } from "@/lib/analytics/period";
-import { getWeekdayFullLabel } from "@/lib/analytics/dateLabels";
 import {
   getSuggestionsPeriodFilterUrl,
   getSuggestionsStatusFilterUrl,
@@ -47,41 +48,49 @@ import {
 } from "@/lib/tickets/filterUrls";
 import { cn } from "@/lib/utils";
 
-const quickLinks = [
-  {
-    href: "/dashboard/home",
-    label: "Naar AI-assistent",
-    description: "Tickets analyseren en helpcenter-artikelen laten genereren",
-  },
-  { href: "/dashboard/tickets", label: "Tickets bekijken", description: "Overzicht en filters" },
-  {
-    href: "/dashboard/suggestions",
-    label: "Helpcenter-artikelen",
-    description: "AI-voorstellen bekijken, bewerken en goedkeuren",
-  },
-  {
-    href: "/dashboard/instellingen",
-    label: "Instellingen",
-    description: "Categorieën en labels beheren",
-  },
-];
-
 export function DashboardContent() {
+  const { t, locale } = useLocale();
   const [period, setPeriod] = useState<AnalyticsPeriod>(DEFAULT_ANALYTICS_PERIOD);
-  const periodLabel = getPeriodLabel(period);
+  const periodLabel = getPeriodLabel(period, locale);
+
+  const quickLinks = useMemo(
+    () => [
+      {
+        href: "/dashboard/home",
+        label: t("dashboard.quickAi"),
+        description: t("dashboard.quickAiDesc"),
+      },
+      {
+        href: "/dashboard/tickets",
+        label: t("dashboard.quickTickets"),
+        description: t("dashboard.quickTicketsDesc"),
+      },
+      {
+        href: "/dashboard/suggestions",
+        label: t("dashboard.quickSuggestions"),
+        description: t("dashboard.quickSuggestionsDesc"),
+      },
+      {
+        href: "/dashboard/instellingen",
+        label: t("dashboard.quickSettings"),
+        description: t("dashboard.quickSettingsDesc"),
+      },
+    ],
+    [t]
+  );
 
   const { data: stats, isLoading: isDashboardStatsLoading } = useDashboardStats();
   const { data: analytics, isLoading: isAnalyticsLoading } = useTicketAnalytics(period);
   const { data: suggestionStats, isLoading: isSuggestionStatsLoading } =
-    useSuggestionStatusStats(period);
+    useSuggestionStatusStats(period, locale);
 
   const ticketSparkline = useMemo(
     () => getVolumeSparkline(analytics?.volumeSeries),
     [analytics?.volumeSeries]
   );
   const ticketTrend = useMemo(
-    () => getVolumeTrend(analytics?.volumeSeries),
-    [analytics?.volumeSeries]
+    () => getVolumeTrend(analytics?.volumeSeries, locale),
+    [analytics?.volumeSeries, locale]
   );
   const busiestWeekdayPoint = useMemo(
     () => getBusiestWeekdayPoint(analytics?.weekdaySeries),
@@ -103,24 +112,27 @@ export function DashboardContent() {
   const topOrganization = analytics?.topOrganizations[0];
   const insights = useMemo(
     () =>
-      buildDashboardInsights({
-        busiestWeekdayFullLabel: busiestWeekdayPoint
-          ? getWeekdayFullLabel(busiestWeekdayPoint.weekday)
-          : null,
-        busiestWeekdayCount: busiestWeekdayPoint?.count ?? 0,
-        topOrganization: topOrganization?.name ?? null,
-        topOrganizationCount: topOrganization?.count ?? 0,
-        approvedShare,
-        periodLabel,
-        busiestWeekdayHref: busiestWeekdayPoint
-          ? getTicketsWeekdayFilterUrl(busiestWeekdayPoint.weekday, period)
-          : undefined,
-        topOrganizationHref: topOrganization
-          ? getTicketsOrganizationFilterUrl(topOrganization.name, period)
-          : undefined,
-        approvedHref: getSuggestionsStatusFilterUrl("approved", period),
-      }),
-    [approvedShare, busiestWeekdayPoint, period, periodLabel, topOrganization]
+      buildDashboardInsights(
+        {
+          busiestWeekdayFullLabel: busiestWeekdayPoint
+            ? getWeekdayFullLabel(busiestWeekdayPoint.weekday, locale)
+            : null,
+          busiestWeekdayCount: busiestWeekdayPoint?.count ?? 0,
+          topOrganization: topOrganization?.name ?? null,
+          topOrganizationCount: topOrganization?.count ?? 0,
+          approvedShare,
+          periodLabel,
+          busiestWeekdayHref: busiestWeekdayPoint
+            ? getTicketsWeekdayFilterUrl(busiestWeekdayPoint.weekday, period)
+            : undefined,
+          topOrganizationHref: topOrganization
+            ? getTicketsOrganizationFilterUrl(topOrganization.name, period)
+            : undefined,
+          approvedHref: getSuggestionsStatusFilterUrl("approved", period),
+        },
+        locale
+      ),
+    [approvedShare, busiestWeekdayPoint, locale, period, periodLabel, topOrganization]
   );
 
   const categoriesHref = topCategoryItem
@@ -131,9 +143,9 @@ export function DashboardContent() {
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10">
       <Reveal>
         <PageHeader
-          eyebrow="Dashboard"
-          title="Statistieken"
-          description="Bekijk trends in je supporttickets, importeer nieuwe data en spring snel door naar tickets, helpcenter-artikelen of de AI-assistent op Home."
+          eyebrow={t("dashboard.eyebrow")}
+          title={t("dashboard.title")}
+          description={t("dashboard.description")}
         />
       </Reveal>
 
@@ -144,7 +156,7 @@ export function DashboardContent() {
       <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Reveal delay={120} className="h-full">
           <StatMetricCard
-            label={`Tickets (${periodLabel.toLowerCase()})`}
+            label={t("dashboard.ticketsInPeriod", { period: periodLabel.toLowerCase() })}
             value={analytics?.ticketCount ?? 0}
             icon={Ticket}
             tone="primary"
@@ -152,42 +164,46 @@ export function DashboardContent() {
             sparkline={ticketSparkline}
             trend={ticketTrend}
             href={getTicketsPeriodFilterUrl(period)}
-            linkLabel={`Bekijk tickets in ${periodLabel.toLowerCase()}`}
+            linkLabel={t("dashboard.viewTicketsInPeriod", {
+              period: periodLabel.toLowerCase(),
+            })}
           />
         </Reveal>
         <Reveal delay={200} className="h-full">
           <StatMetricCard
-            label="Categorieën"
+            label={t("dashboard.categories")}
             value={stats?.categories ?? 0}
             icon={FolderTree}
             tone="teal"
             isLoading={isDashboardStatsLoading}
             hint={
-              topCategory ? `Meest voorkomend: ${topCategory}` : "Nog geen categorieën toegewezen"
+              topCategory
+                ? t("dashboard.mostCommon", { name: topCategory })
+                : t("dashboard.noCategoriesAssigned")
             }
             href={categoriesHref}
             linkLabel={
               topCategoryItem
-                ? `Bekijk tickets in categorie ${topCategory}`
-                : "Beheer categorieën"
+                ? t("dashboard.viewCategoryTickets", { name: topCategory })
+                : t("dashboard.manageCategories")
             }
           />
         </Reveal>
         <Reveal delay={280} className="h-full">
           <StatMetricCard
-            label="Labels"
+            label={t("dashboard.labels")}
             value={stats?.labels ?? 0}
             icon={Tags}
             tone="amber"
             isLoading={isDashboardStatsLoading}
-            hint="Tags voor ticketsegmentatie"
+            hint={t("dashboard.labelsHint")}
             href="/dashboard/instellingen#labels"
-            linkLabel="Beheer labels"
+            linkLabel={t("dashboard.manageLabels")}
           />
         </Reveal>
         <Reveal delay={360} className="h-full">
           <StatMetricCard
-            label={`AI-artikelen (${periodLabel.toLowerCase()})`}
+            label={t("dashboard.aiArticlesInPeriod", { period: periodLabel.toLowerCase() })}
             value={suggestionStats?.total ?? 0}
             icon={Sparkles}
             tone="rose"
@@ -195,11 +211,13 @@ export function DashboardContent() {
             segments={suggestionSegments}
             hint={
               approvedShare !== null
-                ? `${approvedShare}% goedgekeurd in deze periode`
+                ? t("dashboard.approvedShare", { percent: approvedShare })
                 : undefined
             }
             href={getSuggestionsPeriodFilterUrl(period)}
-            linkLabel={`Bekijk AI-artikelen in ${periodLabel.toLowerCase()}`}
+            linkLabel={t("dashboard.viewAiArticlesInPeriod", {
+              period: periodLabel.toLowerCase(),
+            })}
           />
         </Reveal>
       </div>
@@ -239,11 +257,8 @@ export function DashboardContent() {
       ) ? (
         <Card>
           <CardHeader>
-            <CardTitle>Tickets categoriseren</CardTitle>
-            <CardDescription>
-              Tickets die vóór de automatische categorisatie zijn geïmporteerd, krijgen pas een
-              categorie na onderstaande actie (of opnieuw importeren).
-            </CardDescription>
+            <CardTitle>{t("dashboard.categorizeTitle")}</CardTitle>
+            <CardDescription>{t("dashboard.categorizeDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             <CategorizeTicketsButton />
@@ -254,11 +269,8 @@ export function DashboardContent() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Ticket-import</CardTitle>
-            <CardDescription>
-              Haal ~500 supporttickets op uit de DummyJSON Custom Response API. Bestaande tickets
-              worden overgeslagen.
-            </CardDescription>
+            <CardTitle>{t("dashboard.importTitle")}</CardTitle>
+            <CardDescription>{t("dashboard.importDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             <ImportTicketsButton />
@@ -267,7 +279,7 @@ export function DashboardContent() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Snelle acties</CardTitle>
+            <CardTitle>{t("dashboard.quickActions")}</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             {quickLinks.map((link) => (

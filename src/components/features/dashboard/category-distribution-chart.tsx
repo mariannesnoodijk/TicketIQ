@@ -12,6 +12,7 @@ import {
 } from "recharts";
 
 import { ChartPeriodRange } from "@/components/features/dashboard/chart-period-range";
+import { useLocale } from "@/components/providers/locale-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChartSkeleton } from "@/components/ui/content-skeletons";
 import type { CategoryDistribution } from "@/hooks/useTicketCategoryStats";
@@ -40,6 +41,8 @@ type CategoryTooltipProps = {
 };
 
 function CategoryTooltip({ active, payload, period }: CategoryTooltipProps) {
+  const { t, locale } = useLocale();
+
   if (!active || !payload?.length) {
     return null;
   }
@@ -52,11 +55,11 @@ function CategoryTooltip({ active, payload, period }: CategoryTooltipProps) {
   return (
     <div className="rounded-lg border border-border bg-popover px-3 py-2 text-sm shadow-md">
       <p className="font-medium text-popover-foreground">{slice.name}</p>
-      <p className="mt-1 text-xs font-medium text-primary">{formatPeriodDateRange(period)}</p>
+      <p className="mt-1 text-xs font-medium text-primary">{formatPeriodDateRange(period, locale)}</p>
       <p className="mt-1 tabular-nums text-muted-foreground">
-        {slice.value} tickets · {slice.percentage}%
+        {t("analytics.chartTicketsCount", { count: slice.value })} · {slice.percentage}%
       </p>
-      <p className="mt-1 text-xs text-muted-foreground">Klik om tickets te bekijken</p>
+      <p className="mt-1 text-xs text-muted-foreground">{t("analytics.categoryClickHint")}</p>
     </div>
   );
 }
@@ -66,6 +69,7 @@ export function CategoryDistributionChart({
   isLoading,
   period,
 }: CategoryDistributionChartProps) {
+  const { t, locale } = useLocale();
   const router = useRouter();
 
   const chartData: ChartSlice[] =
@@ -94,31 +98,30 @@ export function CategoryDistributionChart({
     }
   }
 
-  const dateRangeLabel = formatPeriodDateRange(period);
+  const dateRangeLabel = formatPeriodDateRange(period, locale);
 
   return (
     <Card>
       <CardHeader className="gap-3">
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <CardTitle>Tickets per categorie</CardTitle>
-          <ChartPeriodRange period={period} />
+          <CardTitle>{t("analytics.categoryTitle")}</CardTitle>
+          <ChartPeriodRange period={period} locale={locale} />
         </div>
         <CardDescription>
-          Verdeling van {isLoading ? "…" : (data?.total ?? 0)} tickets binnen{" "}
-          {dateRangeLabel.toLowerCase()}. Klik op een categorie in het diagram of de lijst om de
-          bijbehorende tickets te openen.
+          {t("analytics.categoryDescriptionLong", {
+            count: isLoading ? "…" : (data?.total ?? 0),
+            range: dateRangeLabel.toLowerCase(),
+          })}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <PieChartSkeleton />
         ) : !data?.total ? (
-          <p className="text-sm text-muted-foreground">
-            Nog geen tickets. Importeer eerst tickets om de verdeling te zien.
-          </p>
+          <p className="text-sm text-muted-foreground">{t("analytics.categoryEmptyNoTickets")}</p>
         ) : chartData.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            Tickets gevonden, maar nog geen categorieverdeling beschikbaar.
+            {t("analytics.categoryEmptyNoDistribution")}
           </p>
         ) : (
           <div className="grid gap-6 lg:grid-cols-2">

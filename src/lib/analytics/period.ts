@@ -1,7 +1,11 @@
+import { getAnalyticsPeriodLabel } from "@/lib/i18n/labels";
+import type { Locale } from "@/lib/i18n/types";
+
 export type AnalyticsPeriod = "day" | "week" | "30d" | "90d" | "year" | "all";
 
 export const DEFAULT_ANALYTICS_PERIOD: AnalyticsPeriod = "30d";
 
+/** @deprecated Use getAnalyticsPeriodOptions(locale) for localized labels */
 export const ANALYTICS_PERIOD_OPTIONS: { value: AnalyticsPeriod; label: string }[] = [
   { value: "day", label: "Dag" },
   { value: "week", label: "Week" },
@@ -40,8 +44,8 @@ export function getDateRangeForPeriod(
   }
 }
 
-export function getPeriodLabel(period: AnalyticsPeriod): string {
-  return ANALYTICS_PERIOD_OPTIONS.find((option) => option.value === period)?.label ?? period;
+export function getPeriodLabel(period: AnalyticsPeriod, locale: Locale = "nl"): string {
+  return getAnalyticsPeriodLabel(period, locale);
 }
 
 export type VolumeBucketUnit = "day" | "week" | "month";

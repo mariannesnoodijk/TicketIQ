@@ -5,15 +5,13 @@ import { isToolUIPart } from "ai";
 import { Bot, ChevronDown, Loader2, User, Wrench } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { useLocale } from "@/components/providers/locale-provider";
 import { Badge } from "@/components/ui/badge";
+import {
+  agentToolLabel,
+  agentToolStateLabel,
+} from "@/lib/i18n/labels";
 import { cn } from "@/lib/utils";
-
-const TOOL_LABELS: Record<string, string> = {
-  fetchTickets: "Tickets ophalen",
-  assignTicketCategory: "Tickets categoriseren",
-  findExistingSuggestions: "Duplicaatcheck",
-  saveSuggestion: "Suggestie opslaan",
-};
 
 type IndexedPart = {
   part: UIMessage["parts"][number];
@@ -24,30 +22,14 @@ type MessageSegment =
   | { kind: "text"; part: Extract<UIMessage["parts"][number], { type: "text" }>; index: number }
   | { kind: "tools"; parts: IndexedPart[] };
 
-function getToolLabel(toolName: string): string {
-  return TOOL_LABELS[toolName] ?? toolName;
-}
-
-function getToolStateLabel(state: string): string {
-  switch (state) {
-    case "input-streaming":
-      return "Bezig…";
-    case "input-available":
-      return "Uitvoeren…";
-    case "output-available":
-      return "Klaar";
-    case "output-error":
-      return "Fout";
-    default:
-      return state;
-  }
-}
-
 function isToolRunning(state: string): boolean {
   return state === "input-streaming" || state === "input-available";
 }
 
-function getToolDetailContent(part: UIMessage["parts"][number]): string | null {
+function getToolDetailContent(
+  part: UIMessage["parts"][number],
+  t: ReturnType<typeof useLocale>["t"]
+): string | null {
   if (!isToolUIPart(part)) {
     return null;
   }
@@ -68,8 +50,10 @@ function getToolDetailContent(part: UIMessage["parts"][number]): string | null {
       (output.source === "database" || output.source === "api")
     ) {
       const sourceLabel =
-        output.source === "api" ? "DummyJSON API" : "geïmporteerde database";
-      return `${output.count} ticket${output.count === 1 ? "" : "s"} uit ${sourceLabel}`;
+        output.source === "api" ? t("agentChat.sourceApi") : t("agentChat.sourceDatabase");
+      const key =
+        output.count === 1 ? "agentChat.fetchResult" : "agentChat.fetchResultPlural";
+      return t(key, { count: output.count, source: sourceLabel });
     }
 
     if ("message" in output && typeof output.message === "string") {
@@ -103,7 +87,6 @@ function segmentMessageParts(parts: UIMessage["parts"]): MessageSegment[] {
   return segments;
 }
 
-/** Toon antwoord vóór ingeklapte tool-stappen zodat de gebruiker niet hoeft te scrollen. */
 function orderSegmentsForDisplay(segments: MessageSegment[], isAssistant: boolean): MessageSegment[] {
   if (!isAssistant) {
     return segments;
@@ -119,15 +102,6 @@ function orderSegmentsForDisplay(segments: MessageSegment[], isAssistant: boolea
   return [...textSegments, ...toolSegments];
 }
 
-function formatToolGroupSummary(count: number, hasError: boolean, anyRunning: boolean): string {
-  if (anyRunning) {
-    return count === 1 ? "AI-stap bezig…" : `${count} AI-stappen bezig…`;
-  }
-
-  const stepLabel = count === 1 ? "AI-stap uitgevoerd" : `${count} AI-stappen uitgevoerd`;
-  return hasError ? `${stepLabel} (met fout)` : stepLabel;
-}
-
 function ToolMessageHeader({
   toolName,
   state,
@@ -137,6 +111,7 @@ function ToolMessageHeader({
   state: string;
   output: unknown;
 }) {
+  const { t, locale } = useLocale();
   const saved =
     toolName === "saveSuggestion" &&
     output &&
@@ -159,12 +134,12 @@ function ToolMessageHeader({
       ) : (
         <Wrench className="size-3.5 text-muted-foreground" aria-hidden />
       )}
-      <span className="font-medium">{getToolLabel(toolName)}</span>
+      <span className="font-medium">{agentToolLabel(toolName, locale)}</span>
       <Badge variant="outline" className="text-xs">
-        {getToolStateLabel(state)}
+        {agentToolStateLabel(state, locale)}
       </Badge>
-      {saved ? <Badge className="text-xs">Opgeslagen</Badge> : null}
-      {categorized ? <Badge className="text-xs">Gecategoriseerd</Badge> : null}
+      {saved ? <Badge className="text-xs">{t("agentChat.saved")}</Badge> : null}
+      {categorized ? <Badge className="text-xs">{t("agentChat.categorized")}</Badge> : null}
     </div>
   );
 }
@@ -178,6 +153,8 @@ function ToolMessagePart({
   messageId: string;
   index: number;
 }) {
+  const { t } = useLocale();
+
   if (!isToolUIPart(part)) {
     return null;
   }
@@ -186,7 +163,7 @@ function ToolMessagePart({
   const output = "output" in part ? part.output : undefined;
   const state = part.state;
   const running = isToolRunning(state);
-  const detailContent = getToolDetailContent(part);
+  const detailContent = getToolDetailContent(part, t);
   const isCollapsible = state === "output-available" && detailContent !== null;
 
   if (running) {
@@ -246,12 +223,28 @@ function ToolMessagePart({
 }
 
 function ToolStepsGroup({ parts, messageId }: { parts: IndexedPart[]; messageId: string }) {
+  const { t } = useLocale();
   const anyRunning = parts.some(
     ({ part }) => isToolUIPart(part) && isToolRunning(part.state)
   );
   const hasError = parts.some(
     ({ part }) => isToolUIPart(part) && part.state === "output-error"
   );
+
+  const summaryLabel = anyRunning
+    ? parts.length === 1
+      ? t("agentChat.toolStepInProgress")
+      : t("agentChat.toolStepsInProgress", { count: parts.length })
+    : hasError
+      ? t("agentChat.toolStepsDoneWithError", {
+          label:
+            parts.length === 1
+              ? t("agentChat.toolStepDone")
+              : t("agentChat.toolStepsDone", { count: parts.length }),
+        })
+      : parts.length === 1
+        ? t("agentChat.toolStepDone")
+        : t("agentChat.toolStepsDone", { count: parts.length });
 
   if (anyRunning) {
     return (
@@ -270,17 +263,17 @@ function ToolStepsGroup({ parts, messageId }: { parts: IndexedPart[]; messageId:
     >
       <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 [&::-webkit-details-marker]:hidden">
         <Wrench className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-        <span className="font-medium">{formatToolGroupSummary(parts.length, hasError, false)}</span>
+        <span className="font-medium">{summaryLabel}</span>
         {hasError ? (
           <Badge variant="outline" className="text-xs text-destructive">
-            Fout
+            {t("agentChat.stateError")}
           </Badge>
         ) : (
           <Badge variant="outline" className="text-xs">
-            Klaar
+            {t("agentChat.stateDone")}
           </Badge>
         )}
-        <span className="text-xs text-muted-foreground">Klik voor details</span>
+        <span className="text-xs text-muted-foreground">{t("agentChat.clickForDetails")}</span>
         <ChevronDown
           className="ml-auto size-4 shrink-0 text-muted-foreground transition-transform group-open/tools:rotate-180"
           aria-hidden
@@ -326,6 +319,7 @@ function TextMessagePart({
 }
 
 function UserChatMessage({ message }: { message: UIMessage }) {
+  const { t } = useLocale();
   const textParts = message.parts.filter(
     (part): part is Extract<UIMessage["parts"][number], { type: "text" }> =>
       part.type === "text" && part.text.trim().length > 0
@@ -338,7 +332,7 @@ function UserChatMessage({ message }: { message: UIMessage }) {
   return (
     <div className="flex items-end justify-end gap-2.5">
       <div className="max-w-[min(85%,34rem)] space-y-1">
-        <p className="text-right text-xs font-medium text-muted-foreground">Jij</p>
+        <p className="text-right text-xs font-medium text-muted-foreground">{t("agentChat.you")}</p>
         <div className="space-y-2">
           {textParts.map((part, index) => (
             <TextMessagePart
@@ -362,6 +356,7 @@ function UserChatMessage({ message }: { message: UIMessage }) {
 }
 
 function AssistantChatMessage({ message }: { message: UIMessage }) {
+  const { t } = useLocale();
   const segments = orderSegmentsForDisplay(segmentMessageParts(message.parts), true);
 
   return (
@@ -373,7 +368,7 @@ function AssistantChatMessage({ message }: { message: UIMessage }) {
         <Bot className="size-4" aria-hidden="true" />
       </div>
       <div className="min-w-0 flex-1 space-y-2 rounded-xl border border-primary/15 bg-muted/50 px-4 py-3 shadow-sm">
-        <p className="text-xs font-semibold tracking-wide text-primary">TicketIQ AI</p>
+        <p className="text-xs font-semibold tracking-wide text-primary">{t("agentChat.brand")}</p>
         {segments.map((segment, segmentIndex) => {
           if (segment.kind === "text") {
             return (
@@ -415,6 +410,8 @@ type AgentChatMessagesProps = {
 };
 
 export function AgentChatMessages({ messages, isLoading, emptyContent }: AgentChatMessagesProps) {
+  const { t } = useLocale();
+
   if (messages.length === 0 && !isLoading) {
     if (emptyContent) {
       return <div className="flex flex-1 flex-col">{emptyContent}</div>;
@@ -423,10 +420,8 @@ export function AgentChatMessages({ messages, isLoading, emptyContent }: AgentCh
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border px-6 py-12 text-center">
         <Bot className="size-8 text-muted-foreground" aria-hidden="true" />
-        <p className="text-sm font-medium">Nog geen berichten</p>
-        <p className="max-w-md text-sm text-muted-foreground">
-          Start een analyse of stel een vraag aan de AI-assistent.
-        </p>
+        <p className="text-sm font-medium">{t("agentChat.noMessages")}</p>
+        <p className="max-w-md text-sm text-muted-foreground">{t("agentChat.emptyHint")}</p>
       </div>
     );
   }
@@ -445,7 +440,7 @@ export function AgentChatMessages({ messages, isLoading, emptyContent }: AgentCh
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           </div>
           <div className="rounded-xl border border-primary/15 bg-muted/50 px-4 py-3 text-sm text-muted-foreground shadow-sm">
-            TicketIQ AI analyseert…
+            {t("agentChat.analyzingProgress")}
           </div>
         </div>
       ) : null}

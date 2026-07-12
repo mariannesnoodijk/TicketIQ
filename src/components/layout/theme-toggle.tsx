@@ -2,18 +2,13 @@
 
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { useTranslations } from "@/components/providers/locale-provider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type ThemeOption = "light" | "dark" | "system";
-
-const THEME_OPTIONS: { value: ThemeOption; label: string; icon: typeof Sun }[] = [
-  { value: "light", label: "Licht", icon: Sun },
-  { value: "dark", label: "Donker", icon: Moon },
-  { value: "system", label: "Systeem", icon: Monitor },
-];
 
 type ThemeToggleProps = {
   className?: string;
@@ -23,7 +18,17 @@ type ThemeToggleProps = {
 
 export function ThemeToggle({ className, compact = false }: ThemeToggleProps) {
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const t = useTranslations();
   const [mounted, setMounted] = useState(false);
+
+  const themeOptions = useMemo(
+    (): { value: ThemeOption; label: string; icon: typeof Sun }[] => [
+      { value: "light", label: t("theme.light"), icon: Sun },
+      { value: "dark", label: t("theme.dark"), icon: Moon },
+      { value: "system", label: t("theme.system"), icon: Monitor },
+    ],
+    [t]
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -43,7 +48,7 @@ export function ThemeToggle({ className, compact = false }: ThemeToggleProps) {
         size="icon"
         className={className}
         onClick={() => setTheme(isDark ? "light" : "dark")}
-        aria-label={isDark ? "Schakel naar licht thema" : "Schakel naar donker thema"}
+        aria-label={isDark ? t("theme.switchToLight") : t("theme.switchToDark")}
       >
         {isDark ? (
           <Moon className="size-4" aria-hidden="true" />
@@ -55,8 +60,8 @@ export function ThemeToggle({ className, compact = false }: ThemeToggleProps) {
   }
 
   return (
-    <div className={cn("flex flex-wrap gap-1", className)} role="group" aria-label="Thema">
-      {THEME_OPTIONS.map(({ value, label, icon: Icon }) => (
+    <div className={cn("flex flex-wrap gap-1", className)} role="group" aria-label={t("theme.group")}>
+      {themeOptions.map(({ value, label, icon: Icon }) => (
         <Button
           key={value}
           type="button"

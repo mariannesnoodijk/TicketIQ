@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
+import { useLocale } from "@/components/providers/locale-provider";
 import type { CategoryDistribution } from "@/hooks/useTicketCategoryStats";
 import {
   buildCategoryDistribution,
@@ -30,10 +31,11 @@ export type TicketAnalytics = {
 };
 
 export function useTicketAnalytics(period: AnalyticsPeriod) {
+  const { locale } = useLocale();
   const supabase = createClient();
 
   return useQuery({
-    queryKey: queryKeys.stats.ticketAnalytics(period),
+    queryKey: queryKeys.stats.ticketAnalytics(period, locale),
     queryFn: async (): Promise<TicketAnalytics> => {
       const range = getDateRangeForPeriod(period);
       const bucketUnit = getVolumeBucketUnit(period);
@@ -54,10 +56,10 @@ export function useTicketAnalytics(period: AnalyticsPeriod) {
 
       return {
         ticketCount: filteredTickets.length,
-        volumeSeries: buildVolumeSeries(filteredTickets, bucketUnit),
-        weekdaySeries: buildWeekdayDistribution(filteredTickets),
-        topOrganizations: buildTopOrganizations(filteredTickets),
-        categoryDistribution: buildCategoryDistribution(filteredTickets, categories),
+        volumeSeries: buildVolumeSeries(filteredTickets, bucketUnit, locale),
+        weekdaySeries: buildWeekdayDistribution(filteredTickets, locale),
+        topOrganizations: buildTopOrganizations(filteredTickets, locale),
+        categoryDistribution: buildCategoryDistribution(filteredTickets, categories, locale),
       };
     },
   });

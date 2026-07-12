@@ -2,7 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { suggestionStatusLabel } from "@/components/ui/badge";
+import { suggestionStatusLabel } from "@/lib/i18n/labels";
+import type { Locale } from "@/lib/i18n/types";
 import { getDateRangeForPeriod, type AnalyticsPeriod } from "@/lib/analytics/period";
 import { queryKeys } from "@/lib/queryKeys";
 import { createClient } from "@/lib/supabase/client";
@@ -53,11 +54,11 @@ function filterSuggestionsByPeriod(
   });
 }
 
-export function useSuggestionStatusStats(period: AnalyticsPeriod) {
+export function useSuggestionStatusStats(period: AnalyticsPeriod, locale: Locale = "nl") {
   const supabase = createClient();
 
   return useQuery({
-    queryKey: queryKeys.stats.suggestionStatusDistribution(period),
+    queryKey: queryKeys.stats.suggestionStatusDistribution(period, locale),
     queryFn: async (): Promise<SuggestionStatusDistribution> => {
       const { data, error } = await supabase.from("ai_suggestions").select("status, created_at");
 
@@ -76,7 +77,7 @@ export function useSuggestionStatusStats(period: AnalyticsPeriod) {
         const count = countByStatus.get(status) ?? 0;
         return {
           status,
-          name: suggestionStatusLabel(status),
+          name: suggestionStatusLabel(status, locale),
           color: STATUS_COLORS[status],
           count,
           percentage: total > 0 ? Math.round((count / total) * 100) : 0,

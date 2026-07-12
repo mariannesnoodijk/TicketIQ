@@ -110,6 +110,7 @@ Live: **https://ticket-iq-zeta.vercel.app**
 | `npm run build` | Productie-build |
 | `npm start` | Productie-server (na `build`) |
 | `npm run lint` | ESLint |
+| `npm run test` | Vitest (unit tests voor kernlogica) |
 
 ## Tech stack
 

@@ -12,6 +12,7 @@ import {
 } from "recharts";
 
 import { ChartPeriodRange } from "@/components/features/dashboard/chart-period-range";
+import { useLocale } from "@/components/providers/locale-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChartSkeleton } from "@/components/ui/content-skeletons";
 import type { SuggestionStatusDistribution } from "@/hooks/useSuggestionStatusStats";
@@ -41,6 +42,8 @@ type SuggestionTooltipProps = {
 };
 
 function SuggestionTooltip({ active, payload, period }: SuggestionTooltipProps) {
+  const { t, locale } = useLocale();
+
   if (!active || !payload?.length) {
     return null;
   }
@@ -53,11 +56,16 @@ function SuggestionTooltip({ active, payload, period }: SuggestionTooltipProps) 
   return (
     <div className="rounded-lg border border-border bg-popover px-3 py-2 text-sm shadow-md">
       <p className="font-medium text-popover-foreground">{slice.name}</p>
-      <p className="mt-1 text-xs font-medium text-primary">{formatPeriodDateRange(period)}</p>
+      <p className="mt-1 text-xs font-medium text-primary">{formatPeriodDateRange(period, locale)}</p>
       <p className="mt-1 tabular-nums text-muted-foreground">
-        {slice.value} AI-helpcenter-artikelen · {slice.percentage}%
+        {t("analytics.suggestionStatusTooltipCount", {
+          count: slice.value,
+          percentage: slice.percentage,
+        })}
       </p>
-      <p className="mt-1 text-xs text-muted-foreground">Klik om artikelen met deze status te bekijken</p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        {t("analytics.suggestionStatusClickHint")}
+      </p>
     </div>
   );
 }
@@ -67,6 +75,7 @@ export function SuggestionStatusChart({
   isLoading,
   period,
 }: SuggestionStatusChartProps) {
+  const { t, locale } = useLocale();
   const router = useRouter();
 
   const chartData: ChartSlice[] =
@@ -91,19 +100,20 @@ export function SuggestionStatusChart({
     }
   }
 
-  const dateRangeLabel = formatPeriodDateRange(period);
+  const dateRangeLabel = formatPeriodDateRange(period, locale);
 
   return (
     <Card>
       <CardHeader className="gap-3">
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <CardTitle>AI-helpcenter-artikelen per status</CardTitle>
-          <ChartPeriodRange period={period} />
+          <CardTitle>{t("analytics.suggestionStatusTitle")}</CardTitle>
+          <ChartPeriodRange period={period} locale={locale} />
         </div>
         <CardDescription>
-          Verdeling van {isLoading ? "…" : (data?.total ?? 0)} door AI voorgestelde
-          helpcenter-artikelen binnen {dateRangeLabel.toLowerCase()}. Klik op een status om de
-          bijbehorende artikelen in de lijst hieronder te filteren.
+          {t("analytics.suggestionStatusDescriptionLong", {
+            count: isLoading ? "…" : (data?.total ?? 0),
+            range: dateRangeLabel.toLowerCase(),
+          })}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -111,8 +121,7 @@ export function SuggestionStatusChart({
           <PieChartSkeleton />
         ) : !data?.total ? (
           <p className="text-sm text-muted-foreground">
-            Nog geen AI-helpcenter-artikelen in deze periode. Pas de periode aan of start een
-            AI-analyse.
+            {t("analytics.suggestionStatusEmptyAnalyze")}
           </p>
         ) : (
           <div className="grid gap-6 lg:grid-cols-2">

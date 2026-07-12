@@ -9,6 +9,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/layout/page-header";
+import { useLocale } from "@/components/providers/locale-provider";
 import { Select } from "@/components/ui/select";
 import { useCategories } from "@/hooks/useCategories";
 import { useLabels } from "@/hooks/useLabels";
@@ -17,17 +18,22 @@ import {
   useRemoveTicketLabel,
 } from "@/hooks/useTicketLabels";
 import { useDeleteTicket, useTicket, useUpdateTicket } from "@/hooks/useTickets";
+import { getIntlLocale, ticketPriorityLabel, ticketStatusLabel } from "@/lib/i18n/labels";
 import { cn } from "@/lib/utils";
 
-function formatDate(value: string | null) {
+function formatDate(
+  value: string | null,
+  locale: ReturnType<typeof useLocale>["locale"]
+) {
   if (!value) return "—";
-  return new Intl.DateTimeFormat("nl-NL", {
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
     dateStyle: "full",
     timeStyle: "short",
   }).format(new Date(value));
 }
 
 export function TicketDetailContent({ ticketId }: { ticketId: string }) {
+  const { t, locale } = useLocale();
   const router = useRouter();
   const { data: ticket, isLoading, error } = useTicket(ticketId);
   const { data: categories } = useCategories();
@@ -40,18 +46,18 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
   const [selectedLabelId, setSelectedLabelId] = useState("");
 
   if (isLoading) {
-    return <p className="px-4 py-10 text-sm text-muted-foreground">Ticket laden…</p>;
+    return <p className="px-4 py-10 text-sm text-muted-foreground">{t("tickets.loadingDetail")}</p>;
   }
 
   if (error || !ticket) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10">
-        <p className="text-destructive">Ticket niet gevonden.</p>
+        <p className="text-destructive">{t("tickets.notFound")}</p>
         <Link
           href="/dashboard/tickets"
           className={cn(buttonVariants({ variant: "outline" }), "mt-4 inline-flex")}
         >
-          Terug naar overzicht
+          {t("common.backToOverview")}
         </Link>
       </div>
     );
@@ -63,7 +69,7 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
   const availableLabels = (labels ?? []).filter((l) => !ticketLabelIds.has(l.id));
 
   async function handleDelete() {
-    if (!confirm("Weet je zeker dat je dit ticket wilt verwijderen?")) return;
+    if (!confirm(t("tickets.deleteConfirm"))) return;
     await deleteTicket.mutateAsync(ticketId);
     router.push("/dashboard/tickets");
   }
@@ -77,9 +83,10 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-10">
       <PageHeader
-        eyebrow="Tickets"
+        eyebrow={t("tickets.pageEyebrow")}
         title={ticket.subject}
         backHref="/dashboard/tickets"
+        backLabel={t("common.backToOverview")}
         size="compact"
         actions={
           <Button
@@ -88,23 +95,27 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
             onClick={handleDelete}
             disabled={deleteTicket.isPending}
           >
-            Verwijderen
+            {t("common.delete")}
           </Button>
         }
       />
       <div className="flex flex-wrap gap-2">
-        <Badge variant={statusBadgeVariant(ticket.status)}>{ticket.status}</Badge>
-        <Badge variant={priorityBadgeVariant(ticket.priority)}>{ticket.priority}</Badge>
+        <Badge variant={statusBadgeVariant(ticket.status)}>
+          {ticketStatusLabel(ticket.status, locale)}
+        </Badge>
+        <Badge variant={priorityBadgeVariant(ticket.priority)}>
+          {ticketPriorityLabel(ticket.priority, locale)}
+        </Badge>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Ticketgegevens</CardTitle>
+          <CardTitle>{t("tickets.details")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status">{t("tickets.statusField")}</Label>
               <Select
                 id="status"
                 value={ticket.status}
@@ -112,13 +123,13 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
                   updateTicket.mutate({ id: ticketId, status: e.target.value })
                 }
               >
-                <option value="open">Open</option>
-                <option value="pending">In behandeling</option>
-                <option value="closed">Gesloten</option>
+                <option value="open">{ticketStatusLabel("open", locale)}</option>
+                <option value="pending">{ticketStatusLabel("pending", locale)}</option>
+                <option value="closed">{ticketStatusLabel("closed", locale)}</option>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="priority">Prioriteit</Label>
+              <Label htmlFor="priority">{t("tickets.priorityField")}</Label>
               <Select
                 id="priority"
                 value={ticket.priority}
@@ -126,14 +137,14 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
                   updateTicket.mutate({ id: ticketId, priority: e.target.value })
                 }
               >
-                <option value="low">Laag</option>
-                <option value="normal">Normaal</option>
-                <option value="high">Hoog</option>
-                <option value="urgent">Urgent</option>
+                <option value="low">{ticketPriorityLabel("low", locale)}</option>
+                <option value="normal">{ticketPriorityLabel("normal", locale)}</option>
+                <option value="high">{ticketPriorityLabel("high", locale)}</option>
+                <option value="urgent">{ticketPriorityLabel("urgent", locale)}</option>
               </Select>
             </div>
             <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="category">Categorie</Label>
+              <Label htmlFor="category">{t("tickets.category")}</Label>
               <Select
                 id="category"
                 value={ticket.category_id ?? ""}
@@ -144,7 +155,7 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
                   })
                 }
               >
-                <option value="">Geen categorie</option>
+                <option value="">{t("tickets.noCategory")}</option>
                 {(categories ?? []).map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -155,14 +166,20 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
           </div>
 
           <div className="space-y-2 text-sm text-muted-foreground">
-            <p>Ontvangen: {formatDate(ticket.ticket_created_at)}</p>
-            <p>Kanaal: {ticket.channel ?? "—"}</p>
-            <p>Extern ID: {ticket.external_id}</p>
+            <p>
+              {t("tickets.received")} {formatDate(ticket.ticket_created_at, locale)}
+            </p>
+            <p>
+              {t("tickets.channel")} {ticket.channel ?? t("common.dash")}
+            </p>
+            <p>
+              {t("tickets.externalId")} {ticket.external_id}
+            </p>
           </div>
 
           {ticket.body ? (
             <div className="space-y-2">
-              <Label>Bericht</Label>
+              <Label>{t("tickets.message")}</Label>
               <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm whitespace-pre-wrap">
                 {ticket.body}
               </div>
@@ -173,7 +190,7 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Labels</CardTitle>
+          <CardTitle>{t("tickets.labels")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">
@@ -187,14 +204,14 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
                     onClick={() =>
                       removeLabel.mutate({ ticketId, labelId: tl.label_id })
                     }
-                    aria-label={`Verwijder label ${tl.labels?.name}`}
+                    aria-label={t("tickets.removeLabel", { name: tl.labels?.name ?? "" })}
                   >
                     ×
                   </button>
                 </Badge>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">Geen labels gekoppeld.</p>
+              <p className="text-sm text-muted-foreground">{t("tickets.noLabels")}</p>
             )}
           </div>
 
@@ -205,7 +222,7 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
                 value={selectedLabelId}
                 onChange={(e) => setSelectedLabelId(e.target.value)}
               >
-                <option value="">Label toevoegen…</option>
+                <option value="">{t("tickets.addLabel")}</option>
                 {availableLabels.map((l) => (
                   <option key={l.id} value={l.id}>
                     {l.name}
@@ -213,7 +230,7 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
                 ))}
               </Select>
               <Button onClick={handleAddLabel} disabled={!selectedLabelId || addLabel.isPending}>
-                Toevoegen
+                {t("common.add")}
               </Button>
             </div>
           ) : null}

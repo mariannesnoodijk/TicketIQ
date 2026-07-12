@@ -2,17 +2,23 @@ import { CalendarRange } from "lucide-react";
 
 import { formatPeriodDateRange } from "@/lib/analytics/dateLabels";
 import type { AnalyticsPeriod } from "@/lib/analytics/period";
+import type { Locale } from "@/lib/i18n/types";
 import { cn } from "@/lib/utils";
 
 type ChartPeriodRangeProps = {
   period: AnalyticsPeriod;
+  locale: Locale;
   className?: string;
-  /** Optioneel: specifiek datumbereik i.p.v. de analytics-periode (bijv. één staaf). */
   overrideLabel?: string;
 };
 
-export function ChartPeriodRange({ period, className, overrideLabel }: ChartPeriodRangeProps) {
-  const label = overrideLabel ?? formatPeriodDateRange(period);
+export function ChartPeriodRange({
+  period,
+  locale,
+  className,
+  overrideLabel,
+}: ChartPeriodRangeProps) {
+  const label = overrideLabel ?? formatPeriodDateRange(period, locale);
 
   return (
     <div

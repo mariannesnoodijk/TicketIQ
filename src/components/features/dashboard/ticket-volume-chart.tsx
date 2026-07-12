@@ -12,6 +12,7 @@ import {
 } from "recharts";
 
 import { ChartPeriodRange } from "@/components/features/dashboard/chart-period-range";
+import { useLocale } from "@/components/providers/locale-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartAreaSkeleton } from "@/components/ui/content-skeletons";
 import type { VolumePoint } from "@/lib/analytics/aggregateTickets";
@@ -32,6 +33,8 @@ type VolumeTooltipProps = {
 };
 
 function VolumeTooltip({ active, payload }: VolumeTooltipProps) {
+  const { t } = useLocale();
+
   if (!active || !payload?.length) {
     return null;
   }
@@ -44,8 +47,10 @@ function VolumeTooltip({ active, payload }: VolumeTooltipProps) {
   return (
     <div className="rounded-lg border border-border bg-popover px-3 py-2 text-sm shadow-md">
       <p className="text-xs font-medium text-primary">{point.dateRangeLabel}</p>
-      <p className="mt-1 font-medium text-popover-foreground">{point.count} tickets</p>
-      <p className="mt-1 text-xs text-muted-foreground">Klik om tickets in dit bereik te bekijken</p>
+      <p className="mt-1 font-medium text-popover-foreground">
+        {t("analytics.chartTicketsCount", { count: point.count })}
+      </p>
+      <p className="mt-1 text-xs text-muted-foreground">{t("analytics.volumeClickHint")}</p>
     </div>
   );
 }
@@ -56,8 +61,9 @@ export function TicketVolumeChart({
   ticketCount,
   isLoading,
 }: TicketVolumeChartProps) {
+  const { t, locale } = useLocale();
   const router = useRouter();
-  const dateRangeLabel = formatPeriodDateRange(period);
+  const dateRangeLabel = formatPeriodDateRange(period, locale);
   const bucketUnit = getVolumeBucketUnit(period);
 
   function handleBarClick(point: VolumePoint) {
@@ -68,22 +74,23 @@ export function TicketVolumeChart({
     <Card>
       <CardHeader className="gap-3">
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <CardTitle>Tickets over tijd</CardTitle>
-          <ChartPeriodRange period={period} />
+          <CardTitle>{t("analytics.volumeTitle")}</CardTitle>
+          <ChartPeriodRange period={period} locale={locale} />
         </div>
         <CardDescription>
           {isLoading
-            ? "…"
-            : `${ticketCount} tickets binnen ${dateRangeLabel.toLowerCase()}. Elke staaf is een datumbereik — klik voor de tickets.`}
+            ? t("common.loading")
+            : t("analytics.volumeDescriptionLong", {
+                count: ticketCount,
+                range: dateRangeLabel.toLowerCase(),
+              })}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <ChartAreaSkeleton />
         ) : !data?.length ? (
-          <p className="text-sm text-muted-foreground">
-            Geen tickets met een datum in deze periode. Pas de periode aan of importeer tickets.
-          </p>
+          <p className="text-sm text-muted-foreground">{t("analytics.volumeEmptyImport")}</p>
         ) : (
           <div className="h-72 min-w-0">
             <ResponsiveContainer width="100%" height="100%">

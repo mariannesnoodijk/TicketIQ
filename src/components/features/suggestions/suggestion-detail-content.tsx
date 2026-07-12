@@ -15,20 +15,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/layout/page-header";
+import { useLocale } from "@/components/providers/locale-provider";
 import {
   useAiSuggestion,
   useDeleteAiSuggestion,
   useReviseAiSuggestion,
   useUpdateAiSuggestion,
 } from "@/hooks/useAiSuggestions";
+import { getIntlLocale } from "@/lib/i18n/labels";
 import type { AiSuggestionMetadata, SuggestionStatus } from "@/types";
 import { cn } from "@/lib/utils";
 
 type SuggestionWithCategory = NonNullable<ReturnType<typeof useAiSuggestion>["data"]>;
 
-function formatDate(value: string | null) {
+function formatDate(
+  value: string | null,
+  locale: ReturnType<typeof useLocale>["locale"]
+) {
   if (!value) return "—";
-  return new Intl.DateTimeFormat("nl-NL", {
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
     dateStyle: "full",
     timeStyle: "short",
   }).format(new Date(value));
@@ -68,6 +73,7 @@ function SuggestionEditForm({
   onSaved: () => void;
   onEditStart: () => void;
 }) {
+  const { t } = useLocale();
   const updateSuggestion = useUpdateAiSuggestion();
   const [title, setTitle] = useState(suggestion.title);
   const [summary, setSummary] = useState(suggestion.summary ?? "");
@@ -91,11 +97,11 @@ function SuggestionEditForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Suggestie bewerken</CardTitle>
+        <CardTitle>{t("suggestions.editTitle")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="title">Titel</Label>
+          <Label htmlFor="title">{t("suggestions.titleField")}</Label>
           <Input
             id="title"
             value={title}
@@ -106,7 +112,7 @@ function SuggestionEditForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="summary">Samenvatting</Label>
+          <Label htmlFor="summary">{t("suggestions.summary")}</Label>
           <Input
             id="summary"
             value={summary}
@@ -117,7 +123,7 @@ function SuggestionEditForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="content">Artikelinhoud</Label>
+          <Label htmlFor="content">{t("suggestions.content")}</Label>
           <textarea
             id="content"
             value={content}
@@ -137,10 +143,10 @@ function SuggestionEditForm({
           {updateSuggestion.isPending ? (
             <>
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-              Opslaan…
+              {t("common.saving")}
             </>
           ) : (
-            "Opslaan"
+            t("common.save")
           )}
         </Button>
       </CardContent>
@@ -155,6 +161,7 @@ function RejectSuggestionCard({
   onReject: (feedback: string) => Promise<void>;
   isPending: boolean;
 }) {
+  const { t } = useLocale();
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -163,7 +170,7 @@ function RejectSuggestionCard({
     const trimmed = feedback.trim();
 
     if (trimmed.length < 10) {
-      setError("Beschrijf minimaal wat er ontbreekt of beter moet (10+ tekens).");
+      setError(t("suggestions.rejectFeedbackMinLength"));
       return;
     }
 
@@ -175,16 +182,13 @@ function RejectSuggestionCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Afwijzen met feedback</CardTitle>
-        <CardDescription>
-          Leg uit wat er ontbreekt of anders moet. Daarna kun je de AI een nieuw artikel laten
-          schrijven.
-        </CardDescription>
+        <CardTitle>{t("suggestions.rejectTitle")}</CardTitle>
+        <CardDescription>{t("suggestions.rejectDescriptionLong")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="reject-feedback">Aanpassingen voorstellen</Label>
+            <Label htmlFor="reject-feedback">{t("suggestions.rejectFeedbackLabel")}</Label>
             <textarea
               id="reject-feedback"
               value={feedback}
@@ -193,13 +197,13 @@ function RejectSuggestionCard({
                 setError(null);
               }}
               rows={4}
-              placeholder="Bijv.: voeg concrete stappen toe voor het resetten van het wachtwoord, inclusief waar de gebruiker moet klikken."
+              placeholder={t("suggestions.rejectPlaceholderLong")}
               className="flex w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
           <Button type="submit" variant="destructive" disabled={isPending}>
-            Afwijzen en feedback opslaan
+            {t("suggestions.rejectSubmitFull")}
           </Button>
         </form>
       </CardContent>
@@ -216,6 +220,7 @@ function ReviseSuggestionCard({
   onRevise: (feedback: string) => Promise<void>;
   isPending: boolean;
 }) {
+  const { t } = useLocale();
   const [feedback, setFeedback] = useState(initialFeedback);
   const [error, setError] = useState<string | null>(null);
 
@@ -224,7 +229,7 @@ function ReviseSuggestionCard({
     const trimmed = feedback.trim();
 
     if (trimmed.length < 10) {
-      setError("Feedback moet minimaal 10 tekens bevatten.");
+      setError(t("suggestions.rejectMinLength"));
       return;
     }
 
@@ -235,16 +240,13 @@ function ReviseSuggestionCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Nieuw artikel laten schrijven</CardTitle>
-        <CardDescription>
-          De AI herschrijft dit artikel op basis van je feedback en de bron-supporttickets, met
-          concrete stappen en secties.
-        </CardDescription>
+        <CardTitle>{t("suggestions.reviseTitle")}</CardTitle>
+        <CardDescription>{t("suggestions.reviseDescriptionLong")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="revise-feedback">Feedback voor AI</Label>
+            <Label htmlFor="revise-feedback">{t("suggestions.reviseFeedbackLabel")}</Label>
             <textarea
               id="revise-feedback"
               value={feedback}
@@ -261,10 +263,10 @@ function ReviseSuggestionCard({
             {isPending ? (
               <>
                 <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-                Artikel wordt geschreven…
+                {t("suggestions.reviseWriting")}
               </>
             ) : (
-              "Nieuw artikel laten schrijven"
+              t("suggestions.reviseSubmitLong")
             )}
           </Button>
         </form>
@@ -274,6 +276,7 @@ function ReviseSuggestionCard({
 }
 
 export function SuggestionDetailContent({ suggestionId }: { suggestionId: string }) {
+  const { t, locale } = useLocale();
   const router = useRouter();
   const { data: suggestion, isLoading, error } = useAiSuggestion(suggestionId);
   const updateSuggestion = useUpdateAiSuggestion();
@@ -290,18 +293,20 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
   }
 
   if (isLoading) {
-    return <p className="px-4 py-10 text-sm text-muted-foreground">Suggestie laden…</p>;
+    return (
+      <p className="px-4 py-10 text-sm text-muted-foreground">{t("suggestions.loadingDetail")}</p>
+    );
   }
 
   if (error || !suggestion) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10">
-        <p className="text-destructive">Suggestie niet gevonden.</p>
+        <p className="text-destructive">{t("suggestions.notFound")}</p>
         <Link
           href="/dashboard/suggestions"
           className={cn(buttonVariants({ variant: "outline" }), "mt-4 inline-flex")}
         >
-          Terug naar overzicht
+          {t("common.backToOverview")}
         </Link>
       </div>
     );
@@ -317,7 +322,11 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
     if (status === "rejected") return;
 
     await updateSuggestion.mutateAsync({ id: suggestionId, status });
-    showFeedback(`Status gewijzigd naar ${suggestionStatusLabel(status).toLowerCase()}.`);
+    showFeedback(
+      t("suggestions.statusChanged", {
+        status: suggestionStatusLabel(status, locale).toLowerCase(),
+      })
+    );
   }
 
   async function handleReject(feedback: string) {
@@ -340,18 +349,20 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
       },
     });
 
-    showFeedback("Suggestie afgewezen. Je kunt nu een nieuw artikel laten schrijven.");
+    showFeedback(t("suggestions.rejectedSuccess"));
   }
 
   async function handleRevise(feedback: string) {
     const result = await reviseSuggestion.mutateAsync({ id: suggestionId, feedback });
     showFeedback(
-      `Nieuw artikel gegenereerd: "${result.title ?? currentSuggestion.title}". Status staat op concept.`
+      t("suggestions.revisedSuccess", {
+        title: result.title ?? currentSuggestion.title,
+      })
     );
   }
 
   async function handleDelete() {
-    if (!confirm("Weet je zeker dat je deze suggestie wilt verwijderen?")) return;
+    if (!confirm(t("suggestions.deleteConfirm"))) return;
     await deleteSuggestion.mutateAsync(suggestionId);
     router.push("/dashboard/suggestions");
   }
@@ -359,9 +370,10 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-10">
       <PageHeader
-        eyebrow="Helpcenter"
+        eyebrow={t("suggestions.pageEyebrow")}
         title={suggestion.title}
         backHref="/dashboard/suggestions"
+        backLabel={t("common.backToOverview")}
         size="compact"
         actions={
           <Button
@@ -370,13 +382,13 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
             onClick={handleDelete}
             disabled={deleteSuggestion.isPending}
           >
-            Verwijderen
+            {t("common.delete")}
           </Button>
         }
       />
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant={suggestionStatusBadgeVariant(suggestion.status)}>
-          {suggestionStatusLabel(suggestion.status)}
+          {suggestionStatusLabel(suggestion.status, locale)}
         </Badge>
         {suggestion.categories ? (
           <Badge variant="outline">{suggestion.categories.name}</Badge>
@@ -397,13 +409,13 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
       <SuggestionEditForm
         key={`${suggestion.id}-${suggestion.updated_at}`}
         suggestion={suggestion}
-        onSaved={() => showFeedback("Artikel opgeslagen.", "success")}
+        onSaved={() => showFeedback(t("suggestions.savedSuccess"), "success")}
         onEditStart={clearFeedback}
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Status wijzigen</CardTitle>
+          <CardTitle>{t("suggestions.changeStatus")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           {(["approved", "pending", "draft"] as const).map((status) => (
@@ -414,7 +426,7 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
               onClick={() => handleStatusChange(status)}
               disabled={updateSuggestion.isPending || suggestion.status === status}
             >
-              {suggestionStatusLabel(status)}
+              {suggestionStatusLabel(status, locale)}
             </Button>
           ))}
         </CardContent>
@@ -429,26 +441,32 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
 
       <Card>
         <CardHeader>
-          <CardTitle>Metadata</CardTitle>
+          <CardTitle>{t("suggestions.metadata")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-muted-foreground">
-          <p>Aangemaakt: {formatDate(suggestion.created_at)}</p>
-          <p>Bijgewerkt: {formatDate(suggestion.updated_at)}</p>
+          <p>
+            {t("suggestions.created")} {formatDate(suggestion.created_at, locale)}
+          </p>
+          <p>
+            {t("suggestions.updated")} {formatDate(suggestion.updated_at, locale)}
+          </p>
           {metadata?.revisionFeedback ? (
             <div className="space-y-1">
-              <p className="font-medium text-foreground">Laatste feedback</p>
+              <p className="font-medium text-foreground">{t("suggestions.lastFeedback")}</p>
               <p className="whitespace-pre-wrap">{metadata.revisionFeedback}</p>
             </div>
           ) : null}
           {metadata?.revisionHistory?.length ? (
             <div className="space-y-1">
-              <p className="font-medium text-foreground">Revisiegeschiedenis</p>
+              <p className="font-medium text-foreground">{t("suggestions.revisionHistory")}</p>
               <ul className="space-y-2">
                 {metadata.revisionHistory.map((entry, index) => (
                   <li key={`${entry.at}-${index}`} className="rounded-lg border border-border p-2">
                     <p className="text-xs text-muted-foreground">
-                      {entry.action === "rejected" ? "Afgewezen" : "Herschreven"} —{" "}
-                      {formatDate(entry.at)}
+                      {entry.action === "rejected"
+                        ? t("suggestions.revisionRejected")
+                        : t("suggestions.revisionRevised")}{" "}
+                      — {formatDate(entry.at, locale)}
                     </p>
                     <p className="whitespace-pre-wrap">{entry.feedback}</p>
                   </li>
@@ -458,18 +476,20 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
           ) : null}
           {metadata?.reasoning ? (
             <div className="space-y-1">
-              <p className="font-medium text-foreground">AI-redenering</p>
+              <p className="font-medium text-foreground">{t("suggestions.aiReasoning")}</p>
               <p className="whitespace-pre-wrap">{metadata.reasoning}</p>
             </div>
           ) : null}
           {metadata?.sourceTicketIds?.length ? (
             <div className="space-y-1">
-              <p className="font-medium text-foreground">Bron-tickets (extern ID)</p>
+              <p className="font-medium text-foreground">{t("suggestions.sourceTickets")}</p>
               <p>{metadata.sourceTicketIds.join(", ")}</p>
             </div>
           ) : null}
           {metadata?.confidence != null ? (
-            <p>Vertrouwen: {Math.round(metadata.confidence * 100)}%</p>
+            <p>
+              {t("suggestions.confidence")} {Math.round(metadata.confidence * 100)}%
+            </p>
           ) : null}
         </CardContent>
       </Card>

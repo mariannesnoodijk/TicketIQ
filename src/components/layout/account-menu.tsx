@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 
 import { logout } from "@/app/(auth)/actions";
+import { useTranslations } from "@/components/providers/locale-provider";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { getUserDisplayName } from "@/lib/auth/displayName";
@@ -29,6 +30,7 @@ function getInitials(displayName: string | undefined, email: string | undefined)
 }
 
 export function AccountMenu({ user, className }: AccountMenuProps) {
+  const t = useTranslations();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const displayName = getUserDisplayName(user.user_metadata);
@@ -96,7 +98,9 @@ export function AccountMenu({ user, className }: AccountMenuProps) {
               {getInitials(displayName, email)}
             </span>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{displayName ?? "Account"}</p>
+              <p className="truncate text-sm font-medium">
+                {displayName ?? t("common.accountFallback")}
+              </p>
               <p className="truncate text-xs text-muted-foreground">{email}</p>
             </div>
           </div>
@@ -112,12 +116,14 @@ export function AccountMenu({ user, className }: AccountMenuProps) {
               onClick={() => setOpen(false)}
             >
               <Settings className="size-4" aria-hidden="true" />
-              Instellingen
+              {t("nav.settings")}
             </Link>
           </div>
 
           <div className="border-t border-border px-2 py-2">
-            <p className="mb-2 px-1 text-xs font-medium text-muted-foreground">Weergave</p>
+            <p className="mb-2 px-1 text-xs font-medium text-muted-foreground">
+              {t("common.display")}
+            </p>
             <ThemeToggle />
           </div>
 
@@ -131,7 +137,7 @@ export function AccountMenu({ user, className }: AccountMenuProps) {
                 className="h-9 w-full justify-start gap-2"
               >
                 <LogOut className="size-4" aria-hidden="true" />
-                Uitloggen
+                {t("auth.logout")}
               </Button>
             </form>
           </div>
@@ -146,6 +152,7 @@ type MobileAccountPanelProps = {
 };
 
 export function MobileAccountPanel({ user }: MobileAccountPanelProps) {
+  const t = useTranslations();
   const displayName = getUserDisplayName(user.user_metadata);
   const email = user.email ?? "";
 
@@ -159,20 +166,22 @@ export function MobileAccountPanel({ user }: MobileAccountPanelProps) {
           {getInitials(displayName, email)}
         </span>
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium">{displayName ?? "Account"}</p>
+          <p className="truncate text-sm font-medium">
+            {displayName ?? t("common.accountFallback")}
+          </p>
           <p className="truncate text-xs text-muted-foreground">{email}</p>
         </div>
       </div>
 
       <div className="px-1">
-        <p className="mb-2 text-xs font-medium text-muted-foreground">Weergave</p>
+        <p className="mb-2 text-xs font-medium text-muted-foreground">{t("common.display")}</p>
         <ThemeToggle />
       </div>
 
       <form action={logout} className="px-1">
         <Button type="submit" variant="outline" size="sm" className="w-full gap-2">
           <LogOut className="size-4" aria-hidden="true" />
-          Uitloggen
+          {t("auth.logout")}
         </Button>
       </form>
     </div>
