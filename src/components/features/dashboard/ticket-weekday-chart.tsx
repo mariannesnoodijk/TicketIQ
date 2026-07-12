@@ -62,7 +62,7 @@ export function TicketWeekdayChart({ data, period, isLoading }: TicketWeekdayCha
   }
 
   return (
-    <Card>
+    <Card id="weekday-chart" className="scroll-mt-24">
       <CardHeader className="gap-3">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <CardTitle>Tickets per weekdag</CardTitle>

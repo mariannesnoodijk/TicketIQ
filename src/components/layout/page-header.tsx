@@ -35,7 +35,9 @@ export function PageHeader({
           ← {backLabel}
         </Link>
       ) : null}
-      <p className="text-sm font-medium text-primary">{eyebrow}</p>
+      <p className="inline-flex w-fit items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-0.5 text-xs font-semibold uppercase tracking-wider text-primary">
+        {eyebrow}
+      </p>
       <h1
         className={cn(
           "text-balance font-semibold tracking-tight",

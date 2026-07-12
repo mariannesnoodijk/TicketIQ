@@ -70,6 +70,23 @@ function periodToCreatedRange(period: AnalyticsPeriod): Pick<TicketListFilters, 
   };
 }
 
+export function getTicketsPeriodFilterUrl(period: AnalyticsPeriod): string {
+  return getTicketsFilterUrl(periodToCreatedRange(period));
+}
+
+export function getSuggestionsPeriodFilterUrl(period: AnalyticsPeriod): string {
+  const params = new URLSearchParams();
+  const range = getDateRangeForPeriod(period);
+
+  if (range.start) {
+    params.set("createdFrom", range.start.toISOString());
+    params.set("createdTo", range.end.toISOString());
+  }
+
+  const qs = params.toString();
+  return qs ? `${SUGGESTIONS_PATH}?${qs}` : SUGGESTIONS_PATH;
+}
+
 export function getTicketsVolumeFilterUrl(
   bucketKey: string,
   unit: VolumeBucketUnit
