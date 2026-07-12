@@ -80,7 +80,7 @@ export function SuggestionsPageContent() {
           <Label htmlFor="search">Zoeken</Label>
           <Input
             id="search"
-            placeholder="Titel..."
+            placeholder="Titel…"
             value={filters.search ?? ""}
             onChange={(e) =>
               setFilters((f) => ({ ...f, search: e.target.value || undefined }))

@@ -68,8 +68,8 @@ export function CategoriesPageContent() {
           <Button onClick={handleSeed} disabled={seedDefaults.isPending} variant="outline">
             {seedDefaults.isPending ? (
               <>
-                <Loader2 className="size-4 animate-spin" />
-                Bezig...
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                Bezig…
               </>
             ) : (
               "Standaard categorieën aanmaken"
@@ -113,7 +113,7 @@ export function CategoriesPageContent() {
 
       <div className="rounded-xl border border-border bg-card">
         {isLoading ? (
-          <p className="p-6 text-sm text-muted-foreground">Categorieën laden...</p>
+          <p className="p-6 text-sm text-muted-foreground">Categorieën laden…</p>
         ) : error ? (
           <p className="p-6 text-sm text-destructive">Kon categorieën niet laden.</p>
         ) : !categories?.length ? (
@@ -137,6 +137,7 @@ export function CategoriesPageContent() {
                     <span
                       className="inline-block size-4 rounded-full border border-border"
                       style={{ backgroundColor: category.color ?? "#6366f1" }}
+                      aria-hidden="true"
                     />
                   </TableCell>
                   <TableCell className="text-right">
@@ -151,7 +152,7 @@ export function CategoriesPageContent() {
                       disabled={deleteCategory.isPending}
                       aria-label={`Verwijder ${category.name}`}
                     >
-                      <Trash2 className="size-4" />
+                      <Trash2 className="size-4" aria-hidden="true" />
                     </Button>
                   </TableCell>
                 </TableRow>

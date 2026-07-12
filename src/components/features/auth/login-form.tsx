@@ -20,7 +20,7 @@ export function LoginForm({ redirectTo = "/dashboard/home" }: LoginFormProps) {
   return (
     <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
       <div className="mb-6 space-y-2 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Inloggen</h1>
+        <h1 className="text-balance text-2xl font-semibold tracking-tight">Inloggen</h1>
         <p className="text-sm text-muted-foreground">
           Log in om supporttickets te analyseren met TicketIQ.
         </p>
@@ -37,6 +37,7 @@ export function LoginForm({ redirectTo = "/dashboard/home" }: LoginFormProps) {
             type="email"
             autoComplete="email"
             placeholder="naam@bedrijf.nl"
+            spellCheck={false}
             required
           />
         </div>
@@ -59,7 +60,7 @@ export function LoginForm({ redirectTo = "/dashboard/home" }: LoginFormProps) {
         ) : null}
 
         <Button type="submit" className="w-full" disabled={pending}>
-          {pending ? "Bezig met inloggen..." : "Inloggen"}
+          {pending ? "Bezig met inloggen…" : "Inloggen"}
         </Button>
       </form>
 

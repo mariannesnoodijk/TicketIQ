@@ -355,7 +355,7 @@ function UserChatMessage({ message }: { message: UIMessage }) {
         className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm"
         aria-hidden
       >
-        <User className="size-4" />
+        <User className="size-4" aria-hidden="true" />
       </div>
     </div>
   );
@@ -370,7 +370,7 @@ function AssistantChatMessage({ message }: { message: UIMessage }) {
         className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"
         aria-hidden
       >
-        <Bot className="size-4" />
+        <Bot className="size-4" aria-hidden="true" />
       </div>
       <div className="min-w-0 flex-1 space-y-2 rounded-xl border border-primary/15 bg-muted/50 px-4 py-3 shadow-sm">
         <p className="text-xs font-semibold tracking-wide text-primary">TicketIQ AI</p>
@@ -422,7 +422,7 @@ export function AgentChatMessages({ messages, isLoading, emptyContent }: AgentCh
 
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border px-6 py-12 text-center">
-        <Bot className="size-8 text-muted-foreground" />
+        <Bot className="size-8 text-muted-foreground" aria-hidden="true" />
         <p className="text-sm font-medium">Nog geen berichten</p>
         <p className="max-w-md text-sm text-muted-foreground">
           Start een analyse of stel een vraag aan de AI-assistent.
@@ -442,7 +442,7 @@ export function AgentChatMessages({ messages, isLoading, emptyContent }: AgentCh
             className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"
             aria-hidden
           >
-            <Loader2 className="size-4 animate-spin" />
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           </div>
           <div className="rounded-xl border border-primary/15 bg-muted/50 px-4 py-3 text-sm text-muted-foreground shadow-sm">
             TicketIQ AI analyseert…

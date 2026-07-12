@@ -17,9 +17,14 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <AppLayoutShell>
+      <a href="#main-content" className="skip-link">
+        Naar hoofdinhoud
+      </a>
       <div className="flex min-h-full flex-1 flex-col">
         <Header />
-        <main className="flex-1">{children}</main>
+        <main id="main-content" className="flex-1">
+          {children}
+        </main>
       </div>
     </AppLayoutShell>
   );

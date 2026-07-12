@@ -86,8 +86,35 @@
   * {
     border-color: var(--border);
   }
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
   body {
     background-color: var(--background);
     color: var(--foreground);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .animate-spin {
+      animation: none;
+    }
+  }
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    z-index: 100;
+    border-radius: var(--radius-lg);
+    background-color: var(--background);
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+    outline: 2px solid var(--ring);
+  }
+  .skip-link:focus {
+    left: 1rem;
+    top: 1rem;
   }
 }

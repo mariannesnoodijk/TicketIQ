@@ -94,12 +94,12 @@ export function AgentChatPanel({ displayName }: AgentChatPanelProps) {
             <Button onClick={handleAnalyze} disabled={isLoading || !hasTickets}>
               {isLoading ? (
                 <>
-                  <Loader2 className="size-4 animate-spin" />
+                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
                   Analyseren…
                 </>
               ) : (
                 <>
-                  <Sparkles className="size-4" />
+                  <Sparkles className="size-4" aria-hidden="true" />
                   Analyseer tickets
                 </>
               )}
@@ -111,7 +111,7 @@ export function AgentChatPanel({ displayName }: AgentChatPanelProps) {
                 onClick={handleClearChat}
                 disabled={isLoading}
               >
-                <Trash2 className="size-4" />
+                <Trash2 className="size-4" aria-hidden="true" />
                 Nieuwe analyse
               </Button>
             ) : null}

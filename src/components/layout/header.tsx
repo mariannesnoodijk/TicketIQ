@@ -88,7 +88,7 @@ export function Header() {
           ) : null}
 
           {loading ? (
-            <span className="text-sm text-muted-foreground">Laden...</span>
+            <span className="text-sm text-muted-foreground">Laden…</span>
           ) : user ? (
             <LogoutButton />
           ) : (

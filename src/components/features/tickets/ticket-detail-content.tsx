@@ -40,7 +40,7 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
   const [selectedLabelId, setSelectedLabelId] = useState("");
 
   if (isLoading) {
-    return <p className="px-4 py-10 text-sm text-muted-foreground">Ticket laden...</p>;
+    return <p className="px-4 py-10 text-sm text-muted-foreground">Ticket laden…</p>;
   }
 
   if (error || !ticket) {
@@ -205,7 +205,7 @@ export function TicketDetailContent({ ticketId }: { ticketId: string }) {
                 value={selectedLabelId}
                 onChange={(e) => setSelectedLabelId(e.target.value)}
               >
-                <option value="">Label toevoegen...</option>
+                <option value="">Label toevoegen…</option>
                 {availableLabels.map((l) => (
                   <option key={l.id} value={l.id}>
                     {l.name}

@@ -136,8 +136,8 @@ function SuggestionEditForm({
         >
           {updateSuggestion.isPending ? (
             <>
-              <Loader2 className="size-4 animate-spin" />
-              Opslaan...
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+              Opslaan…
             </>
           ) : (
             "Opslaan"
@@ -260,8 +260,8 @@ function ReviseSuggestionCard({
           <Button type="submit" disabled={isPending}>
             {isPending ? (
               <>
-                <Loader2 className="size-4 animate-spin" />
-                Artikel wordt geschreven...
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                Artikel wordt geschreven…
               </>
             ) : (
               "Nieuw artikel laten schrijven"
@@ -290,7 +290,7 @@ export function SuggestionDetailContent({ suggestionId }: { suggestionId: string
   }
 
   if (isLoading) {
-    return <p className="px-4 py-10 text-sm text-muted-foreground">Suggestie laden...</p>;
+    return <p className="px-4 py-10 text-sm text-muted-foreground">Suggestie laden…</p>;
   }
 
   if (error || !suggestion) {

@@ -33,8 +33,8 @@ export function CategorizeTicketsButton() {
       >
         {categorizeTickets.isPending ? (
           <>
-            <Loader2 className="size-4 animate-spin" />
-            Categoriseren...
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            Categoriseren…
           </>
         ) : (
           "Categoriseer bestaande tickets"

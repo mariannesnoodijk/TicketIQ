@@ -65,7 +65,7 @@ export function LabelsPageContent() {
 
       <div className="rounded-xl border border-border bg-card">
         {isLoading ? (
-          <p className="p-6 text-sm text-muted-foreground">Labels laden...</p>
+          <p className="p-6 text-sm text-muted-foreground">Labels laden…</p>
         ) : error ? (
           <p className="p-6 text-sm text-destructive">Kon labels niet laden.</p>
         ) : !labels?.length ? (
@@ -96,7 +96,7 @@ export function LabelsPageContent() {
                       disabled={deleteLabel.isPending}
                       aria-label={`Verwijder ${label.name}`}
                     >
-                      <Trash2 className="size-4" />
+                      <Trash2 className="size-4" aria-hidden="true" />
                     </Button>
                   </TableCell>
                 </TableRow>
