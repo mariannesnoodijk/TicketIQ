@@ -64,7 +64,7 @@
 
 ### AI-agent met ToolLoopAgent (AI SDK v7)
 - **Context:** PR5 vereist agent-based flow met tool calling naar DummyJSON, meerstaps-aanpak, streaming en opslag van AI-suggesties. Het oorspronkelijke bouwplan gebruikte 6 tabellen; PR3/PR4 hebben 5 user-scoped tabellen (`ai_suggestions` i.p.v. `analyses` + `article_suggestions`).
-- **Beslissing:** `ToolLoopAgent` in `src/lib/ai/agent.ts` met vier tools: `fetchTickets` (DummyJSON API), `assignTicketCategory` (Supabase `tickets.category_id`), `findExistingSuggestions` (Supabase), `saveSuggestion` (Supabase `ai_suggestions`). Route `POST /api/agent` gebruikt `createAgentUIStreamResponse` + auth via Supabase server-client. Meerstaps-flow via `stopWhen: isStepCount(10)`. Model: `gpt-4.1-mini` via `@ai-sdk/openai`. Hybride UI op `/dashboard/analyze`: Analyseer-knop + gedeelde chat via `AgentChatProvider` + `sessionStorage`.
+- **Beslissing:** `ToolLoopAgent` in `src/lib/ai/agent.ts` met vier tools: `fetchTickets` (DummyJSON API), `assignTicketCategory` (Supabase `tickets.category_id`), `findExistingSuggestions` (Supabase), `saveSuggestion` (Supabase `ai_suggestions`). Route `POST /api/agent` gebruikt `createAgentUIStreamResponse` + auth via Supabase server-client. Meerstaps-flow via `stopWhen: isStepCount(8)` (configureerbaar via `AI_MAX_AGENT_STEPS`). Model: `gpt-4.1-mini` via `@ai-sdk/openai`. Hybride UI op `/dashboard/home`: Analyseer-knop + gedeelde chat via `AgentChatProvider` + `sessionStorage`.
 - **Alternatieven:** `streamText` handmatig — afgevallen (meer boilerplate). Tickets alleen uit Supabase lezen in `fetchTickets` — afgevallen (eindopdracht vereist externe API via tool calling). Categorie alleen op suggesties — uitgebreid met `assignTicketCategory` zodat tickets filterbaar zijn. Chat per pagina — vervangen door provider + sessionStorage.
 - **AI-rol:** agent-ontwerp, tools, prompts en UI opgezet met Cursor; AI SDK v7 API's geverifieerd in `node_modules/ai/docs/`.
 - **Gevolgen:** streaming analyse zichtbaar in UI; tickets kunnen ook via agent `category_id` krijgen; suggesties landen in `ai_suggestions`; chat overleeft navigatie en refresh. PR6 bouwt suggesties-beheer.
@@ -84,8 +84,8 @@
 - **Gevolgen:** volledige CRUD-UI voor alle 5 tabellen; vier kernfunctionaliteiten compleet; goedgekeurde suggesties (`status = approved`) dienen als helpcenter-bibliotheek zoals in het datamodel-besluit bedoeld.
 
 ### Hybride fetchTickets: database + DummyJSON via tool calling
-- **Context:** W3-analyse moet geïmporteerde tickets kunnen analyseren (limieten 50–500/alle), maar de eindopdracht vereist ook externe API via tool calling. Een puur Supabase-only `fetchTickets` is UX-vriendelijk maar zwakker verdedigbaar bij beoordeling.
-- **Beslissing:** één `fetchTickets`-tool met parameter `source: "database" | "api"`. Standaard analyse (Analyseer-knop + prompt) gebruikt `source: "database"`. Live DummyJSON blijft beschikbaar via `source: "api"` (vrij chatten of demo). Import-route blijft aparte ingestie-stap.
+- **Context:** W3-analyse moet geïmporteerde tickets kunnen analyseren, maar de eindopdracht vereist ook externe API via tool calling. Een puur Supabase-only `fetchTickets` is UX-vriendelijk maar zwakker verdedigbaar bij beoordeling.
+- **Beslissing:** één `fetchTickets`-tool met parameter `source: "database" | "api"`. Standaard analyse (Analyseer-knop + prompt) gebruikt `source: "database"` met expliciete `limit` (25 of 50 tickets in UI). Live DummyJSON blijft beschikbaar via `source: "api"` (vrij chatten of demo). Import-route blijft aparte ingestie-stap. `fetchAll` is server-side gecapped op `AI_MAX_TICKETS_PER_FETCH` (default 50).
 - **Alternatieven:** alleen DummyJSON in agent — afgevallen (geen “alle geïmporteerde tickets”, categorisatie koppelt aan DB). Twee aparte tools — afgevallen (agent kiest soms verkeerde tool). Altijd eerst API dan DB — afgevallen (onnodige latency in normale flow).
 - **AI-rol:** hybride ontwerp besproken en geïmplementeerd met Cursor; prompts en UI-labels afgestemd op beide bronnen.
 - **Gevolgen:** normale UX ongewijzigd; verantwoording kan tool calling naar DummyJSON én database-gedreven analyse tonen. `assignTicketCategory`/`saveSuggestion` blijven DB-gekoppeld — volledige analyse vereist import.
@@ -96,3 +96,17 @@
 - **Alternatieven:** revisie via analyse-chat/agent-tool — afgevallen (mindere UX op detailpagina). Alleen handmatig bewerken — afgevallen (geen AI-herschrijving). Nieuwe rij per revisie — afgevallen (zelfde suggestie bijwerken is overzichtelijker).
 - **AI-rol:** prompt, validatie, API-route en UI ontworpen met Cursor; AI SDK v7 `generateObject` geverifieerd.
 - **Gevolgen:** supportmedewerker kan itereren op afgewezen suggesties; artikelen bevatten concrete stappen. DummyJSON-tickets blijven klantvragen — AI levert plausibele helpcenter-inhoud op basis van tickets + feedback.
+
+### AI-tokenbeheersing en kostenlimieten
+- **Context:** AI-analyse kan duur worden bij grote ticketsets, lange chatgeschiedenis en herhaalde API-calls (demo, beoordeling, misbruik). OpenAI-kosten en latency moeten voorspelbaar blijven.
+- **Beslissing:** centrale configuratie in `src/lib/ai/limits.ts` met strenge defaults en optionele `AI_*` environment variables (zie `.env.example`). Maatregelen: analyse-UI beperkt tot 25/50 tickets (geen “alle tickets”); `fetchTickets` hard cap op 50 tickets; chatgeschiedenis getrimd (`prepareAgentMessages`); gebruikersberichten max 2000 tekens; agent max 8 stappen en `maxOutputTokens`; rate limits 15 agent- en 15 revise-requests/uur per gebruiker; revise-prompts truncaten brontickets en artikeltekst.
+- **Alternatieven:** alleen client-side limieten — afgevallen (omzeilbaar via directe API-calls). Vaste limieten zonder env — afgevallen (minder flexibel voor demo vs. productie). Redis rate limiting — uitgesteld (in-memory volstaat voor Vercel demo).
+- **AI-rol:** limieten ontworpen en geïmplementeerd met Cursor; defaults afgestemd op demo met leraar/beoordelaar.
+- **Gevolgen:** lagere tokenkosten en stabielere responstijden; gebruiker ziet 429 bij excessief gebruik; limieten tunebaar zonder codewijziging via Vercel env vars.
+
+### AI-chat scope (alleen TicketIQ-onderwerpen)
+- **Context:** gebruikers (of beoordelaars) kunnen off-topic vragen stellen (algemene kennis, grappen), wat tokens kost en afleidt van de casus.
+- **Beslissing:** drie lagen: (1) **scope-sectie** in NL/EN system prompts — weiger off-topic, geen tools; (2) **server-side topic-guard** (`topic-guard.ts`) voor duidelijke gevallen (hoofdstad, grap, recept, …) met vaste assistent-reply via UI-stream **zonder** OpenAI-call; (3) UI-hint onder chat-input (`scopeNote`) en aangepaste placeholder.
+- **Alternatieven:** alleen prompt — afgevallen (model kan soms toch antwoorden). Altijd model laten weigeren — afgevallen (kost tokens per off-topic vraag).
+- **AI-rol:** patterns en prompts ontworpen met Cursor; ticket-gerelateerde termen als allowlist om false positives te beperken.
+- **Gevolgen:** nette afwijzing in chat; geen rate limit of API-kosten bij obvious off-topic; grensgevallen nog via prompt afgehandeld.

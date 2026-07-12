@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { createTranslator } from "@/lib/i18n";
 import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n/types";
+import { sanitizeRedirect } from "@/lib/safe-redirect";
 import { createClient } from "@/lib/supabase/server";
 
 export type AuthActionState = {
@@ -52,7 +53,7 @@ export async function login(
   }
 
   revalidatePath("/", "layout");
-  redirect(redirectTo.startsWith("/") ? redirectTo : "/dashboard/home");
+  redirect(sanitizeRedirect(redirectTo));
 }
 
 export async function register(

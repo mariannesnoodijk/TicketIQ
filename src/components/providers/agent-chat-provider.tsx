@@ -11,7 +11,9 @@ import {
   type ReactNode,
 } from "react";
 
+import { AI_LIMITS } from "@/lib/ai/limits";
 import { clearAgentChatMessages, loadAgentChatMessages, saveAgentChatMessages } from "@/lib/ai/chatStorage";
+import { prepareAgentMessages } from "@/lib/ai/trim-messages";
 import { getStoredLocale } from "@/lib/i18n/types";
 
 type AgentChatContextValue = {
@@ -24,7 +26,7 @@ function AgentChatPersistence({ chat }: { chat: Chat<UIMessage> }) {
   const { messages } = useChat({ chat });
 
   useEffect(() => {
-    saveAgentChatMessages(messages);
+    saveAgentChatMessages(prepareAgentMessages(messages) as typeof messages);
   }, [messages]);
 
   return null;

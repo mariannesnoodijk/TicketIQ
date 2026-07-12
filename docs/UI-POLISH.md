@@ -115,6 +115,8 @@ Audit-items (mobile nav, skeletons, …) komen **na** jouw wensen, tenzij explic
 
 **Commit:** `bc51f20` — hybride fetchTickets + limieten; akkoord Marianne
 
+> **Update 12 jul 2026:** AI-analyse-UI gebruikt nu **25 / 50 tickets** (geen 500/alle meer) voor tokenbeheersing. Ticketoverzicht “Toon meer” behoudt 50/100/200/500/alle — dat is alleen UI-weergave, geen AI-context. Zie `src/lib/ai/limits.ts` en `AI_*` env vars.
+
 ---
 
 ## W3 vervolg – Chat UX (afgerond 11 jul 2026)
@@ -123,7 +125,8 @@ Audit-items (mobile nav, skeletons, …) komen **na** jouw wensen, tenzij explic
 
 - Inklapbare AI-tool-stappen (individueel + groep); antwoord vóór stappen
 - Hybride `fetchTickets`: database (standaard) + DummyJSON via `source: "api"`
-- Ticketlimieten: 50 · 100 · 200 · 500 · alle geïmporteerde
+- Ticketlimieten in **AI-analyse**: 25 · 50 (configureerbaar via `AI_ANALYZE_TICKET_LIMITS`)
+- Ticketlimieten in **ticketoverzicht** (alleen weergave): 50 · 100 · 200 · 500 · alle geïmporteerde
 - User/AI-styling: gebruiker rechts (primary bubble), AI links (muted card + bot-avatar)
 
 **Bestanden:** `agent-chat-messages.tsx`, `agent-chat-panel.tsx`, `fetchTickets.ts`, `analyzePrompt.ts`, `prompts.ts`
@@ -215,7 +218,7 @@ Quick wins uitgevoerd in A5 — zie sectie “Audit & polish (A1–A5)” hierbo
 | 11 jul 2026 | Home vs dashboard | Home = chat; dashboard = statistieken; analyze redirect | Marianne |
 | 11 jul 2026 | Analyze limiet | 50, 100, 200, 500, alle geïmporteerd | Marianne |
 | 11 jul 2026 | W3 chat UX | Inklapbare stappen, hybride fetch, limieten, user/AI bubbles | Marianne + Agent |
-| 12 jul 2026 | W5 tickets | “Toon meer” 50/100/200/500/alle; teller X van Y | Marianne |
+| 12 jul 2026 | AI-limieten | Analyse 25/50; env-config; rate limits; crash-hardening | Marianne + Agent |
 | 12 jul 2026 | Audit A1–A5 | Hamburger nav; PageHeader B; Select native; skeletons demo-only | Marianne |
 
 ---

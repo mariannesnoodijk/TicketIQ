@@ -38,16 +38,24 @@ export function CategoriesSettingsSection() {
     e.preventDefault();
     if (!name.trim()) return;
 
-    await createCategory.mutateAsync({ name: name.trim(), color });
-    setName("");
-    setMessage(null);
+    try {
+      await createCategory.mutateAsync({ name: name.trim(), color });
+      setName("");
+      setMessage(null);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : t("common.unexpectedError"));
+    }
   }
 
   async function handleSeed() {
-    const result = await seedDefaults.mutateAsync();
-    setMessage(
-      t("settings.seedResult", { inserted: result.inserted, skipped: result.skipped })
-    );
+    try {
+      const result = await seedDefaults.mutateAsync();
+      setMessage(
+        t("settings.seedResult", { inserted: result.inserted, skipped: result.skipped })
+      );
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : t("common.unexpectedError"));
+    }
   }
 
   return (

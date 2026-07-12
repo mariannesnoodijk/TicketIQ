@@ -26,7 +26,7 @@ export async function POST() {
 
     return NextResponse.json({ categorized });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Categorisatie mislukt";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[categorize] POST failed:", error);
+    return NextResponse.json({ error: "Categorisatie mislukt" }, { status: 500 });
   }
 }

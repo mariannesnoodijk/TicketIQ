@@ -44,7 +44,12 @@ cp .env.example .env.local
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key (Dashboard → Project Settings → API) |
 | `NEXT_PUBLIC_SITE_URL` | Basis-URL van de app (`http://localhost:3000` lokaal) |
 | `NEXT_PUBLIC_DUMMYJSON_TICKETS_URL` | DummyJSON Custom Response endpoint voor ticket-import |
-| `OPENAI_API_KEY` | OpenAI API-sleutel voor `/api/agent` |
+| `OPENAI_API_KEY` | OpenAI API-sleutel voor `/api/agent` en suggestie-revisie |
+| `AI_MAX_TICKETS_PER_FETCH` | _(optioneel)_ Max tickets per AI-toolcall (default: `50`) |
+| `AI_ANALYZE_TICKET_LIMITS` | _(optioneel)_ Analyse-opties in UI, komma-gescheiden (default: `25,50`) |
+| `AI_AGENT_REQUESTS_PER_HOUR` | _(optioneel)_ Rate limit agent per gebruiker/uur (default: `15`) |
+
+Zie `.env.example` voor alle optionele `AI_*`-limieten.
 
 ### 3. Supabase configureren
 
@@ -85,6 +90,8 @@ Live: **https://ticket-iq-zeta.vercel.app**
    | `NEXT_PUBLIC_SITE_URL` | `https://ticket-iq-zeta.vercel.app` |
    | `NEXT_PUBLIC_DUMMYJSON_TICKETS_URL` | _(zelfde als lokaal)_ |
    | `OPENAI_API_KEY` | _(jouw OpenAI-sleutel)_ |
+   | `AI_MAX_TICKETS_PER_FETCH` | _(optioneel, default `50`)_ |
+   | `AI_AGENT_REQUESTS_PER_HOUR` | _(optioneel, default `15`)_ |
 
 3. **Redeploy** na het toevoegen of wijzigen van env vars (Deployments → ⋮ → Redeploy).
 4. In **Supabase → Authentication → URL Configuration**:
@@ -117,7 +124,7 @@ Live: **https://ticket-iq-zeta.vercel.app**
 - **Next.js 16** (App Router) + **TypeScript** + **Tailwind CSS**
 - **Supabase** — Auth, PostgreSQL, RLS
 - **TanStack Query** — client-side data fetching
-- **Vercel AI SDK** — AI-agent met tool calling, streaming en meerstaps-flow
+- **Vercel AI SDK** — AI-agent met tool calling, streaming en meerstaps-flow; tokenlimieten via `src/lib/ai/limits.ts` (configureerbaar met `AI_*` env vars)
 - **DummyJSON Custom Response API** — externe ticket-data
 
 ## Projectstructuur
@@ -141,3 +148,4 @@ Meer context: `docs/PROJECT-BRIEF.md` en `docs/eindopdracht.md`.
 - `docs/voortgang.md` — checklist eindopdracht
 - `docs/AI-DECISIONS.md` — architectuurbeslissingen
 - `docs/PROMPT-LOG.md` — gedocumenteerde prompts
+- `.env.example` — optionele `AI_*`-limieten voor tokenbeheersing

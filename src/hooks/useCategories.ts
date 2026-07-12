@@ -109,7 +109,7 @@ export function useSeedDefaultCategories() {
 
       if (fetchError) throw fetchError;
 
-      const existingNames = new Set(existing.map((c) => c.name));
+      const existingNames = new Set((existing ?? []).map((c) => c.name));
       const toInsert = DEFAULT_CATEGORIES.filter((c) => !existingNames.has(c.name)).map(
         (c) => ({
           user_id: user.id,

@@ -6,6 +6,22 @@ export function getIntlLocale(locale: Locale): string {
   return locale === "en" ? "en-GB" : "nl-NL";
 }
 
+/** Formatteert een datum veilig; ongeldige waarden tonen een streepje i.p.v. een crash. */
+export function formatDisplayDate(
+  value: string | null | undefined,
+  locale: Locale,
+  options: Intl.DateTimeFormatOptions = { dateStyle: "full", timeStyle: "short" }
+): string {
+  if (!value) return messages[locale].common.dash;
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return messages[locale].common.dash;
+  }
+
+  return new Intl.DateTimeFormat(getIntlLocale(locale), options).format(date);
+}
+
 export function getAnalyticsPeriodLabel(period: AnalyticsPeriod, locale: Locale): string {
   return messages[locale].analytics.periods[period];
 }

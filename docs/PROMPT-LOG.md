@@ -14,7 +14,7 @@
 | **Datum** | 11 jul 2026 (laatste uitbreiding 12 jul 2026) |
 | **Feature** | Ticket-analyse via `/api/agent` |
 | **Locatie** | `src/lib/ai/prompts.ts` → `TICKET_IQ_AGENT_INSTRUCTIONS` |
-| **Model** | `gpt-4.1-mini` via `ToolLoopAgent` (`maxSteps`: 10) |
+| **Model** | `gpt-4.1-mini` via `ToolLoopAgent` (`maxSteps`: 8, configureerbaar via `AI_MAX_AGENT_STEPS`) |
 
 **Doel:** Definieert rol (TicketIQ-analist), werkwijze in 7 stappen, vaste categorieën, markdown-structuur voor artikelen, NL-taalconstraint en foutafhandeling.
 
@@ -27,7 +27,7 @@
 6. `saveSuggestion` (max. 5, geen duplicaten)
 7. Samenvatting in antwoord
 
-**Effect:** Agent volgt voorspelbare multi-step flow; tool-keuzes zijn beperkt tot de casus.
+**Effect:** Agent volgt voorspelbare multi-step flow; tool-keuzes zijn beperkt tot de casus. Off-topic verzoeken worden geweigerd (scope-sectie in prompt + server-side topic-guard zonder OpenAI-call).
 
 ---
 
@@ -57,7 +57,7 @@
 Roep `fetchTickets` aan met `source: "database"` en `limit: 50` om de 50 meest recente geïmporteerde supporttickets op te halen. Analyseer deze tickets: zoek terugkerende patronen, categoriseer ze met assignTicketCategory, controleer op duplicaten en sla maximaal 5 nieuwe helpcenter-suggesties op. Leg daarna uit wat je hebt gevonden.
 ```
 
-**Effect:** Eenduidige trigger voor de standaard analyse-flow; limit en taal zijn configureerbaar zonder system prompt te wijzigen.
+**Effect:** Eenduidige trigger voor de standaard analyse-flow; limit (25 of 50 tickets) en taal zijn configureerbaar zonder system prompt te wijzigen. Geen `fetchAll` — tokenbeheersing via `src/lib/ai/limits.ts`.
 
 ---
 
@@ -113,6 +113,27 @@ Vaste markdown-secties: Probleem, Oplossing, Stappen, FAQ, Support. Gecombineerd
 
 ---
 
+### 8. AI-tokenlimieten (geen model-prompt, wel gedrag)
+
+| | |
+|---|---|
+| **Datum** | 12 jul 2026 |
+| **Feature** | Kostenbeheersing `/api/agent` + `/api/suggestions/[id]/revise` |
+| **Locatie** | `src/lib/ai/limits.ts`, `trim-messages.ts`, `rate-limit.ts` |
+| **Config** | Optionele `AI_*` env vars in `.env.example` |
+
+**Defaults (streng):**
+- Analyse-UI: 25 / 50 tickets (geen “alle”)
+- Max tickets per tool: 50
+- Chatgeschiedenis: 24 berichten
+- Gebruikersbericht: 2000 tekens
+- Agent-stappen: 8; output max 4096 tokens/stap
+- Rate limit: 15 agent + 15 revise requests/uur per gebruiker
+
+**Effect:** Voorspelbare OpenAI-kosten; minder risico op runaway prompts bij demo of misbruik.
+
+---
+
 ## Prompt-iteraties (good / bad — voor verantwoording 3.4)
 
 ### Goed werkte
@@ -128,8 +149,9 @@ Vaste markdown-secties: Probleem, Oplossing, Stappen, FAQ, Support. Gecombineerd
 1. **Te open eerste versie (“analyseer tickets”)** → agent sloeg stappen over; **oplossing:** genummerde werkwijze + expliciete tool-namen.
 2. **Suggesties zonder concrete stappen (“raadpleeg handleiding”)** → **oplossing:** `ARTICLE_STRUCTURE_TEMPLATE` + `hasActionableArticleContent()`.
 3. **Alleen live API in analyse** → categorisatie/save faalde zonder import; **oplossing:** default `source: "database"`, API optioneel.
-4. **Te korte ticket bodies in tool output (400 tekens)** → trade-off performance vs. context; bewust gelaten, documenteren in verantwoording.
+4. **Te korte ticket bodies in tool output (400 tekens)** → trade-off performance vs. context; bewust afgekapt op 350 tekens (`AI_MAX_TICKET_BODY_CHARS`), max 50 tickets per fetch.
 5. **Substring duplicate check** → snel maar oppervlakkig; prompt vraagt wel `findExistingSuggestions` aan te roepen vóór save.
+6. **“Alle tickets”-analyse** → te duur in tokens; **oplossing:** analyse-UI beperkt tot 25/50, server-side cap op `fetchAll`.
 
 ---
 
@@ -148,6 +170,8 @@ Vaste markdown-secties: Probleem, Oplossing, Stappen, FAQ, Support. Gecombineerd
 | 11 jul 2026 | PR9 | Home split layout + instellingen-pagina | UX-structuur dashboard |
 | 12 jul 2026 | PR11 | UI refresh violet theme, dashboard stat cards, deploy README | Productie-polish |
 | 12 jul 2026 | Grading feedback | Tests, maxSteps-doc, PROMPT-LOG, NL/ENG toggle | Kwaliteit + i18n-basis |
+| 12 jul 2026 | Tokenbeheersing | AI-limieten, rate limits, crash-hardening, env-config | Lagere kosten + stabielere demo |
+| 12 jul 2026 | Topic guard | Scope in system prompt + off-topic filter in `/api/agent` | Geen algemene kennis/grappen; bespaart tokens |
 
 **Cursor rules:** `.cursor/rules/general.mdc` — Next.js 16, Supabase via React Query, AI SDK agent, docs in `docs/`.
 

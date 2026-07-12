@@ -79,10 +79,17 @@ export function DashboardContent() {
     [t]
   );
 
-  const { data: stats, isLoading: isDashboardStatsLoading } = useDashboardStats();
-  const { data: analytics, isLoading: isAnalyticsLoading } = useTicketAnalytics(period);
-  const { data: suggestionStats, isLoading: isSuggestionStatsLoading } =
-    useSuggestionStatusStats(period, locale);
+  const { data: stats, isLoading: isDashboardStatsLoading, isError: isDashboardStatsError } =
+    useDashboardStats();
+  const { data: analytics, isLoading: isAnalyticsLoading, isError: isAnalyticsError } =
+    useTicketAnalytics(period);
+  const {
+    data: suggestionStats,
+    isLoading: isSuggestionStatsLoading,
+    isError: isSuggestionStatsError,
+  } = useSuggestionStatusStats(period, locale);
+
+  const hasDataError = isDashboardStatsError || isAnalyticsError || isSuggestionStatsError;
 
   const ticketSparkline = useMemo(
     () => getVolumeSparkline(analytics?.volumeSeries),
@@ -152,6 +159,12 @@ export function DashboardContent() {
       <Reveal delay={80}>
         <AnalyticsPeriodSelector value={period} onChange={setPeriod} />
       </Reveal>
+
+      {hasDataError ? (
+        <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          {t("common.dataLoadError")}
+        </p>
+      ) : null}
 
       <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Reveal delay={120} className="h-full">

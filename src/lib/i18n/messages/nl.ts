@@ -36,6 +36,9 @@ export const nlMessages = {
     accountFallback: "Account",
     confirmDelete: "Weet je zeker dat je dit wilt verwijderen?",
     loadFailed: "Kon {entity} niet laden.",
+    unexpectedError: "Er ging iets mis. Probeer het opnieuw.",
+    tryAgain: "Opnieuw proberen",
+    dataLoadError: "Sommige dashboardgegevens konden niet worden geladen.",
     emptyPlaceholder: "—",
   },
   auth: {
@@ -252,7 +255,8 @@ export const nlMessages = {
     clear: "Wissen",
     newAnalysis: "Nieuwe analyse",
     clearConfirm: "Chatgeschiedenis wissen en opnieuw beginnen?",
-    placeholder: "Stel een vraag of geef een opdracht aan de AI-assistent…",
+    placeholder: "Vraag over tickets, analyse of suggesties…",
+    scopeNote: "Alleen vragen over TicketIQ — geen algemene kennis of smalltalk.",
     brand: "TicketIQ AI",
     you: "Jij",
     noMessages: "Nog geen berichten",
@@ -281,7 +285,7 @@ export const nlMessages = {
     welcome: "Welkom bij TicketIQ!",
     welcomeSidePanel: "Stel een vraag of start een analyse met de knop rechtsboven in de chat.",
     welcomeIntro:
-      "Ik help je supporttickets te analyseren en AI-helpcenter-artikelen voor te stellen. Dit kun je doen:",
+      "Ik help je supporttickets te analyseren en AI-helpcenter-artikelen voor te stellen. Vragen buiten tickets, analyse en deze app beantwoord ik niet.",
     welcomeInChat: "In deze chat:",
     welcomeInChatDesc:
       "tickets analyseren, patronen vinden en helpcenter-artikelen laten genereren",
@@ -294,6 +298,8 @@ export const nlMessages = {
     apiKeyMissing: "OPENAI_API_KEY is niet geconfigureerd.",
     unauthorized: "Niet geautoriseerd",
     messagesMissing: "Berichten ontbreken",
+    invalidJson: "Ongeldige JSON in aanvraag",
+    rateLimited: "Te veel AI-verzoeken. Probeer over {minutes} minuten opnieuw.",
     agentStartFailed: "AI-agent kon niet worden gestart",
     toolStepInProgress: "AI-stap bezig…",
     toolStepsInProgress: "{count} AI-stappen bezig…",

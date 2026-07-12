@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { invalidateDashboardAnalytics } from "@/lib/analytics/invalidateDashboardAnalytics";
+import { parseFetchJson } from "@/lib/fetch-json";
 import { type AiSuggestionListFilters, queryKeys } from "@/lib/queryKeys";
 import { createClient } from "@/lib/supabase/client";
 import type { AiSuggestionInsert, AiSuggestionUpdate } from "@/types";
@@ -121,7 +122,11 @@ export function useUpdateAiSuggestion() {
       return data;
     },
     onSuccess: (data) => {
-      invalidateSuggestionQueries(queryClient, data.id);
+      if (data?.id) {
+        invalidateSuggestionQueries(queryClient, data.id);
+      } else {
+        invalidateSuggestionQueries(queryClient);
+      }
     },
   });
 }
@@ -152,7 +157,7 @@ export function useReviseAiSuggestion() {
         body: JSON.stringify({ feedback }),
       });
 
-      const data: { error?: string; title?: string } = await response.json();
+      const data = await parseFetchJson<{ error?: string; title?: string }>(response);
 
       if (!response.ok) {
         throw new Error(data.error ?? "Herschrijven mislukt");

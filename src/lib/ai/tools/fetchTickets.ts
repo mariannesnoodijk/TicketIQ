@@ -1,14 +1,15 @@
 import { tool } from "ai";
 import { z } from "zod";
 
+import { AI_LIMITS, truncateForPrompt } from "@/lib/ai/limits";
 import type { FetchTicketsResult, FetchedTicketSummary } from "@/lib/ai/types";
 import { fetchDummyJsonTickets, type DummyJsonTicket } from "@/lib/dummyjson";
 import type { createClient } from "@/lib/supabase/server";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
-const MAX_BODY_LENGTH = 400;
-const MAX_LIMIT = 500;
+const MAX_BODY_LENGTH = AI_LIMITS.maxTicketBodyChars;
+const MAX_LIMIT = AI_LIMITS.maxTicketsPerFetch;
 
 const fetchTicketsInputSchema = z.object({
   source: z
@@ -27,7 +28,9 @@ const fetchTicketsInputSchema = z.object({
   fetchAll: z
     .boolean()
     .default(false)
-    .describe("True om alle tickets uit de gekozen bron op te halen"),
+    .describe(
+      `True om tickets op te halen (max ${MAX_LIMIT} tickets, ook bij fetchAll)`
+    ),
   search: z
     .string()
     .optional()
@@ -50,7 +53,9 @@ function truncateBody(body: string | null): string | null {
     return null;
   }
 
-  return body.length > MAX_BODY_LENGTH ? `${body.slice(0, MAX_BODY_LENGTH)}…` : body;
+  return body.length > MAX_BODY_LENGTH
+    ? truncateForPrompt(body, MAX_BODY_LENGTH)
+    : body;
 }
 
 function getRawString(raw: unknown, key: string): string | null {
@@ -113,11 +118,11 @@ function applyLimit(
   fetchAll: boolean,
   limit: number
 ): FetchedTicketSummary[] {
-  if (fetchAll) {
-    return tickets;
-  }
+  const effectiveLimit = fetchAll
+    ? MAX_LIMIT
+    : Math.min(limit, MAX_LIMIT);
 
-  return tickets.slice(0, limit);
+  return tickets.slice(0, effectiveLimit);
 }
 
 async function fetchTicketsFromDatabase(
