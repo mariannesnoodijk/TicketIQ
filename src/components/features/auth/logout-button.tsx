@@ -1,6 +1,6 @@
 "use client";
 
-import { logout } from "@/app/(auth)/actions";
+import { LogoutForm } from "@/components/features/auth/logout-form";
 import { useTranslations } from "@/components/providers/locale-provider";
 import { Button } from "@/components/ui/button";
 
@@ -8,10 +8,10 @@ export function LogoutButton() {
   const t = useTranslations();
 
   return (
-    <form action={logout}>
+    <LogoutForm>
       <Button type="submit" variant="outline" size="sm">
         {t("auth.logout")}
       </Button>
-    </form>
+    </LogoutForm>
   );
 }

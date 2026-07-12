@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 
-import { logout } from "@/app/(auth)/actions";
+import { LogoutForm } from "@/components/features/auth/logout-form";
 import { useTranslations } from "@/components/providers/locale-provider";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -128,7 +128,7 @@ export function AccountMenu({ user, className }: AccountMenuProps) {
           </div>
 
           <div className="border-t border-border pt-1">
-            <form action={logout}>
+            <LogoutForm>
               <Button
                 type="submit"
                 variant="ghost"
@@ -139,7 +139,7 @@ export function AccountMenu({ user, className }: AccountMenuProps) {
                 <LogOut className="size-4" aria-hidden="true" />
                 {t("auth.logout")}
               </Button>
-            </form>
+            </LogoutForm>
           </div>
         </div>
       ) : null}
@@ -178,12 +178,12 @@ export function MobileAccountPanel({ user }: MobileAccountPanelProps) {
         <ThemeToggle />
       </div>
 
-      <form action={logout} className="px-1">
+      <LogoutForm className="px-1">
         <Button type="submit" variant="outline" size="sm" className="w-full gap-2">
           <LogOut className="size-4" aria-hidden="true" />
           {t("auth.logout")}
         </Button>
-      </form>
+      </LogoutForm>
     </div>
   );
 }
