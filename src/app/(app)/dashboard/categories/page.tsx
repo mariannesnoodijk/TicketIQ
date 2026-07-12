@@ -1,5 +1,5 @@
-import { CategoriesPageContent } from "@/components/features/categories/categories-page-content";
+import { redirect } from "next/navigation";
 
 export default function CategoriesPage() {
-  return <CategoriesPageContent />;
+  redirect("/dashboard/instellingen#categories");
 }

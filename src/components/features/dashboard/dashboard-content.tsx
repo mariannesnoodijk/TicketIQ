@@ -37,11 +37,10 @@ const quickLinks = [
     description: "AI-voorstellen bekijken, bewerken en goedkeuren",
   },
   {
-    href: "/dashboard/categories",
-    label: "Categorieën beheren",
-    description: "Organiseer tickets per thema",
+    href: "/dashboard/instellingen",
+    label: "Instellingen",
+    description: "Categorieën en labels beheren",
   },
-  { href: "/dashboard/labels", label: "Labels beheren", description: "Tag tickets met labels" },
 ];
 
 export function DashboardContent() {

@@ -1,5 +1,5 @@
-import { LabelsPageContent } from "@/components/features/labels/labels-page-content";
+import { redirect } from "next/navigation";
 
 export default function LabelsPage() {
-  return <LabelsPageContent />;
+  redirect("/dashboard/instellingen#labels");
 }
