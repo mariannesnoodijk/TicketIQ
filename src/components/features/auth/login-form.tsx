@@ -14,11 +14,13 @@ const initialState: AuthActionState = {};
 type LoginFormProps = {
   redirectTo?: string;
   authCallbackFailed?: boolean;
+  sessionExpired?: boolean;
 };
 
 export function LoginForm({
   redirectTo = "/dashboard/home",
   authCallbackFailed = false,
+  sessionExpired = false,
 }: LoginFormProps) {
   const [state, formAction, pending] = useActionState(login, initialState);
   const { locale } = useLocale();
@@ -29,6 +31,12 @@ export function LoginForm({
       {authCallbackFailed ? (
         <p className="mb-4 rounded-lg bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
           {t("auth.authCallbackFailed")}
+        </p>
+      ) : null}
+
+      {sessionExpired ? (
+        <p className="mb-4 rounded-lg bg-amber-500/10 px-3 py-2 text-center text-sm text-amber-800 dark:text-amber-200">
+          {t("auth.sessionExpired")}
         </p>
       ) : null}
 

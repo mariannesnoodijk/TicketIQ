@@ -57,7 +57,10 @@ Zie `.env.example` voor alle optionele `AI_*`-limieten.
 2. Onder **Authentication → URL Configuration**:
    - **Site URL (lokaal):** `http://localhost:3000`
    - **Redirect URLs:** `http://localhost:3000/auth/callback`
-3. Voor productie voeg je de Vercel-URL toe (zie hieronder).
+3. Onder **Authentication → Sessions** (hosted project; lokaal via `supabase/config.toml`):
+   - **JWT expiry:** `900` seconden (15 minuten)
+   - **Inactivity timeout:** `30m` (sluit aan op de client idle-logout)
+4. Voor productie voeg je de Vercel-URL toe (zie hieronder).
 
 ### 4. Development server starten
 
@@ -97,6 +100,9 @@ Live: **https://ticket-iq-zeta.vercel.app**
 4. In **Supabase → Authentication → URL Configuration**:
    - **Site URL:** `https://ticket-iq-zeta.vercel.app`
    - **Redirect URLs:** `https://ticket-iq-zeta.vercel.app/auth/callback`
+5. In **Supabase → Authentication → Sessions** (eenmalig, geldt voor alle omgevingen die dit project gebruiken):
+   - **JWT expiry:** `900` (15 min)
+   - **Inactivity timeout:** `30 minutes`
 
 ### Diagnose
 

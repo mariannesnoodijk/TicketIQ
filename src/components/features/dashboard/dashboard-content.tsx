@@ -15,6 +15,7 @@ import { TicketVolumeChart } from "@/components/features/dashboard/ticket-volume
 import { TicketWeekdayChart } from "@/components/features/dashboard/ticket-weekday-chart";
 import { TopOrganizationsChart } from "@/components/features/dashboard/top-organizations-chart";
 import { CategorizeTicketsButton } from "@/components/features/tickets/categorize-tickets-button";
+import { ClearTicketsButton } from "@/components/features/tickets/clear-tickets-button";
 import { ImportTicketsButton } from "@/components/features/tickets/import-tickets-button";
 import { PageHeader } from "@/components/layout/page-header";
 import { useLocale } from "@/components/providers/locale-provider";
@@ -285,8 +286,14 @@ export function DashboardContent() {
             <CardTitle>{t("dashboard.importTitle")}</CardTitle>
             <CardDescription>{t("dashboard.importDescription")}</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex flex-col gap-4">
             <ImportTicketsButton />
+            <div className="border-t border-border pt-4">
+              <p className="mb-2 text-sm text-muted-foreground">
+                {t("dashboard.clearTicketsHint")}
+              </p>
+              <ClearTicketsButton />
+            </div>
           </CardContent>
         </Card>
 

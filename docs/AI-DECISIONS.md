@@ -110,3 +110,10 @@
 - **Alternatieven:** alleen prompt — afgevallen (model kan soms toch antwoorden). Altijd model laten weigeren — afgevallen (kost tokens per off-topic vraag).
 - **AI-rol:** patterns en prompts ontworpen met Cursor; ticket-gerelateerde termen als allowlist om false positives te beperken.
 - **Gevolgen:** nette afwijzing in chat; geen rate limit of API-kosten bij obvious off-topic; grensgevallen nog via prompt afgehandeld.
+
+### Sessiebeveiliging: idle timeout, chat clear, security headers
+- **Context:** een open tab bleef oneindig ingelogd door automatische token-refresh; chat bleef in `sessionStorage` na logout; `next.config` had geen security headers; JWT-default was 1 uur zonder inactivity-timeout.
+- **Beslissing:** (1) client idle-timeout van **30 min** met waarschuwing **1 min** van tevoren (`SessionTimeoutGuard` + `useIdleTimeout`); (2) `clearAgentChatMessages` bij handmatige logout én idle-logout; (3) security headers in `next.config.ts` (CSP, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy); (4) kortere sessie: JWT expiry **15 min** + inactivity timeout **30m** in `supabase/config.toml` en README-instructies voor het hosted Dashboard.
+- **Alternatieven:** alleen kortere JWT zonder idle-UI — afgevallen (geen waarschuwing, refresh houdt sessie alsnog levend). Alleen client idle zonder server inactivity — afgevallen (zwakker bij gestolen refresh-token). Redis/session-store — overkill voor demo.
+- **AI-rol:** implementatie met Cursor; JWT/inactivity-waarden afgestemd op Supabase Auth sessions-documentatie.
+- **Gevolgen:** gedeelde laptops zijn veiliger; login toont melding na idle-logout; hosted project moet Sessions-instellingen handmatig zetten (niet via migratie).

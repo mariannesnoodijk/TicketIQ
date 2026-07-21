@@ -172,6 +172,7 @@ Vaste markdown-secties: Probleem, Oplossing, Stappen, FAQ, Support. Gecombineerd
 | 12 jul 2026 | Grading feedback | Tests, maxSteps-doc, PROMPT-LOG, NL/ENG toggle | Kwaliteit + i18n-basis |
 | 12 jul 2026 | Tokenbeheersing | AI-limieten, rate limits, crash-hardening, env-config | Lagere kosten + stabielere demo |
 | 12 jul 2026 | Topic guard | Scope in system prompt + off-topic filter in `/api/agent` | Geen algemene kennis/grappen; bespaart tokens |
+| 21 jul 2026 | Sessiebeveiliging | Idle 30 min + waarschuwing, chat clear, security headers, JWT 15 min | Minder risk bij open tabs / gedeelde devices |
 
 **Cursor rules:** `.cursor/rules/general.mdc` — Next.js 16, Supabase via React Query, AI SDK agent, docs in `docs/`.
 
