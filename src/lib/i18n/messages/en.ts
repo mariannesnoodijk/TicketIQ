@@ -76,6 +76,12 @@ export const enMessages: Messages = {
     errorPasswordMismatch: "Passwords do not match.",
     registerSuccessEmailConfirm:
       "Account created. Confirm your email via the link in your inbox before signing in.",
+    sessionTimeoutTitle: "Session about to expire",
+    sessionTimeoutDescription:
+      "You've been inactive for a while. You'll be signed out automatically in {seconds} seconds.",
+    sessionTimeoutStay: "Stay signed in",
+    sessionExpired:
+      "You were signed out due to inactivity. Sign in again to continue.",
   },
   landing: {
     badge: "AI-powered support analysis",
@@ -154,6 +160,8 @@ export const enMessages: Messages = {
     importTitle: "Ticket import",
     importDescription:
       "Fetch ~500 support tickets from the DummyJSON Custom Response API. Existing tickets are skipped.",
+    clearTicketsHint:
+      "Demo: delete all imported tickets to start fresh and import again.",
     quickActions: "Quick actions",
     quickAi: "Go to AI assistant",
     quickAiDesc: "Analyze tickets and generate help center articles",
@@ -367,6 +375,12 @@ export const enMessages: Messages = {
     importSuccessTotal:
       "{imported} tickets imported, {skipped} skipped (total {total}).{backfilled}",
     importBackfilled: " {backfilled} existing tickets categorized.",
+    clear: "Delete all tickets",
+    clearing: "Deleting…",
+    clearConfirm:
+      "Are you sure you want to delete all imported tickets? This cannot be undone.",
+    clearSuccess: "{count} tickets deleted.",
+    clearFailed: "Failed to delete tickets",
     statusLabels: {
       open: "Open",
       pending: "In progress",

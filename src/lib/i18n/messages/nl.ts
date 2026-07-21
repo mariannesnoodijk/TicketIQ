@@ -74,6 +74,12 @@ export const nlMessages = {
     errorPasswordMismatch: "De wachtwoorden komen niet overeen.",
     registerSuccessEmailConfirm:
       "Account aangemaakt. Bevestig je e-mailadres via de link in je inbox voordat je inlogt.",
+    sessionTimeoutTitle: "Sessie bijna verlopen",
+    sessionTimeoutDescription:
+      "Je bent al een tijdje inactief. Over {seconds} seconden word je automatisch uitgelogd.",
+    sessionTimeoutStay: "Blijf ingelogd",
+    sessionExpired:
+      "Je bent automatisch uitgelogd door inactiviteit. Log opnieuw in om verder te gaan.",
   },
   landing: {
     badge: "AI-gedreven supportanalyse",
@@ -152,6 +158,8 @@ export const nlMessages = {
     importTitle: "Ticket-import",
     importDescription:
       "Haal ~500 supporttickets op uit de DummyJSON Custom Response API. Bestaande tickets worden overgeslagen.",
+    clearTicketsHint:
+      "Demo: wis alle geïmporteerde tickets om opnieuw met een schone lei te importeren.",
     quickActions: "Snelle acties",
     quickAi: "Naar AI-assistent",
     quickAiDesc: "Tickets analyseren en helpcenter-artikelen laten genereren",
@@ -366,6 +374,12 @@ export const nlMessages = {
     importSuccessTotal:
       "{imported} tickets geïmporteerd, {skipped} overgeslagen (totaal {total}).{backfilled}",
     importBackfilled: " {backfilled} bestaande tickets gecategoriseerd.",
+    clear: "Verwijder alle tickets",
+    clearing: "Verwijderen…",
+    clearConfirm:
+      "Weet je zeker dat je alle geïmporteerde tickets wilt verwijderen? Dit kan niet ongedaan worden gemaakt.",
+    clearSuccess: "{count} tickets verwijderd.",
+    clearFailed: "Tickets verwijderen mislukt",
     statusLabels: {
       open: "Open",
       pending: "In behandeling",

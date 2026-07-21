@@ -149,6 +149,39 @@ export function useDeleteTicket() {
   });
 }
 
+/** Verwijdert alle tickets van de ingelogde gebruiker (demo: schone lei). */
+export function useClearTickets() {
+  const queryClient = useQueryClient();
+  const supabase = createClient();
+
+  return useMutation({
+    mutationFn: async (): Promise<{ deleted: number }> => {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        throw new Error("Niet geautoriseerd");
+      }
+
+      const { data, error } = await supabase
+        .from("tickets")
+        .delete()
+        .eq("user_id", user.id)
+        .select("id");
+
+      if (error) throw error;
+      return { deleted: data?.length ?? 0 };
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.tickets.all });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.stats.dashboard });
+      invalidateDashboardAnalytics(queryClient);
+    },
+  });
+}
+
 export function useDashboardStats() {
   const supabase = createClient();
 

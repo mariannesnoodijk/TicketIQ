@@ -1,6 +1,9 @@
 # Supabase local development config (TicketIQ).
 # Remote schema changes are tracked in supabase/migrations/.
 # See: https://supabase.com/docs/guides/cli/config
+#
+# Hosted project: zet dezelfde waarden in het Dashboard
+# (Authentication → Sessions / JWT) — zie README.md.
 
 project_id = "ticket-iq"
 
@@ -18,3 +21,11 @@ major_version = 15
 [studio]
 enabled = true
 port = 54323
+
+[auth]
+# Access token lifetime: 15 min (default was 3600 = 1 uur).
+jwt_expiry = 900
+
+[auth.sessions]
+# Server-side logout na 30 min zonder token-refresh (sluit aan op client idle timeout).
+inactivity_timeout = "30m"

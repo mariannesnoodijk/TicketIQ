@@ -40,18 +40,18 @@ Skills.sh zijn opgezet (PR1).
 
 ## Deelopdracht 3 – Verantwoordingsdocument (45%)
 
-- [ ] Titelblad (naam, inleverdatum, leerlijntitel, GitHub/Vercel/Supabase URLs)
-- [ ] Samenvatting (max 150 woorden)
-- [ ] Inhoudsopgave met paginanummering
-- [ ] Introductie (probleem, doelgroep, features, 1–3 screenshots)
-- [ ] Technische implementatie AI-flow beantwoord + codevoorbeelden (3.1)
-- [ ] Database-ontwerp + ERD-screenshot + RLS/policies + risico's (3.2)
-- [ ] Agentgedrag: `maxSteps`, system prompts, foutafhandeling onderbouwd (3.3)
-- [ ] Prompt design: kritische, iteratieve analyse (3.4)
-- [ ] Reflectie op AI-gebruik + leerpunten (3.5)
-- [ ] Conclusie
-- [ ] Bijlagen: alle app-prompts, agent-instructie, Cursor-instructies
-- [ ] Omvang 2500–3000 woorden (excl. inhoudsopgave/bijlagen)
+- [~] Titelblad (naam, inleverdatum, leerlijntitel, GitHub/Vercel/Supabase URLs) — tekst in `docs/VERANTWOORDING.md`; vul `[INLEVERDATUM]` en `[NAAM DOCENT]` in
+- [x] Samenvatting (max 150 woorden)
+- [ ] Inhoudsopgave met paginanummering — aanbevolen structuur in `docs/VERANTWOORDING.md` § PDF-checklist
+- [~] Introductie (probleem, doelgroep, features, 1–3 screenshots) — tekst klaar; screenshots nog invoegen (Fig. 1–3)
+- [x] Technische implementatie AI-flow beantwoord + codevoorbeelden (3.1)
+- [~] Database-ontwerp + ERD-screenshot + RLS/policies + risico's (3.2) — tekst klaar; Fig. 4 (ERD) nog invoegen
+- [x] Agentgedrag: `maxSteps`, system prompts, foutafhandeling onderbouwd (3.3)
+- [x] Prompt design: kritische, iteratieve analyse (3.4)
+- [x] Reflectie op AI-gebruik + leerpunten (3.5)
+- [x] Conclusie
+- [x] Bijlagen: alle app-prompts, agent-instructie, Cursor-instructies
+- [~] Omvang 2500–3000 woorden (excl. inhoudsopgave/bijlagen) — ca. 3.063 woorden; optioneel ~60 woorden inkorten
 - [ ] Ingeleverd als PDF, pagina's genummerd
 
 ## Deelopdracht 4 – (Video)presentatie (10%)
